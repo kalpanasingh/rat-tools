@@ -1,0 +1,40 @@
+Tools for the FitLike Reconstruction Processors
+-----------------------------------------------
+(last updated 09/04/09, Jeanne Wilson, - j.wilson2@physics.ox.ac.uk)
+
+The FitLike processors for Position and Energy reconstruction are driven by MonteCarlo PDFs. The position fitter
+requires a root ntuple file input in order to generate PDF histograms of time residuals for different positions
+and energies. The energy fitter requires a parameterisation for the mean and sigma of gaussian charge
+distributions in terms of energy and vertex position, which is read in from the FIT_LIKE.ratdb file. 
+
+The tools in this directory are used to generate the PDFs (different optic constants, changes in detector
+geometry etc. will require new PDFs) and test the fitter. 
+
+* write_scriptcmd_likeposPDFs.perl : Perl script to generate macro and submission scripts to run
+	RAT simulations for generation of the time PDF inputs for the FitLikePos position reconstruction processor. 
+	Variables set up for Oxford CPU cluster (edit these to run on your system). 
+	Each simulation outputs a rootfile containing a simple root Ntuple.
+
+* MergeNtuples.C : Root macro for merging the root Ntuple files created above into one file used as input for
+	the FitLikePos processor. 
+	
+* MakeHists.C : Once a single merged Ntuple file has been created, this root macro can be used to check and plot
+	the PDFs that would be generated in RAT.
+
+* write_scriptcmd_likeenergyPDFs.perl : Perl script to generate macro and submission scripts to run
+	RAT simulations for generation of the energy PDF inputs for the FitLikeEnergy energy reconstruction processor. 
+	Variables set up for Oxford CPU cluster (edit these to run on your system). 
+	Each simulation outputs a rootfile containing a simple histogram of total charge for events at a fixed
+	position and energy.
+	
+* ParameteriseQER.C : Root macro that takes the the root histogram files created above and parameterised the
+	mean and sigma of the gaussian charge distributions in terms of energy and vertex radius. These
+	parameterisations are output in RATDB format and should be entered into the FIT_LIKE.ratdb file. A series of
+	plots and chisquared values are also generated to verify the quality of this parameterisation.	
+
+* write_batch_test_suite.perl : Perl script to generate macro and submission scripts for a series of RAT
+	simulations to test position and energy reconstruction (compares FitLike to other fitters). Test different
+	energy electron events at a series of positions and isotropic.
+	
+* CompareFit.C : Root macro for analysis of root files created by above jobs. Outputs figures and fitter bias
+	and resolution parameters in Latex formate.
