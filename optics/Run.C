@@ -103,7 +103,7 @@ void Run(char* option){
 /*		
 		// could output the plots to file here if you want
 		TFile g("pcppo_plots.root","RECREATE");
-		g.Append(hpcppo_prim);
+		g.Append(hpcppo_prim);execute c++
 		g.Append(hpcppo_reem);
 		g.Append(gpcppo_mfp);
 		g.Append(gpcppo_opscat);
@@ -124,8 +124,8 @@ void Run(char* option){
 		char *filenames_labppo[2];
 		filenames_labppo[0] = "text_files/LAB_absorption.txt";
 		filenames_labppo[1] = "text_files/PPO_absorption.txt";
-		double relCont_labppo[2] = {1.0,1.33}; 
-		double remprob_labppo[2] = {0.59,0.8};
+		double relCont_labppo[2] = {1.0,0.001}; 
+		double remprob_labppo[2] = {0.0001,0.8};
 		double RSf_labppo = 12.14;
 		double RImean_labppo = 1.505;
 		double isocomp_labppo = 4.92e-10;
@@ -174,5 +174,198 @@ void Run(char* option){
 		f.Append(glabppo_remprob);
 		f.Write();
 */
-	}
+	}	
+
+
+if(option == "ndlabppo_noscatt_noabs"){
+		// labppo_scintillator refractive index
+		double RI_labppo[3] = {1.505, 0.0, 0.0 };
+		RefIndex(RI_labppo);
+		// LABPPO primary emission
+		ScintEmissionSpec("text_files/LABPPO_primary_emission.txt");
+		// LABPPO remission
+		ScintReemissionSpec("text_files/PPO_reemission.txt");
+		// LABPPO absorption and scattering
+		char *filenames_labppo[3];
+		filenames_labppo[0] = "text_files/no_absorption.txt";
+		filenames_labppo[1] = "text_files/no_absorption.txt";	
+		filenames_labppo[2] = "text_files/no_absorption.txt";
+		double relCont_labppo[3] = {0.99829, 0.001710,0.0001}; 
+		double remprob_labppo[3] = {0.0001,0.8,0.0};
+		double RSf_labppo = 0.000001;
+		double RImean_labppo = 1.505;
+		double isocomp_labppo = 4.92e-10;
+		AbsScatRemScint(3, relCont_labppo, RSf_labppo, RImean_labppo, isocomp_labppo,
+		                filenames_labppo, remprob_labppo);
+
+		// Now make a comparison plot (and rename histograms)
+		TH1F *hlabppo_prim = (TH1F*)hscintOut->Clone("hlabppo_prim");
+		hlabppo_prim->Scale(50);
+		hlabppo_prim->SetAxisRange(0.,1.1,"Y");
+		hlabppo_prim->SetYTitle("");
+		hlabppo_prim->SetTitle("");
+		TH1F *hlabppo_reem = (TH1F*)hremOut->Clone("hlabppo_reem");
+		hlabppo_reem->Scale(50);
+		hlabppo_reem->SetLineColor(2);
+		TGraph *glabppo_mfp = (TGraph*)gROOT->FindObject("gTotmfp");
+		glabppo_mfp->SetName("glabppo_mfp");
+		TGraph *glabppo_opscat  = (TGraph*)gROOT->FindObject("gfracray");
+		glabppo_opscat->SetName("glabppo_opscat");
+		TGraph *glabppo_remprob = (TGraph*)gROOT->FindObject("gremprob");
+		glabppo_remprob->SetName("glabppo_remprob");
+		TCanvas *CanCom = new TCanvas("CanCom");
+		CanCom->cd();
+		hlabppo_prim->Draw();
+		hlabppo_reem->Draw("same");
+		glabppo_mfp->Draw("PL");
+		glabppo_opscat->Draw("PL");
+		glabppo_remprob->Draw("PL");
+		TLegend *legCom = new TLegend(0.55,0.28,0.89,0.53);
+		legCom->SetBorderSize(0);
+		legCom->SetFillColor(0);
+		legCom->AddEntry(hlabppo_prim,"Primary Emission Spectrum", "L");
+		legCom->AddEntry(hlabppo_reem,"Reemission Spectrum", "L");
+		legCom->AddEntry(glabppo_mfp,"Total MFP for extinction in mm", "PL");
+		legCom->AddEntry(glabppo_opscat,"Fraction of Attenuation due to Rayleigh", "PL");
+		legCom->AddEntry(glabppo_remprob,"Probability of Reemission if absorbed","PL");
+		legCom->Draw();
+		
+/*
+		// could output the plots to file here if you want
+		TFile f("labppo_plots.root","RECREATE");
+		f.Append(hlabppo_prim);
+		f.Append(hlabppo_reem);
+		f.Append(glabppo_mfp);
+		f.Append(glabppo_opscat);
+		f.Append(glabppo_remprob);
+		f.Write();
+*/
+	}	
+		if(option == "ndlabppo_noscatt"){
+		// labppo_scintillator refractive index
+		double RI_labppo[3] = {1.505, 0.0, 0.0 };
+		RefIndex(RI_labppo);
+		// LABPPO primary emission
+		ScintEmissionSpec("text_files/LABPPO_primary_emission.txt");
+		// LABPPO remission
+		ScintReemissionSpec("text_files/PPO_reemission.txt");
+		// LABPPO absorption and scattering
+		char *filenames_labppo[3];
+		filenames_labppo[0] = "text_files/LAB_absorption.txt";
+		filenames_labppo[1] = "text_files/PPO_absorption.txt";
+		filenames_labppo[2] = "text_files/Nd_absorption.txt"; 
+		double relCont_labppo[3] = {0.99829, 0.001710,0.0001}; 
+		double remprob_labppo[3] = {0.0001,0.8,0.0};
+		double RSf_labppo = 0.000001;
+		double RImean_labppo = 1.505;
+		double isocomp_labppo = 4.92e-10;
+		AbsScatRemScint(3, relCont_labppo, RSf_labppo, RImean_labppo, isocomp_labppo,
+		                filenames_labppo, remprob_labppo);
+
+		// Now make a comparison plot (and rename histograms)
+		TH1F *hlabppo_prim = (TH1F*)hscintOut->Clone("hlabppo_prim");
+		hlabppo_prim->Scale(50);
+		hlabppo_prim->SetAxisRange(0.,1.1,"Y");
+		hlabppo_prim->SetYTitle("");
+		hlabppo_prim->SetTitle("");
+		TH1F *hlabppo_reem = (TH1F*)hremOut->Clone("hlabppo_reem");
+		hlabppo_reem->Scale(50);
+		hlabppo_reem->SetLineColor(2);
+		TGraph *glabppo_mfp = (TGraph*)gROOT->FindObject("gTotmfp");
+		glabppo_mfp->SetName("glabppo_mfp");
+		TGraph *glabppo_opscat  = (TGraph*)gROOT->FindObject("gfracray");
+		glabppo_opscat->SetName("glabppo_opscat");
+		TGraph *glabppo_remprob = (TGraph*)gROOT->FindObject("gremprob");
+		glabppo_remprob->SetName("glabppo_remprob");
+		TCanvas *CanCom = new TCanvas("CanCom");
+		CanCom->cd();
+		hlabppo_prim->Draw();
+		hlabppo_reem->Draw("same");
+		glabppo_mfp->Draw("PL");
+		glabppo_opscat->Draw("PL");
+		glabppo_remprob->Draw("PL");
+		TLegend *legCom = new TLegend(0.55,0.28,0.89,0.53);
+		legCom->SetBorderSize(0);
+		legCom->SetFillColor(0);
+		legCom->AddEntry(hlabppo_prim,"Primary Emission Spectrum", "L");
+		legCom->AddEntry(hlabppo_reem,"Reemission Spectrum", "L");
+		legCom->AddEntry(glabppo_mfp,"Total MFP for extinction in mm", "PL");
+		legCom->AddEntry(glabppo_opscat,"Fraction of Attenuation due to Rayleigh", "PL");
+		legCom->AddEntry(glabppo_remprob,"Probability of Reemission if absorbed","PL");
+		legCom->Draw();
+		
+/*
+		// could output the plots to file here if you want
+		TFile f("labppo_plots.root","RECREATE");
+		f.Append(hlabppo_prim);
+		f.Append(hlabppo_reem);
+		f.Append(glabppo_mfp);
+		f.Append(glabppo_opscat);
+		f.Append(glabppo_remprob);
+		f.Write();
+*/
+	}	if(option == "ndlabppo_noabs"){
+		// labppo_scintillator refractive index
+		double RI_labppo[3] = {1.505, 0.0, 0.0 };
+		RefIndex(RI_labppo);
+		// LABPPO primary emission
+		ScintEmissionSpec("text_files/LABPPO_primary_emission.txt");
+		// LABPPO remission
+		ScintReemissionSpec("text_files/PPO_reemission.txt");
+		// LABPPO absorption and scattering
+		char *filenames_labppo[2];
+		filenames_labppo[0] = "text_files/no_absorption.txt";
+		filenames_labppo[1] = "text_files/no_absorption.txt";	
+		filenames_labppo[2] = "text_files/no_absorption.txt";
+		double relCont_labppo[3] = {0.99829, 0.001710,0.0}; 
+		double remprob_labppo[3] = {0.0001,0.8,0.0};
+		double RSf_labppo = 12.14;
+		double RImean_labppo = 1.505;
+		double isocomp_labppo = 4.92e-10;
+		AbsScatRemScint(3, relCont_labppo, RSf_labppo, RImean_labppo, isocomp_labppo,
+		                filenames_labppo, remprob_labppo);
+
+		// Now make a comparison plot (and rename histograms)
+		TH1F *hlabppo_prim = (TH1F*)hscintOut->Clone("hlabppo_prim");
+		hlabppo_prim->Scale(50);
+		hlabppo_prim->SetAxisRange(0.,1.1,"Y");
+		hlabppo_prim->SetYTitle("");
+		hlabppo_prim->SetTitle("");
+		TH1F *hlabppo_reem = (TH1F*)hremOut->Clone("hlabppo_reem");
+		hlabppo_reem->Scale(50);
+		hlabppo_reem->SetLineColor(2);
+		TGraph *glabppo_mfp = (TGraph*)gROOT->FindObject("gTotmfp");
+		glabppo_mfp->SetName("glabppo_mfp");
+		TGraph *glabppo_opscat  = (TGraph*)gROOT->FindObject("gfracray");
+		glabppo_opscat->SetName("glabppo_opscat");
+		TGraph *glabppo_remprob = (TGraph*)gROOT->FindObject("gremprob");
+		glabppo_remprob->SetName("glabppo_remprob");
+		TCanvas *CanCom = new TCanvas("CanCom");
+		CanCom->cd();
+		hlabppo_prim->Draw();
+		hlabppo_reem->Draw("same");
+		glabppo_mfp->Draw("PL");
+		glabppo_opscat->Draw("PL");
+		glabppo_remprob->Draw("PL");
+		TLegend *legCom = new TLegend(0.55,0.28,0.89,0.53);
+		legCom->SetBorderSize(0);
+		legCom->SetFillColor(0);
+		legCom->AddEntry(hlabppo_prim,"Primary Emission Spectrum", "L");
+		legCom->AddEntry(hlabppo_reem,"Reemission Spectrum", "L");
+		legCom->AddEntry(glabppo_mfp,"Total MFP for extinction in mm", "PL");
+		legCom->AddEntry(glabppo_opscat,"Fraction of Attenuation due to Rayleigh", "PL");
+		legCom->AddEntry(glabppo_remprob,"Probability of Reemission if absorbed","PL");
+		legCom->Draw();
+		
+/*
+		// could output the plots to file here if you want
+		TFile f("labppo_plots.root","RECREATE");
+		f.Append(hlabppo_prim);
+		f.Append(hlabppo_reem);
+		f.Append(glabppo_mfp);
+		f.Append(glabppo_opscat);
+		f.Append(glabppo_remprob);
+		f.Write();
+*/
+	}	
 }
