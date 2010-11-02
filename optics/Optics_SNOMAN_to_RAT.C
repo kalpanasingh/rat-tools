@@ -6,9 +6,13 @@
 /// Note, for parameters where an _option is required, it should be set to "wavelength".
 ///
 /// First version
-/// auhor: Jeanne Wilson (Oxford)
+/// author: Jeanne Wilson (Oxford)
 /// date:  13/11/08
 ///
+/// Second version, updates to AbsScatNonScint and RefIndex
+/// author: Phil Jones (Oxford)
+/// date: 12/10/10
+
 
 ///-----------------------------------------------------------------------------------------///
 /// Helper method to make plots look nice ;)
@@ -60,10 +64,13 @@ void Help(){
 ///-----------------------------------------------------------------------------------------///
 /// Method to convert from the polynomial definition of refractive index in SNOMAN's 
 /// media.dat file to a wavelength dependent array, RINDEX, in RAT format
-void RefIndex(double *RI){
+void RefIndex(double *RI, double lo_wave = 200, double hi_wave = 800 )
+{
 /// Arguments:
 	/// RI 			= pointer to a double array of 3 values defining the refractive index
 	/// 			polynomial, taken from media.dat
+        /// lo_wave             = Starting wavelength
+        /// hi_wave             = End wavelength
 	
 /// Output graphs:
 	/// gRIsnoman	= graph of the input data refractive index vs wavelength
@@ -75,8 +82,6 @@ void RefIndex(double *RI){
 	/// RINDEX_value2	= corresponding array of RI values
 
 /// Parameters:
-	double lo_wave 			= 200;		// starting wavelength 
-	double hi_wave 			= 800;		// last wavelength 
 	const int nvals_output 	= 31;		// how many values do we want to output?
 	bool verbose 			= false;	// output more info if true 
 
@@ -135,15 +140,18 @@ void RefIndex(double *RI){
 /// length, ABSLENGTH (mm). The fraction of this extinction that is due to scattering is 
 /// output as the OPSCATFRAC array.
 void AbsScatNonScint(int ninp, double *wave, double *abscoeff, double RSfactor, double meanRI, 
-                     double isocomp){
+                     double isocomp, double lo_wave = 200, double hi_wave = 800 )
+{
 /// Arguments:
-	/// ninp		= number of input points
-	/// wave 		= pointer to double array of up to 15 wavelengths
+	/// ninp	= number of input points
+	/// wave 	= pointer to double array of up to 15 wavelengths
 	/// abscoeff 	= pointer to double array of up to 15 corresponding absorption 
 	///           	coefficients (in cm-1), taken from media.dat
 	/// RSfactor 	= Rayleigh Scattering scale factor from media.dat
-	/// meanRI 		= mean refractive index for this material, taken from media.dat
+	/// meanRI 	= mean refractive index for this material, taken from media.dat
 	/// isocomp 	= Isothermal Compressibility of the material, taken from media.dat
+        /// lo_wave     = Starting wavelength
+        /// hi_wave     = End wavelength 
 	
 /// Output histograms and graphs:
 	/// gabsIn		= SNOMAN absorption coefficients
@@ -163,8 +171,6 @@ void AbsScatNonScint(int ninp, double *wave, double *abscoeff, double RSfactor, 
 	/// OPSCAT_FRAC_value2
 
 /// Parameters:
-	double lo_wave 			= 200;		// starting wavelength 
-	double hi_wave 			= 800;		// last wavelength 
 	const int nvals_output 	= 31;		// how many values do we want to output?
 	bool verbose 			= false;	// output more info if true 
 	double Confac 			= 1.53e26;	// Conversion factor used in SNOMAN (rayint_prob.for)
@@ -196,7 +202,50 @@ void AbsScatNonScint(int ninp, double *wave, double *abscoeff, double RSfactor, 
 	// add another entry on the end if it doesn't go all the way to hi_wave (same as last)
 	waveRAT[ninp+1] = hi_wave;
 	abscoRAT[ninp+1] = abscoRAT[ninp];
-	TGraph *gabsRAT = new TGraph(ninp+2,waveRAT,abscoRAT);
+
+	// New method to match SNOMAN fit_atten.for, linear interpolation between point and extrapolation beyond
+        {
+          vector<double> waveVec;
+          vector<double> absorptionVec;
+          for( double iWave = lo_wave; iWave <= hi_wave; iWave+=10.0 )
+            {
+              waveVec.push_back( iWave );
+              double x0, grad, delta;
+              if( iWave < wave[0] )
+                {
+                  x0 = abscoeff[0];
+                  grad = ( abscoeff[1] - abscoeff[0] ) / ( wave[1] - wave[0] );
+                  delta = iWave - wave[0];
+                }
+              else if( iWave > wave[ninp-1] )
+                {
+                  x0 = abscoeff[ninp-1];
+                  grad = ( abscoeff[ninp-1] - abscoeff[ninp-2] ) / ( wave[ninp-1] - wave[ninp-2] );
+                  delta = iWave - wave[ninp-1];
+                }
+              else
+                {
+                  // First find nearest index in submitted array
+		  int index = -1;
+                  int iLoop;
+                  for( iLoop = 0; iLoop <= ninp - 2; iLoop++ )
+                    if( iWave >= wave[iLoop] && iWave <= wave[iLoop+1] )
+                      index = iLoop;
+                  if( index < 0 )
+                    cout << "Error in absorption interpolation" << endl;
+                  x0 = abscoeff[index];
+                  grad = ( abscoeff[index+1] - abscoeff[index] ) / ( wave[index+1] - wave[index] );
+                  delta = iWave - wave[index];
+                }
+              double fitAbsCoef = x0 + grad*delta;
+              if( fitAbsCoef < 1e-6 )
+                fitAbsCoef = 1e-6;
+
+	      absorptionVec.push_back( Attenuation( fitAbsCoef ) );
+            }
+          gabsRAT = new TGraph(waveVec.size(),&waveVec[0],&absorptionVec[0]);
+        }             
+
 	gabsRAT->SetMarkerStyle(23);gabsRAT->SetMarkerColor(3);gabsRAT->SetLineColor(3);
 	gabsRAT->GetXaxis()->SetTitle("wavelength (nm)");
 	gabsRAT->GetYaxis()->SetTitle("(RAT) Absorption length (mm)");
@@ -297,20 +346,20 @@ void AbsScatNonScint(int ninp, double *wave, double *abscoeff, double RSfactor, 
 		cout << FormatRatD(waveOut[i]) << ", ";	
 	}
 	cout << "], " << endl;				
-    cout << "ABSLENGTH_value2: [";
+	cout << "ABSLENGTH_value2: [";
 	for(int i=0; i<nvals_output; ++i){
-		cout << FormatRatD(mfp_tot[i]) << ", ";
+		cout << FormatRatD(mfp_abs[i]) << ", ";
 	}
 	cout << "], " << endl;					
-	cout << "OPSCATFRAC_option: \"wavelength\"," << endl;
-	cout << "OPSCATFRAC_value1: [";
+	cout << "RSLENGTH_option: \"wavelength\"," << endl;
+	cout << "RSLENGTH_value1: [";
 	for(int i=0; i<nvals_output; ++i){
 		cout << FormatRatD(waveOut[i]) << ", ";	
 	}
 	cout << "], " << endl;				
-    cout << "OPSCATFRAC_value2: [";
+	cout << "RSLENGTH_value2: [";
 	for(int i=0; i<nvals_output; ++i){
-		cout << FormatRatD(fracray[i]) << ", ";
+		cout << FormatRatD(mfp_ray[i]) << ", ";
 	}
 	cout << "], " << endl;					
 }

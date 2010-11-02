@@ -1,7 +1,13 @@
-void Run(char* option){
+void Run(char* option)
+{
 
 	gROOT->ProcessLine(".L Optics_SNOMAN_to_RAT.C");
 	SetUp();
+	if( option == "" ) // Print out possible values
+	  {
+	    cout << "Options available: h20, d2o, acrylic, glass, pcppo, labppo, ndlabppo_noscatt_noabs, ndlabppo_noscatt, ndlabppo_noabs" << endl;
+	    cout << "Salt Phase: h2o_salt, d2o_salt, acrylic_salt" << endl;
+	  }
 
 	if(option == "h2o"){
 		// lightwater_sno refractive index
@@ -15,20 +21,44 @@ void Run(char* option){
 		double absco_h2o[6] = {4.949e-05, 2.407e-05, 1.226e-04, 3.071e-04, 5.766e-04, 2.183e-03};
 		AbsScatNonScint(6, wave_h2o, absco_h2o, RSf_h2o, meanRI_h2o, isocomp_h2o);
 	}
-	
+	if(option == "h2o_salt")
+	  {
+	    // lightwater_sno refractive index
+	    double RI_h2o[3] = {1.302, 0.01562, 0.32 };
+	    RefIndex(RI_h2o);
+	    // lightwater_sno absorption and scattering (from make_scintillator cmdfiles)
+	    double meanRI_h2o = 1.342;
+	    double RSf_h2o = 0.87;
+	    double isocomp_h2o = 4.78e-10;
+	    double wave_h2o[6] = {337.0, 365.0, 386.0, 420.0, 500.0, 620.0};
+	    double absco_h2o[6] = {1.068e-06,   1.022e-05,   4.123e-05,   2.193e-04,   4.344e-04,   2.498e-03 };
+	    AbsScatNonScint(6, wave_h2o, absco_h2o, RSf_h2o, meanRI_h2o, isocomp_h2o);
+        }	
 	if(option == "d2o"){	
 		// heavywater_sno refractive index
 		double RI_d2o[3] = {1.302, 0.01333, 0.32};
 		RefIndex(RI_d2o);
 		// D2O absorption and scattering (from media_qoca_jan22)
 		double meanRI_d2o = 1.337;
-		double RSf_d2o = 2.0;
+		double RSf_d2o = 1.289;
 		double isocomp_d2o = 4.92e-10; 
 		double wave_d2o[6] = {337.0, 365.0, 386.0, 420.0, 500.0, 620.0};
-		double absco_d2o[6] = {1.697e-05, 5.450e-05, 5.962e-05, 4.851e-05, 3.760e-05, 4.236e-05};
+		double absco_d2o[6] = {8.507e-05,   7.991e-05,   7.495e-05,   1.141e-04,   2.313e-05,   2.801e-05};
 		AbsScatNonScint(6, wave_d2o, absco_d2o, RSf_d2o, meanRI_d2o, isocomp_d2o);
 	}
-	
+	if(option == "d2o_salt")
+	  {
+	    // heavywater_sno refractive index
+	    double RI_d2o[3] = {1.302, 0.01333, 0.32};
+	    RefIndex(RI_d2o, 220, 710);
+	    // D2O absorption and scattering (from media_qoca_jan22)
+	    double meanRI_d2o = 1.337;
+	    double RSf_d2o = 1.289;
+	    double isocomp_d2o = 4.92e-10;
+	    double wave_d2o[6] = {337.0, 365.0, 386.0, 420.0, 500.0, 620.0};
+	    double absco_d2o[6] = {1.024e-04,   8.922e-05,   8.763e-05,   9.653e-05,   1.207e-05,   1.177e-05};
+	    AbsScatNonScint(6, wave_d2o, absco_d2o, RSf_d2o, meanRI_d2o, isocomp_d2o, 220, 710);
+        }
 	if(option == "acrylic"){	
 		// acrylic_sno refractive index
 		double RI_acrylic[3] = {1.452, 0.02, 0.32 };
@@ -41,7 +71,19 @@ void Run(char* option){
 		double absco_acr[6] = {5.610e-02, 2.279e-02, 1.204e-02, 7.587e-03, 7.036e-03, 7.068e-03};
 		AbsScatNonScint(6, wave_acr, absco_acr, RSf_acr, meanRI_acr, isocomp_acr);	
 	}
-	
+	if(option == "acrylic_salt")
+	  {
+	    // acrylic_sno refractive index
+	    double RI_acrylic[3] = {1.452, 0.02, 0.32 };
+	    RefIndex(RI_acrylic);
+	    // acrylic absorption and scattering (from make_scintillator cmdfile)
+	    double meanRI_acr = 1.5;
+	    double RSf_acr = 0.95;
+	    double isocomp_acr = 3.55e-10;
+	    double wave_acr[6] = {337.0, 365.0, 386.0, 420.0, 500.0, 620.0};
+	    double absco_acr[6] = {5.610e-02,   2.279e-02,   1.204e-02,   7.587e-03,   7.036e-03,   7.068e-03};
+	    AbsScatNonScint(6, wave_acr, absco_acr, RSf_acr, meanRI_acr, isocomp_acr);
+        }
 	if(option == "glass"){
 		// glass_sno refractive index
 		double RI_glass[3] = {1.458, 0.0, 0.0 };
