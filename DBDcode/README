@@ -1,0 +1,10 @@
+version 0 of the Double Beta Decay sensitivity code
+
+To compile:
+
+Make
+
+to run:
+
+
+./DBDanalysis_mainTest.ext Listoffiles.dat
