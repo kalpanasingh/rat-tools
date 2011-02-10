@@ -1,0 +1,82 @@
+*LOG
+*---  Non-Standard Titles File: qio_data.dat                13:Sep:2002
+*---                 Banks: TQIO
+*---                   TQIO/RCH I/O control bank
+*---                   Contact:  M. Boulay, Queen's
+*---
+*LOG OFF
+*DO  TQIO   3   -i(30I 6I 1F 2I 3F 2I 3F -I)  #.  Bank for QIO control
+#.
+#.    Contact:  M. Boulay, Queen's
+#.
+#.       Standard Database Header
+#.
+19750101        0 20380517 03331900  #.  1..4   Intrinsic validity
+       0        0        0           #.  5..7   Data type, Task type, Format no.
+       0        0        0           #.  8..10  Creation Date, Time, Source Id.
+19750101        0 20380517 03331900  #. 11..14  Effective validity
+       0        0                    #. 15..16  Entry Date Time
+4*0                                  #. 17..20  Spare
+10*0                                 #. 21..30  Temporary data (not in database)
+#.
+#.    End of Standard Database Header
+#.
+#.User Data
+ 0         #. Output mode           (0=root file only, 1=rch file only, 2 = root and rch files)
+ 0         #. Soft Nhit cut, only write PMT data for events above this threhold
+ 0         #. Hard Nhit cut, only output events above this threshold
+ 0         #. Flag for TSLH correction (0->Do Nothing, 1->Apply TSLH)
+ 0         #. Prescale factor, save every nth event below the Soft Nhit cut 
+ 0         #. Prompt peak determination mode, 0 = find peak, 1 = use titles
+ 0.0       #. Prompt peak in nsec (for mode 1 above)
+ 500       #. Number of events to use in peak determination
+ 0         #. Source position mode, 0=use cast, 1 = use titles
+ 0.0       #. Source x in cm
+ 10.0      #. Source y in cm 
+ 20.0      #. Source z in cm
+ 32768     #. singles histogram trigger mask
+ 0         #. RCH PMT time (0->PT, 1->PT1) 
+ -10.0     #. RCH histogram low charge cut
+ 4095.0    #. RCH histogram high charge cut
+ 1.3710    #. Group refractive index for time residuals and reconstruction 
+ 0         #. Cut on damn/darn words             (0=NONE, 1=DAMN only, 2=DARN only, 3=DAMN and DARN)
+ 1         #. Store damn/darn words              (0=NONE, 1=DAMN only, 2=DARN only, 3=DAMN and DARN)
+ 15953893  #. DAMN mask
+ 0         #. DAMN1 mask
+ 267649023 #. DARN mask
+ 0         #. Input flag  (0 -> zdab  1 -> root file)
+ 0         #. 0  open ROOT output file in RECREATE mode ( default )
+           #. +1 open in UPDATE mode
+           #. -1 attempt to append to last file in TChain
+ 2095104   #. Bit flags controlling ROOT input/unpacking (See note 1 below).
+ 1         #. MCVX flag
+ 14         #. number of MC vertex types
+#. 	   Included MC Vertex Interaction Codes
+ 100       #. Start
+#. 101        Beta Decay
+#. 103        Beta Gamma Decay
+#. 104        Alpha Decay
+#. 199        Photon Bomb
+ 200       #. Crosses Boundary
+ 201       #. Photon spectral reflection
+ 202       #. Photon diffuse reflection
+ 203       #. Photon spectral refraction
+ 204       #. Photon diffuse transmission
+ 301       #. Photon from $CP
+ 302       #. Photon created within PMT
+ 303       #. Photon Rayleigh scattering
+ 304       #. Photon (created within PMT) escapes
+ 305       #. Photon bounces (enters and leaves PMT) For 3d PMT, used on both entry and exit MCVX 
+#. 400        $CP lost (left tracking region)
+ 401       #. Photon discarded (CERFAC cut) or track error
+ 402       #. Photon reached and fired PMT
+ 404       #. Photon absorbed (any media)
+
+#. Notes:
+#. 1:  Bit flag controlling root unpacking
+#.         [31-21][20-11][10-3] [2] [1-0]
+#.            |      |      |    |    |-> unpack DAMN (0),DARN(1) words (and store these)
+#.            |      |      |    |------> unpack RSP bank
+#.            |      |      |-----------> spare
+#.            |      |------------------> upack FITTER bank 10+i
+#.            |-------------------------> spare
