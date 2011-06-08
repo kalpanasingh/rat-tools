@@ -1,0 +1,53 @@
+#!/usr/bin/env python
+#-*-python-*-
+import os
+# Author P G Jones - 13/03/2011 <p.jones22@physics.ox.ac.uk>
+
+class FitCoordinate:
+	def __init__( self, target ):
+		self.fTarget = target
+		self.fcwd = os.getcwd()
+		os.chdir( self.fTarget )
+		# Load the settings from the config file
+		params = {}
+		execfile( "fitcoordinate.config", {}, params )
+		for name, value in params.items():
+			setattr( self, name, value )
+
+	def Produce( self, options ):
+		self.RunCommand( "./" + self.production_script + options )
+	def Analyse( self, options ):
+		self.RunCommand( "./" + self.analysis_script + options )
+	def RunCommand( self, command ):
+		print 'Running:', command
+		os.system( command )
+	def Describe( self ):
+		print self.description
+
+
+import optparse
+if __name__ == '__main__':
+	parser = optparse.OptionParser( usage = "usage: %prog [options] target", version="%prog 1.0" )
+	parser.add_option( "-g", type="string", dest="geoFile", help="Geometry File to use, location must be absolute or relative to target.", default="" )
+	parser.add_option( "-s", type="string", dest="scintMaterial", help="Scintillator material.", default="" )
+	parser.add_option( "-i", type="string", dest="index", help="RATDB index to place result.", default="" )
+	(options, args) = parser.parse_args()
+	
+	if len( args ) != 1:
+		print "Incorrect usage"
+	else:
+		fc = FitCoordinate( args[0] )
+		fc.Describe()
+		# Produce
+		prodOptions = ""
+		if( options.geoFile != "" ):
+			prodOptions = "-g " + options.geoFile
+		if( options.scintMaterial != "" ):
+			prodOptions = prodOptions + " -s " + options.scintMaterial
+		fc.Produce( prodOptions )
+
+		# Analyse
+		if( options.index != "" ):
+			fc.Analyse( "-i " + options.index )
+		else:
+			fc.Analyse( "" )

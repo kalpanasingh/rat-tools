@@ -1,0 +1,29 @@
+# In this file the source is at 0.0 ${SourcePos} 0.0
+
+# Parameters
+/glg4debug/glg4param omit_muon_processes 1.0
+/glg4debug/glg4param omit_hadronic_processes 1.0
+/glg4debug/glg4param omit_neutron_hp 1.0
+
+/run/initialize
+
+/rat/proc frontend
+/rat/proc trigger
+/rat/proc eventbuilder
+/rat/proc count
+/rat/procset update 100
+/rat/proc calibratePMT
+/rat/proc outroot
+/rat/procset file "Electron3MeV_${SourcePos}.root"
+
+# Generator
+
+/generator/add combo gun:point
+/generator/vtx/set e- 0 0 0 3.0
+
+/generator/pos/set 0.0 ${SourcePos} 0.0
+/generator/rate/set 1
+
+/run/beamOn 1000
+
+exit
