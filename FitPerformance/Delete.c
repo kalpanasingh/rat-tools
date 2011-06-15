@@ -1,0 +1,11 @@
+////////////////////////////////////////////////////////
+/// Deletes the FitCharacterise functions
+///
+/// P G Jones <p.jones22@physics.ox.ac.uk>
+///
+/// 13/06/11 - New File
+////////////////////////////////////////////////////////
+
+{
+  gROOT->ProcessLine(".rm $RATTOOLS/FitPerformance/*_cc.*");
+}
