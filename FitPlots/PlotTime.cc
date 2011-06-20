@@ -202,7 +202,7 @@ ExtractTime(
 			  cout << "Time has not been fit." << endl;
 			  return;
 			}
-		  double deltaT = fitTime - mcTime;
+		  double deltaT = fitTime - ( mcTime + 390.0 - rEV->GetGTrigTime() );
 
 		  (*hCountVRes)->Fill( deltaT );
 		  (*gResVR)->SetPoint( graphPoint, mcPos.Mag(), deltaT );
