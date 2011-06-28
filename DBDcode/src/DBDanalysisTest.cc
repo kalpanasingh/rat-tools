@@ -436,11 +436,12 @@ void analysis::FitData(TF1* func,TVirtualFitter* fitter){
     efitUp[i]*=hsigpdf[i-NofBkg]->Integral();
     efitLow[i]*=hsigpdf[i-NofBkg]->Integral();
     efitSigUp[i]=efitUp[i];
+    globcc_test[i]=globcc[i]; //modified
     efitSigLow[i]=efitLow[i];
     cout<<"EfitUP     *************  "<<efitUp[i]<<endl;
     // I found out that for root version 5.20 and higher (maybe due to a bug) EfitUp is too small which statistically not correct
 
-    if (efitUp[i]<1.0) {cout<< "Going to skip this fit----- "<<endl;}
+    if (globcc[i]<0.0001) {cout<< "Going to skip this fit----- "<<endl;} //modified
     fitresult[i]=func->GetParameter(i)*hsigpdf[i-NofBkg]->Integral();
     
 
@@ -560,6 +561,5 @@ void analysis::GetSigHistograms(char hname1[10], char hname2[10], char hname3[10
   }
 
 }
-
 
 

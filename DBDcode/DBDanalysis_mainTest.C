@@ -43,7 +43,7 @@ char Type[10];
 double livetime=1.0; //how many years
 int numback(0);
 int numsig(0);
-double mass = 0.048;
+double mass = 0.0437;
 double isotopemass=150.;
 double numass = 500;//the neutrino mass in eV
 double halfLifeLimitGraph[5];
@@ -180,7 +180,7 @@ void SingleLiveTimeTest(analysis *ana,const char path[500]){
   func = new TF1("func",ana,&analysis::Evaluate,0,15,numsig+numback); 
   func->SetNumberFitPoints(100);
  TVirtualFitter *fitter=TVirtualFitter::Fitter(0,numback+numsig);
-;
+
 
  
 
@@ -303,7 +303,7 @@ void EnsembleTests(analysis *ana,TVirtualFitter *fitter){
       }
    
       if (count2!=0) continue;
-      if (ana->efitSigUp[numback]<1.0 ) continue;// this is for root version 5.20 and higher where the fitter sometimes failes to finds the error on the fit and gives a wrong small error
+      if (ana->globcc_test[numback]<0.0001) continue;//modified
       
 
       //  Fill the mean with fit values
@@ -319,21 +319,22 @@ void EnsembleTests(analysis *ana,TVirtualFitter *fitter){
 
   //Write the witdh and mean histograms in a file, perform a gausan fit to find the overall fit result and error.
    TFile fin("temp_ratnd.root","recreate");
-  width.Write();
+   //width.Write();   modified
   //
   TF1 *f1=new TF1("f1","gaus",-100,100);
   mean.Fit(f1,"LQ");
   mean.Write();
-  fin.Close();
+  // fin.Close();    modified
   ensemble_mean = f1->GetParameter(1);
   cout<<"ensemble_mean "<<ensemble_mean<<endl;
   eensemble_mean = f1->GetParError(1);
   
   TF1 *f2=new TF1("f2","gaus",-100,100);
   width.Fit(f2,"LQ");
-
+  width.Write(); // modified
   ensemble_width =f2->GetParameter(1);
   eensemble_width =f2->GetParError(1);
+  fin.Close(); // modified
 
   if(fabs(ensemble_width-width.GetMean())>1.0)
     {
@@ -344,5 +345,4 @@ void EnsembleTests(analysis *ana,TVirtualFitter *fitter){
  
 
 }
-
 

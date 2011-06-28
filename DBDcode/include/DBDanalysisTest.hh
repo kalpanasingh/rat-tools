@@ -27,6 +27,7 @@ class analysis{
   double numbackevents[30];
   double nhits;
   double efitSigUp[10];
+  double globcc[10]; // modified
   double fitresult[30];
   double efitSigLow[10];
   TH1F *hback[30];
