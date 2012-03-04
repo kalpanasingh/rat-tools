@@ -1,0 +1,253 @@
+#####################################################
+# Makefile for main SASQUATCH installation.
+#
+# Original version by Stan Seibert,
+# modified by S. Biller to accomodate new
+# directory structure, to run documentation
+# scripts, and to account for Mac OS X 
+# peculiarities.
+#
+# The two build modes are as follows: the default or
+# 'all' is everything, the grid mode is specifically 
+# for the grid or installations where graphics and 
+# graphical libraries are missing. To make call either
+# 'make' or 'make grid=true' but not both.
+# Secondly RAT can be optionally sourced by svn at 
+# snolab rather than github with ratversion=svn, 
+# furthermore a specific version can be obtained by 
+# make ratversion=release-2.00.
+# -P Jones.
+#
+# CONTACT: S. Biller, Oxford University
+#         <Steven.Biller@physics.ox.ac.uk>
+#          P. Jones, QMUL
+#         <p.g.jones@qmul.ac.uk>
+#
+# HISTORY: 14 December 2008 1st modified version.
+#          26 January  2009 Fix OS X problem for root.
+#          16 February 2009 Introduce 'VARIANT' variable
+#                           to specify code versions.
+#          12 June     2009 Change archive location,
+#                           added variant tag to env files
+#          12 October  2009 Update library versions,
+#                           define SCONS version now
+#                           part of library section
+#          23 February 2010 Archive moved to site
+#          10 May      2011 New libraries for release 2 of
+#                           RAT and added the export RAT_SCONS
+#                           line that was lost in a previous
+#                           update. Also removed 32bit Mac 
+#                           support
+#          24 July     2011 Added SFML and XERCES libraries for
+#                           viewer installation. Also added 
+#                           viewer and altered Geant4 to build GDML.
+#          25 January  2012 Added zeromq library for event dispatch.
+#                           Also added grid build mode, avalanche and
+#                           viewer git clones.
+#          02 February 2012 Removed VARIANT variable as obsolete,
+#                           as git has branches. Also removed the 
+#                           sasquatch folder.
+#####################################################
+SHELL := /bin/bash #Must use bash for source and env setting
+
+# To update the library add to libraries/ and update these numbers:
+CLHEP_VERSION=2.1.0.1
+ROOT_VERSION=5.32.01
+GEANT4_VERSION=4.9.4.p01
+SCONS_VERSION=2.1.0
+SFML_VERSION=2.0
+XERCES_VERSION=3.1.1
+ZEROMQ_VERSION=2.1.11
+
+#########
+# Set the global environment variables
+TOPLEVEL=$(shell pwd)
+export CLHEP_BASE=$(TOPLEVEL)/libraries/clhep-$(CLHEP_VERSION)
+CLHEP_SRC=$(CLHEP_BASE)/CLHEP
+export ROOTSYS=$(TOPLEVEL)/libraries/root-$(ROOT_VERSION)
+export GEANT4_BASE=$(TOPLEVEL)/libraries/geant$(GEANT4_VERSION)
+G4OSNAME=$(shell uname)
+G4SYSTEM=$(G4OSNAME)-g++
+export G4OSNAME G4SYSTEM
+export SCONSROOT=$(TOPLEVEL)/libraries/scons-$(SCONS_VERSION)
+export RAT_SCONS=$(SCONSROOT)
+export ZEROMQROOT=$(TOPLEVEL)/libraries/zeromq-$(ZEROMQ_VERSION)
+# Version free, downloaded on installation below:
+export RAT_BASE=$(TOPLEVEL)/rat
+export AVALANCHEROOT=$(TOPLEVEL)/libraries/avalanche
+#########
+# Below are the variables that change if a grid build is required over a normal build
+ifeq ($(grid), true)
+	G4_CONFIG=geant4-grid-config.sh # Grid build
+	G4_DEPENDENCIES= # No extra graphical dependencies
+	LOCAL_LIB_PATH=$(ZEROMQROOT)/lib # Only the zeromq library
+else
+	export XERCESCROOT=$(TOPLEVEL)/libraries/xerces-c-$(XERCES_VERSION)
+	G4_CONFIG=geant4-config.sh # Graphical build
+	G4_DEPENDENCIES=$(XERCESCROOT)/lib/libxerces-c.a # Extra Graphical dependencies, Xerces is required for gdml in graphical version
+	LOCAL_LIB_PATH=$(XERCESCROOT)/lib:$(ZEROMQROOT)/lib # Add xerces and zeromq to library path
+	GRAPHICAL_DEPENDENCIES=xercesc sfml snogoggles
+# Extra installed library locations
+	export SFMLROOT=$(TOPLEVEL)/libraries/sfml-$(SFML_VERSION)
+	export VIEWERROOT=$(TOPLEVEL)/snogoggles
+endif
+# Get RAT from github or svn
+ifndef ratversion
+	ratversion=github
+endif
+#########
+
+.PHONY: all libraries update root clhep geant4 scons rat sfml xercesc zeromq avalanche snogoggles docs tools
+
+all: root geant4 zeromq avalanche scons rat docs tools $(GRAPHICAL_DEPENDENCIES) 
+
+libraries: root geant4 zeromq avalanche scons $(GRAPHICAL_DEPENDENCIES)
+
+update: $(RAT_BASE)/bin/rat_$(G4SYSTEM) $(AVALANCHEROOT)/lib/cpp/libavalanche.so $(VIEWERROOT)/bin/snogoggles $(TOPLEVEL)/doc/companion/exe/make_search.exe tools
+
+env.sh:
+	rm -f env.sh
+	echo '#!/bin/bash' > env.sh
+	echo '#ratcage environment' >> env.sh
+	echo 'source $(GEANT4_BASE)/env.sh' >> env.sh
+	echo 'export ROOTSYS=$(ROOTSYS)' >> env.sh
+# Add viewer line
+	echo 'export PATH=$(ROOTSYS)/bin:$$PATH' >> env.sh
+	echo 'export AVALANCHEROOT=$(AVALANCHEROOT)' >> env.sh
+	echo 'export LD_LIBRARY_PATH=$$LD_LIBRARY_PATH:$(CLHEP_BASE)/lib:$(ROOTSYS)/lib:$(AVALANCHEROOT)/lib/cpp:$(LOCAL_LIB_PATH)' >> env.sh
+	echo 'export DYLD_LIBRARY_PATH=$$DYLD_LIBRARY_PATH:$(CLHEP_BASE)/lib:$(ROOTSYS)/lib:$(AVALANCHEROOT)/lib/cpp:$(LOCAL_LIB_PATH)' >> env.sh
+	echo 'export PYTHONPATH=$(ROOTSYS)/lib:$$PYTHONPATH' >> env.sh
+	echo 'export RAT_SCONS=$(SCONSROOT)' >> env.sh	
+	echo 'source $(RAT_BASE)/env.sh' >> env.sh
+	echo 'cd $$RATROOT' >> env.sh
+
+env.csh:
+	rm -f env.csh
+	echo '#!/bin/csh' > env.csh
+	echo '#ratcage environment' >> env.csh
+	echo 'source $(GEANT4_BASE)/env.csh' >> env.csh
+	echo 'setenv ROOTSYS $(ROOTSYS)' >> env.csh
+# Add viewer line
+	echo 'setenv PATH $(ROOTSYS)/bin:$${PATH}' >> env.csh
+	echo 'setenv AVALANCHEROOT $(AVALANCHEROOT)' >> env.csh
+	echo 'if ( $${?LD_LIBRARY_PATH} )  then' >> env.csh
+	echo 'setenv LD_LIBRARY_PATH $${LD_LIBRARY_PATH}:$(CLHEP_BASE)/lib:$(ROOTSYS)/lib:$(AVALANCHEROOT)/lib/cpp:$(LOCAL_LIB_PATH)' >> env.csh
+	echo 'else' >> env.csh
+	echo 'setenv LD_LIBRARY_PATH $(CLHEP_BASE)/lib:$(ROOTSYS)/lib:$(AVALANCHEROOT)/lib/cpp:$(LOCAL_LIB_PATH)' >> env.csh
+	echo 'endif' >> env.csh
+	echo 'if ( $${?DYLD_LIBRARY_PATH} )  then' >> env.csh
+	echo 'setenv DYLD_LIBRARY_PATH $${DYLD_LIBRARY_PATH}:$(CLHEP_BASE)/lib:$(ROOTSYS)/lib:$(AVALANCHEROOT)/lib/cpp:$(LOCAL_LIB_PATH)' >> env.csh
+	echo 'else' >> env.csh
+	echo 'setenv DYLD_LIBRARY_PATH $(CLHEP_BASE)/lib:$(ROOTSYS)/lib:$(AVALANCHEROOT)/lib/cpp:$(LOCAL_LIB_PATH)' >> env.csh	
+	echo 'endif' >> env.csh
+	echo 'if ( $${?PYTHONPATH} )  then' >> env.csh
+	echo 'setenv PYTHONPATH $(ROOTSYS)/lib:$${PYTHONPATH}' >> env.csh
+	echo 'else' >> env.csh
+	echo 'setenv PYTHONPATH $(ROOTSYS)/lib' >> env.csh
+	echo 'endif' >> env.csh
+	echo 'setenv RAT_SCONS $(SCONSROOT)' >> env.csh 	
+	echo 'source $(RAT_BASE)/env.csh' >> env.csh
+	echo 'cd $${RATROOT}' >> env.csh
+###
+root: $(ROOTSYS)/bin/root.exe
+
+$(ROOTSYS)/bin/root.exe:
+	cd $(ROOTSYS) && ./configure --enable-minuit2 --enable-roofit
+	cd $(ROOTSYS) && $(MAKE)
+
+###
+clhep: $(CLHEP_BASE)/lib/libCLHEP.a
+
+$(CLHEP_BASE)/lib/libCLHEP.a:
+	cd $(CLHEP_SRC) && ./configure --prefix=`pwd`/../
+	cd $(CLHEP_SRC) && $(MAKE)
+	cd $(CLHEP_SRC) && $(MAKE) install
+###
+geant4: $(G4_DEPENDENCIES) $(GEANT4_BASE)/include/G4Event.hh
+
+$(GEANT4_BASE)/include/G4Event.hh: $(CLHEP_BASE)/lib/libCLHEP.a
+	cd $(GEANT4_BASE) && ./Configure -incflags -build -d -e -f ../$(G4_CONFIG)
+	cd $(GEANT4_BASE) && ./Configure -incflags -install -d -e -f ../$(G4_CONFIG)
+	cd $(GEANT4_BASE) && (./Configure || true) # Configure returns false?!
+	touch $(GEANT4_BASE)/include/G4Event.hh  # Mark that we finished
+###
+scons: 
+	chmod a+x $(SCONSROOT)/script/scons
+###
+rat: $(RAT_BASE)/bin/rat_$(G4SYSTEM) 
+
+$(TOPLEVEL)/rat:
+ifeq (${ratversion}, github)
+	git clone git@github.com:snoplus/rat.git $(TOPLEVEL)/rat
+else
+ifeq (${ratversion}, svn)
+	svn co https://www.snolab.ca/snoplus/svn/sasquatch/dev $(TOPLEVEL) #dev?
+else
+	wget https://www.snolab.ca/snoplus/private/$(ratversion).tar.gz
+	tar -xvf $(ratversion).tar.gz -C rat --strip-components 1
+endif
+endif
+
+$(RAT_BASE)/bin/rat_$(G4SYSTEM): $(TOPLEVEL)/rat env.sh env.csh $(GEANT4_BASE)/include/G4Event.hh $(ROOTSYS)/bin/root.exe scons
+	cd $(RAT_BASE) && source $(GEANT4_BASE)/env.sh && ./configure
+	cd $(RAT_BASE) && git pull git@github.com:snoplus/rat.git master
+	cd $(RAT_BASE) && source $(TOPLEVEL)/env.sh && $(MAKE)
+###
+sfml: $(SFMLROOT)/lib/libsfml-system-d.a
+
+$(SFMLROOT)/lib/libsfml-system-d.a:
+	cd $(SFMLROOT) && cmake -DCMAKE_INSTALL_PREFIX:PATH=$(SFMLROOT)
+	cd $(SFMLROOT) && make
+###
+xercesc: $(XERCESCROOT)/lib/libxerces-c.a
+
+$(XERCESCROOT)/lib/libxerces-c.a:
+	cd $(XERCESCROOT) && ./configure
+	cd $(XERCESCROOT) && $(MAKE)
+	cd $(XERCESCROOT) && $(MAKE) install prefix=$(XERCESCROOT)
+	echo 'g4gdml_xercesc_root=$(XERCESCROOT)' >> $(TOPLEVEL)/libraries/geant4-config.sh
+	echo 'with_xercesc_root=$(XERCESCROOT)' >> $(TOPLEVEL)/libraries/geant4-config.sh
+###
+zeromq: $(ZEROMQROOT)/lib/libzmq.a
+
+$(ZEROMQROOT)/lib/libzmq.a:
+	cd $(ZEROMQROOT) && ./configure
+	cd $(ZEROMQROOT) && $(MAKE) 
+	cd $(ZEROMQROOT) && $(MAKE) install prefix=$(ZEROMQROOT)/installed #Must chose a slightly obscure directory
+	mv $(ZEROMQROOT)/installed/lib $(ZEROMQROOT)/lib
+###
+avalanche: $(AVALANCHEROOT)/lib/cpp/libavalanche.so
+
+$(AVALANCHEROOT):
+	git clone git://github.com/mastbaum/avalanche.git $(AVALANCHEROOT)
+	cd $(AVALANCHEROOT)/lib/cpp && make clean
+
+$(AVALANCHEROOT)/lib/cpp/libavalanche.so: $(AVALANCHEROOT) $(ZEROMQROOT)/lib/libzmq.a $(ROOTSYS)/bin/root.exe
+# Avalanche must know where ROOT and zeromq is
+	cd $(AVALANCHEROOT) && git pull
+	export PATH=${ROOTSYS}/bin:${PATH} && cd $(AVALANCHEROOT)/lib/cpp && make CXXFLAGS='-L$(ZEROMQROOT)/lib -I$(ZEROMQROOT)/include' && echo $(PATH)
+
+###
+snogoggles: $(VIEWERROOT)/bin/snogoggles
+
+$(VIEWERROOT):
+	git clone git@github.com:snoplus/snogoggles.git $(VIEWERROOT)
+
+$(VIEWERROOT)/bin/snogoggles: $(VIEWERROOT) rat root sfml geant4 env.sh scons avalanche
+	cd $(VIEWERROOT) && git pull git@github.com:snoplus/snogoggles.git master
+	source $(TOPLEVEL)/env.sh && cd $(VIEWERROOT) && source autoconfigure && source env.sh && scons
+###
+docs: $(TOPLEVEL)/doc/companion/exe/make_search.exe
+
+$(TOPLEVEL)/doc:
+	git clone git@github.com:snoplus/rat-doc.git $(TOPLEVEL)/doc
+
+$(TOPLEVEL)/doc/companion/exe/make_search.exe: $(TOPLEVEL)/doc
+	cd $(TOPLEVEL)/doc && git pull git@github.com:snoplus/rat-doc.git master
+	cd $(TOPLEVEL)/doc/companion && ./make_companion.scr all
+###
+tools: $(TOPLEVEL)/tools
+	cd $(TOPLEVEL)/tools && git pull git@github.com:snoplus/rat-tools.git master
+$(TOPLEVEL)/tools:
+	git clone git@github.com:snoplus/rat-tools.git $(TOPLEVEL)/tools
+###
