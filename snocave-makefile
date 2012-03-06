@@ -52,7 +52,7 @@ SHELL := /bin/bash #Must use bash for source and env setting
 
 # To update the library add to libraries/ and update these numbers:
 CLHEP_VERSION=2.1.0.1
-ROOT_VERSION=5.32.01
+ROOT_VERSION=5.32.00
 GEANT4_VERSION=4.9.4.p01
 SCONS_VERSION=2.1.0
 SFML_VERSION=2.0
