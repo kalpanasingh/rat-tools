@@ -114,6 +114,7 @@ env.sh:
 # Add viewer line
 	echo 'export PATH=$(ROOTSYS)/bin:$$PATH' >> env.sh
 	echo 'export AVALANCHEROOT=$(AVALANCHEROOT)' >> env.sh
+	echo 'export ZEROMQROOT=$(ZEROMQROOT)' >> env.sh
 	echo 'export LD_LIBRARY_PATH=$$LD_LIBRARY_PATH:$(CLHEP_BASE)/lib:$(ROOTSYS)/lib:$(AVALANCHEROOT)/lib/cpp:$(LOCAL_LIB_PATH)' >> env.sh
 	echo 'export DYLD_LIBRARY_PATH=$$DYLD_LIBRARY_PATH:$(CLHEP_BASE)/lib:$(ROOTSYS)/lib:$(AVALANCHEROOT)/lib/cpp:$(LOCAL_LIB_PATH)' >> env.sh
 	echo 'export PYTHONPATH=$(ROOTSYS)/lib:$$PYTHONPATH' >> env.sh
@@ -130,6 +131,7 @@ env.csh:
 # Add viewer line
 	echo 'setenv PATH $(ROOTSYS)/bin:$${PATH}' >> env.csh
 	echo 'setenv AVALANCHEROOT $(AVALANCHEROOT)' >> env.csh
+	echo 'setenv ZEROMQROOT $(ZEROMQROOT)' >> env.csh
 	echo 'if ( $${?LD_LIBRARY_PATH} )  then' >> env.csh
 	echo 'setenv LD_LIBRARY_PATH $${LD_LIBRARY_PATH}:$(CLHEP_BASE)/lib:$(ROOTSYS)/lib:$(AVALANCHEROOT)/lib/cpp:$(LOCAL_LIB_PATH)' >> env.csh
 	echo 'else' >> env.csh
