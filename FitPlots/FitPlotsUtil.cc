@@ -92,35 +92,38 @@ ArrangeStatBox(
 
 vector<string>
 GetFitNames(
-			string lFile )
+	    string lFile )
 {
   vector<string> fitNames;
-
+  
   RAT::DS::Root* rDS;
   RAT::DS::PMTProperties* rPMTList;
   TChain* tree;
 
   LoadRootFile( lFile, &tree, &rDS, &rPMTList );
 
-  tree->GetEntry( 0 );
+  int iMCEvent = 0;
+  tree->GetEntry( iMCEvent );
+  while( rDS->GetEVCount() == 0 )
+    tree->GetEntry( ++iMCEvent );
 
   RAT::DS::EV* rEV = rDS->GetEV(0);
   for( map<string, RAT::DS::FitResult>::iterator iTer = rEV->GetFitResultIterBegin(); iTer != rEV->GetFitResultIterEnd(); iTer++ )
-	fitNames.push_back( iTer->first );
-
+    fitNames.push_back( iTer->first );
+  
   return fitNames;
 }
 
 void
 PrintFitNames(
-			  string lFile )
+	      string lFile )
 {
   vector<string> names;
   names = GetFitNames( lFile );
   for( unsigned int uLoop = 0; uLoop < names.size(); uLoop++ )
-	{
-	  cout << names[uLoop] << endl;
-	}
+    {
+      cout << names[uLoop] << endl;
+    }
 }
 
 ////////////////////////////////////////////////////////
@@ -129,7 +132,7 @@ PrintFitNames(
 
 string
 ShortFormName(
-			  string lFit )
+	      string lFit )
 {
   int colonPos = lFit.find_first_of( ":" );
   return lFit.substr( 0, colonPos );
