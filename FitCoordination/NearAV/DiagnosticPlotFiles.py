@@ -7,18 +7,25 @@ def PlotAveragedHistograms():
 	""" Draws the averaged timed histograms overlaided on the same plot."""
 	print "Average Histogram Plotting"
 	averageHistograms = []
-	for pos in sorted( range( 5400, 6100, 100 ) + [5000] ):
+	posSet = sorted( range( 5400, 6100, 100 ) + [5000] )
+	for pos in posSet:
 		fileName = "Electron3MeV_" + str(pos) + ".root"
 		print "Extracting " + fileName
 		averageHistograms.append( NearAVUtil.ProduceTimeCorrectedAverageHistogram( fileName ) )
 
+	l1 = ROOT.TLegend( 0.7, 0.5, 0.9, 0.9 )
+
 	for index, histogram in enumerate( averageHistograms ):
 		histogram.SetLineColor( index + 1 )
+		l1.AddEntry( histogram, str( posSet[index] ) + "mm", "l" )
 		if( index == 0 ):
+			histogram.GetXaxis().SetTitle( "PMT Hit Time [ns]" )
+			histogram.GetYaxis().SetTitle( "Summed hits per 1ns bin" )
 			histogram.Draw()
 		else:
 			histogram.Draw("SAME")
 
+	l1.Draw()
 	raw_input( "Hit Enter to exit." )
 
 def PlotAveragedRatios( windowStart,
@@ -63,6 +70,16 @@ def PlotRatios( windowStart,
 
 import optparse
 if __name__ == '__main__':
+	ROOT.gROOT.SetStyle("Plain")
+	ROOT.gStyle.SetCanvasBorderMode(0)
+	ROOT.gStyle.SetPadBorderMode(0)
+	ROOT.gStyle.SetPadColor(0)
+	ROOT.gStyle.SetCanvasColor(0)
+	ROOT.gStyle.SetOptTitle(0)
+	ROOT.gStyle.SetLabelSize( 0.06, "xyz" )
+	ROOT.gStyle.SetTitleSize( 0.06, "xyz" )
+	ROOT.gStyle.SetOptStat(0)									
+
 	parser = optparse.OptionParser( usage = "usage: %prog [options] windowStart windowEnd", version="%prog 1.0" )
 	parser.add_option( "-a", action="store_true", dest="average", default=False, help="Use averaged histograms?" )
 	(options, args) = parser.parse_args()
