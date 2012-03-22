@@ -20,6 +20,6 @@ import optparse
 if __name__ == '__main__':
     parser = optparse.OptionParser( usage = "usage: %prog [options] target", version="%prog 1.0" )
     parser.add_option( "-g", type="string", dest="geoFile", help="Geometry File to use, location must be absolute or relative to target.", default="geo/snoplus.geo" )
-    parser.add_option( "-s", type="string", dest="scintMaterial", help="Scintillator material.", default="scintillator" )
+    parser.add_option( "-s", type="string", dest="scintMaterial", help="Scintillator material.", default="labppo_scintillator" )
     (options, args) = parser.parse_args()
 	ProduceRunMacFile( options )
