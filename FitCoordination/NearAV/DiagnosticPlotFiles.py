@@ -76,8 +76,6 @@ if __name__ == '__main__':
 	ROOT.gStyle.SetPadColor(0)
 	ROOT.gStyle.SetCanvasColor(0)
 	ROOT.gStyle.SetOptTitle(0)
-	ROOT.gStyle.SetLabelSize( 0.06, "xyz" )
-	ROOT.gStyle.SetTitleSize( 0.06, "xyz" )
 	ROOT.gStyle.SetOptStat(0)									
 
 	parser = optparse.OptionParser( usage = "usage: %prog [options] windowStart windowEnd", version="%prog 1.0" )

@@ -7,8 +7,7 @@ def ProduceRunMacFile( options ):
 	inFile = open( "E1MeV.mac", "r" )
 	rawText = string.Template( inFile.read() )
 	inFile.close()
-    outText = rawText.substitute( SourcePos = str( pos ),
-                                  GeoFile = options.geoFile,
+    outText = rawText.substitute( GeoFile = options.geoFile,
                                   ScintMaterial = options.scintMaterial )
     outFileName = "E1MeVRun.mac"
     outFile = open( outFileName, "w" )
