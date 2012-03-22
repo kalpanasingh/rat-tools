@@ -3,7 +3,7 @@ import string, ROOT, SimpleEnergyUtil
 # Analyses the files to determine the Nhit to MeV ratio
 # Author P G Jones - 22/05/2011 <p.jones22@physics.ox.ac.uk>
 
-def AnalyseFiles():
+def AnalyseFiles( options ):
 	""" Determine the Nhit to MeV ratio, then the dependence near the AV."""
 
 	nhitRPlot = SimpleEnergyUtil.ProduceNhitRadiusGraph()
