@@ -15,9 +15,17 @@ def AnalyseFiles():
 	avNhitFit = ROOT.TF1( "linear", "[0] + [1]*x", 5000.0, 6000.0 )
 	nhitRPlot.Fit( avNhitFit )
 	# Print the results
+    print "{\nname: \"FIT_SIMPLE_ENERGY\","
+    print "index: \"%s\"," % options.index
+    print "valid_begin : [0, 0],\nvalid_end : [0, 0],"
 	print "nhit_per_mev: %.2fd," % originFit.GetParameter( 1 )
 	print "nhit_intercept: %.2fd," % avNhitFit.GetParameter( 0 )
 	print "nhit_gradient: %.6fd," % avNhitFit.GetParameter( 1 )
+    print "}"
 
+import optparse
 if __name__ == '__main__':
-	AnalyseFiles()
+    parser = optparse.OptionParser( usage = "usage: %prog [options] target", version="%prog 1.0" )
+    parser.add_option( "-i", type="string", dest="index", help="RATDB index to place result.", default="" )
+    (options, args) = parser.parse_args()
+    AnalyseFiles( options )

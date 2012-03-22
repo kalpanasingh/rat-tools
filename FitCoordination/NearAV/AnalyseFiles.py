@@ -21,9 +21,8 @@ def AnalyseFiles( options ):
 	bestRatio = FindBestRatioCut( histograms, bestWindow[0], bestWindow[1] )
 
     print "{\nname: \"FIT_NEAR_AV\","
-    print "index: \"%s\",\n" % options.index
+    print "index: \"%s\"," % options.index
     print "valid_begin : [0, 0],\nvalid_end : [0, 0],"
-        
 	print "region_start: %.2fd," % bestWindow[0]
 	print "region_end: %.2fd," % bestWindow[1]
 	print "ratio_m: %.2fd," % bestWindow[2]
