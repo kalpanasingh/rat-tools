@@ -1,53 +1,63 @@
 #!/usr/bin/env python
-#-*-python-*-
-import os
 # Author P G Jones - 13/03/2011 <p.jones22@physics.ox.ac.uk>
+#        P G Jones - 23/03/2012 <p.g.jones@qmul.ac.uk> New location option
+import os
+import shutil
 
 class FitCoordinate:
-	def __init__( self, target ):
-		self.fTarget = target
-		self.fcwd = os.getcwd()
-		os.chdir( self.fTarget )
-		# Load the settings from the config file
-		params = {}
-		execfile( "fitcoordinate.config", {}, params )
-		for name, value in params.items():
-			setattr( self, name, value )
+    def __init__( self, target, location ):
+        """ If location is set, copy the target folder and run the coordinator there."""
+        self._Target = target
+        self._TargetLocation = os.path.join( os.getcwd(), target )
+        if location is "":
+            self._RunLocation = self._TargetLocation
+        else:
+            self._RunLocation = os.path.join( location, target )
+            shutil.copytree( self._TargetLocation, self._RunLocation )
+        os.chdir( self._RunLocation )
+        
+        # Load the settings from the config file
+        params = {}
+        execfile( "fitcoordinate.config", {}, params )
+        for name, value in params.items():
+            setattr( self, name, value )
 
-	def Produce( self, options ):
-		self.RunCommand( "./" + self.production_script + options )
-	def Analyse( self, options ):
-		self.RunCommand( "./" + self.analysis_script + options )
-	def RunCommand( self, command ):
-		print 'Running:', command
-		os.system( command )
-	def Describe( self ):
-		print self.description
+    def Produce( self, options ):
+        self.RunCommand( "python " + self.production_script + " " + options )
+    def Analyse( self, options ):
+        self.RunCommand( "python " + self.analysis_script + " " + options )
+    def RunCommand( self, command ):
+        print 'Running:', command
+        os.system( command )
+    def Describe( self ):
+        print self.description
 
 
 import optparse
 if __name__ == '__main__':
-	parser = optparse.OptionParser( usage = "usage: %prog [options] target", version="%prog 1.0" )
-	parser.add_option( "-g", type="string", dest="geoFile", help="Geometry File to use, location must be absolute or relative to target.", default="" )
-	parser.add_option( "-s", type="string", dest="scintMaterial", help="Scintillator material.", default="" )
-	parser.add_option( "-i", type="string", dest="index", help="RATDB index to place result.", default="" )
-	(options, args) = parser.parse_args()
-	
-	if len( args ) != 1:
-		print "Incorrect usage"
-	else:
-		fc = FitCoordinate( args[0] )
-		fc.Describe()
-		# Produce
-		prodOptions = ""
-		if( options.geoFile != "" ):
-			prodOptions = "-g " + options.geoFile
-		if( options.scintMaterial != "" ):
-			prodOptions = prodOptions + " -s " + options.scintMaterial
-		fc.Produce( prodOptions )
+    parser = optparse.OptionParser( usage = "usage: %prog [options] target", version="%prog 1.0" )
+    parser.add_option( "-g", type="string", dest="geoFile", help="Geometry File to use, location must be absolute or relative to target.", default="" )
+    parser.add_option( "-s", type="string", dest="scintMaterial", help="Scintillator material.", default="" )
+    parser.add_option( "-i", type="string", dest="index", help="RATDB index to place result.", default="" )
+    parser.add_option( "-d", type="string", dest="location", help="Set to run the scripts in a particular location, e.g. on a data disc.", default="" )
+    parser.add_option( "-p", type="string", dest="particle", help="Particle type.", default="e-" )
+    (options, args) = parser.parse_args()
 
-		# Analyse
-		if( options.index != "" ):
-			fc.Analyse( "-i " + options.index )
-		else:
-			fc.Analyse( "" )
+    if len( args ) != 1:
+        print "Incorrect usage"
+    else:
+        fc = FitCoordinate( args[0], options.location )
+        fc.Describe()
+        # Produce
+        prodOptions = "-p " + options.particle
+        if( options.geoFile != "" ):
+            prodOptions = " -g " + options.geoFile
+        if( options.scintMaterial != "" ):
+            prodOptions = prodOptions + " -s " + options.scintMaterial
+        fc.Produce( prodOptions )
+
+        # Analyse
+        if( options.index != "" ):
+            fc.Analyse( "-i " + options.index )
+        else:
+            fc.Analyse( "" )

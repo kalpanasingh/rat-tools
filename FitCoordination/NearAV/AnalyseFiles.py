@@ -9,14 +9,14 @@ def AnalyseFiles( options ):
 	# Ratio window is calculated using events near the AV (>5400mm)
 	averageHistograms = []
 	for pos in sorted( range( 5400, 6100, 100 ) ):
-		fileName = "Electron3MeV_" + str(pos) + ".root"
+		fileName = "Base_" + str(pos) + ".root"
 		print "Extracting " + fileName
 		averageHistograms.append( NearAVUtil.ProduceTimeCorrectedAverageHistogram( fileName ) )
 
 	bestWindow = FindBestWindow( averageHistograms )
 
 	# The ratio is calculated using events away from the AV (<5400mm)
-	fileName = "Electron3MeV_5000.root"
+	fileName = "Base_5000.root"
 	histograms = NearAVUtil.ProduceTimeCorrectedHistograms( fileName )
 	bestRatio = FindBestRatioCut( histograms, bestWindow[0], bestWindow[1] )
 

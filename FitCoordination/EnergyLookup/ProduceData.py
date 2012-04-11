@@ -12,7 +12,7 @@ def ProduceRunFiles( options ):
 		for energy in EnergyLookupUtil.EnergySet:
 			# Set the generator text first
 			generator = "/generator/add combo gun:point\n" + \
-						"/generator/vtx/set e- 0 0 0 " + str( energy ) + "\n" + \
+						"/generator/vtx/set " + options.particle + " 0 0 0 " + str( energy ) + "\n" + \
 						"/generator/pos/set 0 %.0f 0" % pos 
 			# Create the correct file
 			outFileName = "P%.0fE%.0f" % (pos, (energy * 10))
@@ -34,5 +34,6 @@ if __name__ == '__main__':
     parser = optparse.OptionParser( usage = "usage: %prog [options] target", version="%prog 1.0" )
     parser.add_option( "-g", type="string", dest="geoFile", help="Geometry File to use, location must be absolute or relative to target.", default="geo/snoplus.geo" )
     parser.add_option( "-s", type="string", dest="scintMaterial", help="Scintillator material.", default="labppo_scintillator" )
+    parser.add_option( "-p", type="string", dest="particle", help="Particle type.", default="e-" )
     (options, args) = parser.parse_args()
     ProduceRunFiles( options )

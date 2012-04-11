@@ -20,12 +20,12 @@
 
 # END EVENT LOOP
 /generator/add combo gun:fill
-/generator/vtx/set e- 0 0 0 1.0
+/generator/vtx/set ${Particle} 0 0 0 1.0
 /generator/pos/set 0 0 0
 /generator/rate/set 1
 
 /generator/add combo gun:point
-/generator/vtx/set e- 0 0 0 1.0
+/generator/vtx/set ${Particle} 0 0 0 1.0
 /generator/pos/set 0 0 0
 /generator/rate/set 1
 
