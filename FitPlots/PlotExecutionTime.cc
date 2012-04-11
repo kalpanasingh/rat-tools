@@ -183,8 +183,16 @@ ExtractExecutionTime(
 
 		  RAT::DS::EV *rEV = rDS->GetEV(0);
 
-		  if( rEV->GetFitResult( lFit ).GetValid() == false )
-			continue;
+          try
+            {
+              if( rEV->GetFitResult( lFit ).GetValid() == false )
+                continue;
+            }
+          catch( std::runtime_error& e )
+            {
+              cout << lFit << " failed for event " << iEvent << ". Continuing..." << endl;
+              continue;
+            }
 		  (*gExecTime)->SetPoint( graphPoint, rEV->GetPMTCalCount(), rEV->GetFitResult( lFit ).GetExecutionTime() );
 		  
 		  graphPoint++;

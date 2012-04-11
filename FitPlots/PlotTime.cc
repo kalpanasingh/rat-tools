@@ -196,8 +196,16 @@ ExtractTime(
             continue;
 
           RAT::DS::EV *rEV = rDS->GetEV( iEvent );
-          if( rEV->GetFitResult( lFit ).GetValid() == false )
-            continue;
+          try
+            {
+              if( rEV->GetFitResult( lFit ).GetValid() == false )
+                continue;
+            }
+          catch( std::runtime_error& e )
+            {
+              cout << lFit << " failed for event " << iEvent << ". Continuing..." << endl;
+              continue;
+            }
 
           double fitTime;
           try

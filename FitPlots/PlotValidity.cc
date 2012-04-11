@@ -178,10 +178,16 @@ ExtractValidity(
             continue;
 
 		  RAT::DS::EV *rEV = rDS->GetEV(0);
-
-          (*gExecTime)->SetPoint( graphPoint, rEV->GetPMTCalCount(), rEV->GetFitResult( lFit ).GetValid() );
-		  
-		  graphPoint++;
+          try
+            {
+              (*gExecTime)->SetPoint( graphPoint, rEV->GetPMTCalCount(), rEV->GetFitResult( lFit ).GetValid() );
+              graphPoint++;
+            }
+          catch( std::runtime_error& e )
+            {
+              cout << lFit << " failed for event " << iEvent << ". Continuing..." << endl;
+              continue;
+            }
 		}
 	}
   (*gExecTime)->SetName( graphName.c_str() );
