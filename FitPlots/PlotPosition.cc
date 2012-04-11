@@ -31,36 +31,36 @@ using namespace std;
 
 void
 ExtractPosition(
-				string lFile,
-				string lFit,
-				TH1D** hCountVRes,
-				TGraph** gResVR,
-				TH1D** hCountVResX,
-				TH1D** hCountVResY,
-				TH1D** hCountVResZ,
-				TGraph** gRadialBiasVR );
+                string lFile,
+                string lFit,
+                TH1D** hCountVRes,
+                TGraph** gResVR,
+                TH1D** hCountVResX,
+                TH1D** hCountVResY,
+                TH1D** hCountVResZ,
+                TGraph** gRadialBiasVR );
 
 TCanvas*
 UpdatePosition(
-			   string lFile,
-			   string lFit, 
-			   TCanvas* c1,
-			   Int_t fitNum );
+               string lFile,
+               string lFit, 
+               TCanvas* c1,
+               Int_t fitNum );
 
 ////////////////////////////////////////////////////////
 /// Call-able functions
 ////////////////////////////////////////////////////////
 TCanvas*
 PlotPosition(
-			 string lFile )
+             string lFile )
 {
   return PlotPosition( lFile, GetFitNames( lFile ) );
 }
 
 TCanvas*
 PlotPosition(
-			 string lFile,
-			 string lFit )
+             string lFile,
+             string lFit )
 {
   vector<string> fits; fits.push_back( lFit );
   return PlotPosition( lFile, fits );
@@ -68,9 +68,9 @@ PlotPosition(
 
 TCanvas*
 PlotPosition(
-			 string lFile, 
-			 string lFit1, 
-			 string lFit2 )
+             string lFile, 
+             string lFit1, 
+             string lFit2 )
 {
   vector<string> fits; fits.push_back( lFit1 ); fits.push_back( lFit2 );
   return PlotPosition( lFile, fits );
@@ -78,16 +78,16 @@ PlotPosition(
 
 TCanvas*
 PlotPosition(
-			 string file,
-			 vector<string> fits )
+             string file,
+             vector<string> fits )
 {
   TCanvas* c1 = NULL;
   for( unsigned int uFit = 0; uFit < fits.size(); uFit++ )
-	{
-	  Int_t drawNum = uFit;
-	  c1 = UpdatePosition( file, fits[uFit], c1, drawNum );
-	  cout << "Plotted " << file << " fit: " << fits[uFit] << endl;
-	}
+    {
+      Int_t drawNum = uFit;
+      c1 = UpdatePosition( file, fits[uFit], c1, drawNum );
+      cout << "Plotted " << file << " fit: " << fits[uFit] << endl;
+    }
   return c1;
 }
 
@@ -97,18 +97,18 @@ PlotPosition(
 
 TCanvas*
 UpdatePosition(
-			   string lFile,
-			   string lFit, 
-			   TCanvas* c1,
-			   Int_t fitNum )
+               string lFile,
+               string lFit, 
+               TCanvas* c1,
+               Int_t fitNum )
 {
   bool firstDraw = false;
   if( c1 == NULL )
-	{
-	  firstDraw = true;
-	  c1 = new TCanvas();
-	  c1->Divide( 2, 2 );
-	}
+    {
+      firstDraw = true;
+      c1 = new TCanvas();
+      c1->Divide( 2, 2 );
+    }
 
   TH1D* hCountVRes;
   TGraph* gResVR;
@@ -118,75 +118,79 @@ UpdatePosition(
   TGraph* gRadialBiasVR;
   // First extract the data
   ExtractPosition( lFile, lFit, &hCountVRes, &gResVR, &hCountVResX, &hCountVResY, &hCountVResZ, &gRadialBiasVR );
+  // Don't plot empty fits...
+  if( hCountVRes->GetEntries() == 0 )
+    return c1;
 
   // Now draw the results
-  c1->cd(1);
+  TVirtualPad* cPad = NULL;
+  cPad = c1->cd(1);
   if( firstDraw )
-	hCountVRes->Draw("E");
+    hCountVRes->Draw("E");
   else
-	{
-	  hCountVRes->SetLineColor( fitNum + 1);
-	  hCountVRes->Draw("SAMES E");
-	}
+    {
+      hCountVRes->SetLineColor( fitNum + 1 );
+      hCountVRes->Draw("SAMES E");
+    }
   c1->Update();
-  ArrangeStatBox( hCountVRes, fitNum + 1, fitNum );
+  ArrangeStatBox( hCountVRes, fitNum + 1, cPad );
 
-  c1->cd(2);
+  cPad = c1->cd(2);
   if( firstDraw )
-	gResVR->Draw("AP");
+    gResVR->Draw("AP");
   else
-	{
-	  gResVR->SetMarkerColor( fitNum + 1 );
-	  gResVR->Draw("P");
-	}
+    {
+      gResVR->SetMarkerColor( fitNum + 1 );
+      gResVR->Draw("P");
+    }
 
   TVirtualPad* vc1 = c1->cd(3);
   if( firstDraw )
-	vc1->Divide( 2, 1 );
-  vc1->cd(1);
+    vc1->Divide( 2, 1 );
+  cPad = vc1->cd(1);
   if( firstDraw )
-	hCountVResX->Draw("E");
+    hCountVResX->Draw("E");
   else
-	{
-	  hCountVResX->SetLineColor( fitNum + 1 );
-	  hCountVResX->Draw("SAMES E");
-	}
+    {
+      hCountVResX->SetLineColor( fitNum + 1 );
+      hCountVResX->Draw("SAMES E");
+    }
   c1->Update();
-  ArrangeStatBox( hCountVResX, fitNum + 1, fitNum );
+  ArrangeStatBox( hCountVResX, fitNum + 1, cPad );
 
-  vc1->cd(2);
+  cPad = vc1->cd(2);
   if( firstDraw )
-	hCountVResY->Draw("E");
+    hCountVResY->Draw("E");
   else
-	{
-	  hCountVResY->SetLineColor( fitNum + 1 );
-	  hCountVResY->Draw("SAMES E");
-	}
+    {
+      hCountVResY->SetLineColor( fitNum + 1 );
+      hCountVResY->Draw("SAMES E");
+    }
   c1->Update();
-  ArrangeStatBox( hCountVResY, fitNum + 1, fitNum );
+  ArrangeStatBox( hCountVResY, fitNum + 1, cPad );
 
   TVirtualPad* vc2 = c1->cd(4);
   if( firstDraw )
-	vc2->Divide( 2, 1 );
-  vc2->cd(1);
+    vc2->Divide( 2, 1 );
+  cPad = vc2->cd(1);
   if( firstDraw )
-	hCountVResZ->Draw("E");
+    hCountVResZ->Draw("E");
   else
-	{
-	  hCountVResZ->SetLineColor( fitNum + 1 );
-	  hCountVResZ->Draw("SAMES E");
-	}
+    {
+      hCountVResZ->SetLineColor( fitNum + 1 );
+      hCountVResZ->Draw("SAMES E");
+    }
   c1->Update();
-  ArrangeStatBox( hCountVResZ, fitNum + 1, fitNum );
+  ArrangeStatBox( hCountVResZ, fitNum + 1, cPad );
 
-  vc2->cd(2);
+  cPad = vc2->cd(2);
   if( firstDraw )
-	gRadialBiasVR->Draw("AP");
+    gRadialBiasVR->Draw("AP");
   else
-	{
-	  gRadialBiasVR->SetMarkerColor( fitNum + 1 );
-	  gRadialBiasVR->Draw("P");
-	}
+    {
+      gRadialBiasVR->SetMarkerColor( fitNum + 1 );
+      gRadialBiasVR->Draw("P");
+    }
 
   c1->cd();
   return c1;  
@@ -198,14 +202,14 @@ UpdatePosition(
 
 void
 ExtractPosition(
-				string lFile,
-				string lFit,
-				TH1D** hCountVRes,
-				TGraph** gResVR,
-				TH1D** hCountVResX,
-				TH1D** hCountVResY,
-				TH1D** hCountVResZ,
-				TGraph** gRadialBiasVR )
+                string lFile,
+                string lFit,
+                TH1D** hCountVRes,
+                TGraph** gResVR,
+                TH1D** hCountVResX,
+                TH1D** hCountVResY,
+                TH1D** hCountVResZ,
+                TGraph** gRadialBiasVR )
 {
   // First new the histograms
   const int kBins = 20;
@@ -255,47 +259,55 @@ ExtractPosition(
   for( int iLoop = 0; iLoop < tree->GetEntries(); iLoop++ )
     {
       tree->GetEntry( iLoop );
-	  RAT::DS::MC *rMC = rDS->GetMC();
+      RAT::DS::MC *rMC = rDS->GetMC();
 
-	  TVector3 mcPos = rMC->GetMCParticle(0)->GetPos();
-	    
+      TVector3 mcPos = rMC->GetMCParticle(0)->GetPos();
+        
       /*Produce a average position (unweighted ?? )
       for( int iLoop2 = 1; iLoop2 < numMCParticles; iLoop2++ )
-		{
-		  cout << "Warn, pileup: averaging position" << endl;
-		  RAT::DS::MCParticle *rMCParticle =  rMC->GetMCParticle( iLoop2 );
-		  mcPos = mcPos + rMCParticle->GetPos();
-		}
+        {
+          cout << "Warn, pileup: averaging position" << endl;
+          RAT::DS::MCParticle *rMCParticle =  rMC->GetMCParticle( iLoop2 );
+          mcPos = mcPos + rMCParticle->GetPos();
+        }
       mcPos = mcPos * ( 1.0 / numMCParticles );
-	  */
+      */
       for( int iEvent = 0; iEvent < rDS->GetEVCount(); iEvent++ )
-		{
-		  RAT::DS::EV *rEV = rDS->GetEV( iEvent );
-		  if( rEV->GetFitResult( lFit ).GetValid() == false )
-			continue;
+        {
+          if( gIgnoreRetriggers && iEvent > 0 )
+            continue;
 
-		  TVector3 fitPos;
-		  try
-			{
-			  fitPos = rEV->GetFitResult( lFit ).GetVertex(0).GetPosition();
-			}
-		  catch( RAT::DS::FitVertex::NoValueError& e )
-			{
-			  cout << "Position has not been fit." << endl;
-			  return;
-			}
-		  TVector3 deltaR = fitPos - mcPos;
+          RAT::DS::EV *rEV = rDS->GetEV( iEvent );
+          if( rEV->GetFitResult( lFit ).GetValid() == false )
+            continue;
 
-		  (*hCountVRes)->Fill( deltaR.Mag() );
-		  (*gResVR)->SetPoint( graphPoint, mcPos.Mag(), deltaR.Mag() );
-		  (*hCountVResX)->Fill( fitPos.x() - mcPos.x() );
-		  (*hCountVResY)->Fill( fitPos.y() - mcPos.y() );
-		  (*hCountVResZ)->Fill( fitPos.z() - mcPos.z() );
-		  (*gRadialBiasVR)->SetPoint( graphPoint, mcPos.Mag(), deltaR.Dot( mcPos.Unit() ) );
+          TVector3 fitPos;
+          try
+            {
+              fitPos = rEV->GetFitResult( lFit ).GetVertex(0).GetPosition();
+            }
+          catch( RAT::DS::FitVertex::NoValueError& e )
+            {
+              cout << lFit << " fitter has not reconstructed a position." << endl;
+              return;
+            }
+          catch( RAT::DS::FitResult::NoVertexError& e )
+            {
+              cout << lFit << " has not reconstructed a vertex." << endl;
+              return;
+            }
+          TVector3 deltaR = fitPos - mcPos;
 
-		  graphPoint++;
-		}
-	}
+          (*hCountVRes)->Fill( deltaR.Mag() );
+          (*gResVR)->SetPoint( graphPoint, mcPos.Mag(), deltaR.Mag() );
+          (*hCountVResX)->Fill( fitPos.x() - mcPos.x() );
+          (*hCountVResY)->Fill( fitPos.y() - mcPos.y() );
+          (*hCountVResZ)->Fill( fitPos.z() - mcPos.z() );
+          (*gRadialBiasVR)->SetPoint( graphPoint, mcPos.Mag(), deltaR.Dot( mcPos.Unit() ) );
+
+          graphPoint++;
+        }
+    }
   (*gResVR)->GetXaxis()->SetTitle( "#cbar MC(r) #cbar [mm]" );
   (*gResVR)->GetYaxis()->SetTitle( "#cbar Fit(r) - MC(r) #cbar [mm]" );
   (*gResVR)->SetMarkerStyle( 2 );

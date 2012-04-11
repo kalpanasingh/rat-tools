@@ -30,37 +30,37 @@ using namespace std;
 
 void
 ExtractDirection(
-				 string lFile,
-				 string lFit,
-				 TH1D** hCountVRes,
-				 TGraph** gResVR );
+                 string lFile,
+                 string lFit,
+                 TH1D** hCountVRes,
+                 TGraph** gResVR );
 
 TCanvas*
 PlotDirection(
-			  string file,
-			  vector<string> fits );
+              string file,
+              vector<string> fits );
 
 TCanvas*
 UpdateDirection(
-				string lFile,
-				string lFit, 
-				TCanvas* c1,
-				Int_t fitNum );
+                string lFile,
+                string lFit, 
+                TCanvas* c1,
+                Int_t fitNum );
 
 ////////////////////////////////////////////////////////
 /// Call-able functions
 ////////////////////////////////////////////////////////
 TCanvas*
 PlotDirection(
-			  string lFile )
+              string lFile )
 {
   return PlotDirection( lFile, GetFitNames( lFile ) );
 }
 
 TCanvas*
 PlotDirection(
-			  string lFile,
-			  string lFit )
+              string lFile,
+              string lFit )
 {
   vector<string> fits; fits.push_back( lFit );
   return PlotDirection( lFile, fits );
@@ -68,9 +68,9 @@ PlotDirection(
 
 TCanvas*
 PlotDirection(
-			  string lFile, 
-			  string lFit1, 
-			  string lFit2 )
+              string lFile, 
+              string lFit1, 
+              string lFit2 )
 {
   vector<string> fits; fits.push_back( lFit1 ); fits.push_back( lFit2 );
   return PlotDirection( lFile, fits );
@@ -78,16 +78,16 @@ PlotDirection(
 
 TCanvas*
 PlotDirection(
-			  string file,
-			  vector<string> fits )
+              string file,
+              vector<string> fits )
 {
   TCanvas* c1 = NULL;
   for( unsigned int uFit = 0; uFit < fits.size(); uFit++ )
-	{
-	  Int_t drawNum = uFit;
-	  c1 = UpdateDirection( file, fits[uFit], c1, drawNum );
-	  cout << "Plotted " << file << " fit: " << fits[uFit] << endl;
-	}
+    {
+      Int_t drawNum = uFit;
+      c1 = UpdateDirection( file, fits[uFit], c1, drawNum );
+      cout << "Plotted " << file << " fit: " << fits[uFit] << endl;
+    }
   return c1;
 }
 
@@ -97,45 +97,49 @@ PlotDirection(
 
 TCanvas*
 UpdateDirection(
-				string lFile,
-				string lFit, 
-				TCanvas* c1,
-				Int_t fitNum )
+                string lFile,
+                string lFit, 
+                TCanvas* c1,
+                Int_t fitNum )
 {
   bool firstDraw = false;
   if( c1 == NULL )
-	{
-	  firstDraw = true;
-	  c1 = new TCanvas();
-	  c1->Divide( 2, 1 );
-	}
+    {
+      firstDraw = true;
+      c1 = new TCanvas();
+      c1->Divide( 2, 1 );
+    }
 
   TH1D* hCountVRes;
   TGraph* gResVR;
 
   // First extract the data
   ExtractDirection( lFile, lFit, &hCountVRes, &gResVR );
+  // Don't plot empty fits...
+  if( hCountVRes->GetEntries() == 0 )
+    return c1;
 
   // Now draw the results
-  c1->cd(1);
+  TVirtualPad* cPad = NULL;
+  cPad = c1->cd(1);
   if( firstDraw )
-	hCountVRes->Draw("E");
+    hCountVRes->Draw("E");
   else
-	{
-	  hCountVRes->SetLineColor( fitNum + 1);
-	  hCountVRes->Draw("SAMES E");
-	}
+    {
+      hCountVRes->SetLineColor( fitNum + 1 );
+      hCountVRes->Draw("SAMES E");
+    }
   c1->Update();
-  ArrangeStatBox( hCountVRes, fitNum + 1, fitNum );
+  ArrangeStatBox( hCountVRes, fitNum + 1, cPad );
 
   c1->cd(2);
   if( firstDraw )
-	gResVR->Draw("AP");
+    gResVR->Draw("AP");
   else
-	{
-	  gResVR->SetMarkerColor( fitNum + 1 );
-	  gResVR->Draw("P");
-	}
+    {
+      gResVR->SetMarkerColor( fitNum + 1 );
+      gResVR->Draw("P");
+    }
 
   c1->cd();
   return c1;  
@@ -147,10 +151,10 @@ UpdateDirection(
 
 void
 ExtractDirection(
-				 string lFile,
-				 string lFit,
-				 TH1D** hCountVRes,
-				 TGraph** gResVR )
+                 string lFile,
+                 string lFit,
+                 TH1D** hCountVRes,
+                 TGraph** gResVR )
 {
   // First new the histograms
   const int kBins = 180;
@@ -181,35 +185,43 @@ ExtractDirection(
   for( int iLoop = 0; iLoop < tree->GetEntries(); iLoop++ )
     {
       tree->GetEntry( iLoop );
-	  RAT::DS::MC *rMC = rDS->GetMC();
+      RAT::DS::MC *rMC = rDS->GetMC();
 
       TVector3 mcPos = rMC->GetMCParticle(0)->GetPos();
-	  TVector3 mcDirection = rMC->GetMCParticle(0)->GetMom();
+      TVector3 mcDirection = rMC->GetMCParticle(0)->GetMom();
 
       for( int iEvent = 0; iEvent < rDS->GetEVCount(); iEvent++ )
-		{
-		  RAT::DS::EV *rEV = rDS->GetEV( iEvent );
-		  if( rEV->GetFitResult( lFit ).GetValid() == false )
-			continue;
+        {
+          if( gIgnoreRetriggers && iEvent > 0 )
+            continue;
 
-		  TVector3 fitDirection;
-		  try
-			{
-			  fitDirection = rEV->GetFitResult( lFit ).GetVertex(0).GetDirection();
-			}
-		  catch( RAT::DS::FitVertex::NoValueError& e )
-			{
-			  cout << "Direction has not been fit." << endl;
-			  return;
-			}
-		  double deltaD = acos( fitDirection.Dot( mcDirection ) ) * 180.0 / 3.14;
+          RAT::DS::EV *rEV = rDS->GetEV( iEvent );
+          if( rEV->GetFitResult( lFit ).GetValid() == false )
+            continue;
 
-		  (*hCountVRes)->Fill( deltaD );
-		  (*gResVR)->SetPoint( graphPoint, mcPos.Mag(), deltaD );
+          TVector3 fitDirection;
+          try
+            {
+              fitDirection = rEV->GetFitResult( lFit ).GetVertex(0).GetDirection();
+            }
+          catch( RAT::DS::FitVertex::NoValueError& e )
+            {
+              cout << lFit << " fitter has not reconstructed a direction." << endl;
+              return;
+            }
+          catch( RAT::DS::FitResult::NoVertexError& e )
+            {
+              cout << lFit << " has not reconstructed a vertex." << endl;
+              return;
+            }
+          double deltaD = acos( fitDirection.Dot( mcDirection ) ) * 180.0 / 3.14;
 
-		  graphPoint++;
-		}
-	}
+          (*hCountVRes)->Fill( deltaD );
+          (*gResVR)->SetPoint( graphPoint, mcPos.Mag(), deltaD );
+
+          graphPoint++;
+        }
+    }
   (*gResVR)->GetXaxis()->SetTitle( "#cbar MC(r) #cbar [mm]" );
   (*gResVR)->GetYaxis()->SetTitle( "#cbar Fit(D) #cdot MC(D) #cbar [deg]" );
   (*gResVR)->SetMarkerStyle( 2 );

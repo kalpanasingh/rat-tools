@@ -1,9 +1,9 @@
 ////////////////////////////////////////////////////////
-/// Plots the execution time(s) of the fits
+/// Plots the validity of the fits
 ///
-/// P G Jones <p.jones22@physics.ox.ac.uk>
+/// P G Jones <p.g.jones@qmul.ac.uk>
 ///
-/// 01/06/11 - New File
+/// 11/04/12 - New File
 ////////////////////////////////////////////////////////
 
 #include <FitPlotsUtil.hh>
@@ -29,26 +29,24 @@ using namespace ROOT;
 using namespace std;
 
 void
-ExtractExecutionTime(
+ExtractValidity(
                    string lFile,
                    string lFit,
 				   string graphName,
                    TGraph** gExecTime );
 
 TCanvas*
-PlotExecutionTime(
+PlotValidity(
                 string file,
                 vector<string> fits );
 
 TCanvas*
-UpdateExecutionTime(
+UpdateValidity(
 				  string lFile,
 				  string lFit, 
 				  TCanvas* c1,
 				  Int_t fitNum );
 // Globals
-double gMaxExecutionTime = 0.0;
-double gMinExecutionTime = 9e999;
 double gMaxNhit = 0.0;
 double gMinNhit = 0.0; //Force origin
 
@@ -60,46 +58,45 @@ TLegend* gExecTimeLegend; // ROOT is stupid
 ////////////////////////////////////////////////////////
 
 TCanvas*
-PlotExecutionTime(
-				string lFile )
+PlotValidity(
+             string lFile )
 {
-  return PlotExecutionTime( lFile, GetFitNames( lFile ) );
+  return PlotValidity( lFile, GetFitNames( lFile ) );
 }
 
 TCanvas*
-PlotExecutionTime(
-				string lFile, 
-				string lFit1 )
+PlotValidity(
+             string lFile, 
+             string lFit1 )
 {
   vector<string> fits; fits.push_back( lFit1 );
-  return PlotExecutionTime( lFile, fits );
+  return PlotValidity( lFile, fits );
 }
 
 TCanvas*
-PlotExecutionTime(
-				string lFile, 
-				string lFit1, 
-				string lFit2 )
+PlotValidity(
+             string lFile, 
+             string lFit1, 
+             string lFit2 )
 {
   vector<string> fits; fits.push_back( lFit1 ); fits.push_back( lFit2 );
-  return PlotExecutionTime( lFile, fits );
+  return PlotValidity( lFile, fits );
 }
 
 TCanvas*
-PlotExecutionTime(
-                string file,
-                vector<string> fits )
+PlotValidity(
+             string file,
+             vector<string> fits )
 {
   TCanvas* c1 = NULL;
   for( unsigned int uFit = 0; uFit < fits.size(); uFit++ )
 	{
 	  Int_t drawNum = uFit;
-	  c1 = UpdateExecutionTime( file, fits[uFit], c1, drawNum );
+	  c1 = UpdateValidity( file, fits[uFit], c1, drawNum );
 	  cout << "Plotted " << file << " fit: " << fits[uFit] << endl;
 	}
   gExecTimeLegend->SetFillColor( kWhite );
   gExecTimeLegend->Draw();
-  gStyle->SetOptLogy(0);
   return c1;
 }
 
@@ -108,13 +105,12 @@ PlotExecutionTime(
 ////////////////////////////////////////////////////////
 
 TCanvas*
-UpdateExecutionTime(
+UpdateValidity(
 				  string lFile,
 				  string lFit, 
 				  TCanvas* c1,
 				  Int_t fitNum )
 {
-  gStyle->SetOptLogy(1);
   bool firstDraw = false;
   if( c1 == NULL )
 	{
@@ -130,7 +126,7 @@ UpdateExecutionTime(
 	graphName << lFile;
   else
 	graphName << lFile << "_" << lFit;
-  ExtractExecutionTime( lFile, lFit, graphName.str(), &gExecTime );
+  ExtractValidity( lFile, lFit, graphName.str(), &gExecTime );
 
   TVirtualPad* vc1 = c1->cd(1);
   // Now draw the results
@@ -142,7 +138,7 @@ UpdateExecutionTime(
 	  gExecTime->Draw("P");
 	}
   gExecTimeLegend->AddEntry( gExecTime, lFit.c_str(), "P" );
-  reinterpret_cast< TGraph* >( vc1->FindObject( lFile.c_str() ) )->GetYaxis()->SetRangeUser( gMinExecutionTime / 10.0, gMaxExecutionTime * 10.0 );
+  reinterpret_cast< TGraph* >( vc1->FindObject( lFile.c_str() ) )->GetYaxis()->SetRangeUser( 0.0, 1.0 );
 
   c1->Update();
 
@@ -154,7 +150,7 @@ UpdateExecutionTime(
 ////////////////////////////////////////////////////////
 
 void
-ExtractExecutionTime(
+ExtractValidity(
                    string lFile,
                    string lFit,
 				   string graphName,
@@ -183,9 +179,7 @@ ExtractExecutionTime(
 
 		  RAT::DS::EV *rEV = rDS->GetEV(0);
 
-		  if( rEV->GetFitResult( lFit ).GetValid() == false )
-			continue;
-		  (*gExecTime)->SetPoint( graphPoint, rEV->GetPMTCalCount(), rEV->GetFitResult( lFit ).GetExecutionTime() );
+          (*gExecTime)->SetPoint( graphPoint, rEV->GetPMTCalCount(), rEV->GetFitResult( lFit ).GetValid() );
 		  
 		  graphPoint++;
 		}
@@ -195,7 +189,5 @@ ExtractExecutionTime(
   (*gExecTime)->GetYaxis()->SetTitle( "Execution Time [s]" );
   (*gExecTime)->SetMarkerStyle( 2 );
 
-  gMaxExecutionTime = (*gExecTime)->GetHistogram()->GetMaximum() > gMaxExecutionTime ? (*gExecTime)->GetHistogram()->GetMaximum() : gMaxExecutionTime;
-  gMinExecutionTime = (*gExecTime)->GetHistogram()->GetMinimum() < gMinExecutionTime ? (*gExecTime)->GetHistogram()->GetMinimum() : gMinExecutionTime;
 }
 

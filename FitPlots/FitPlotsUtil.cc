@@ -13,6 +13,7 @@
 #include <TChain.h>
 #include <TFile.h>
 #include <TPaveStats.h>
+#include <TVirtualPad.h>
 using namespace ROOT;
 
 #include <RAT/DS/Root.hh>
@@ -25,16 +26,18 @@ using namespace ROOT;
 #include <iostream>
 using namespace std;
 
+bool gIgnoreRetriggers = false; // Global variable used to ignore retriggered (low nhit tail) events
+
 ////////////////////////////////////////////////////////
 /// Load a chain of ROOTs file with RAT information in
 /// and fill the information pointers
 ////////////////////////////////////////////////////////
 void
 LoadRootFile(
-			 string lFile,
-			 TChain** tree,
-			 RAT::DS::Root** rDS,
-			 RAT::DS::PMTProperties** rPMTList )
+             string lFile,
+             TChain** tree,
+             RAT::DS::Root** rDS,
+             RAT::DS::PMTProperties** rPMTList )
 {
   (*tree) = new TChain( "T" );
   // Strip the .root part
@@ -55,7 +58,6 @@ LoadRootFile(
     lastFile << lFile.substr( 0, fileLen - 5 ) << "_" << numFiles - 1 << ".root";
   else
     lastFile << lFile;
-  cout << lastFile.str() << endl;
   TFile *file = new TFile( lastFile.str().c_str() );
   TTree *rRunTree = (TTree*)file->Get( "runT" );
 
@@ -73,16 +75,23 @@ LoadRootFile(
 
 void
 ArrangeStatBox( 
-			   TH1D* hHistogram,
+               TH1D* hHistogram,
                Int_t color,
-               Int_t number )
+               TVirtualPad* pad )
 {
+  // First Get the number of exisiting stat boxes
+  int numStats = 0;
+  TIter next( pad->GetListOfPrimitives() );
+  while( TObject *obj = next() ) 
+    if( obj->GetName() == string( "stats" ) )
+      numStats++;
+
   TPaveStats *sBox = (TPaveStats*)hHistogram->GetListOfFunctions()->FindObject("stats");
   hHistogram->GetListOfFunctions()->Remove( sBox );
   hHistogram->SetStats( 0 );
   sBox->SetLineColor( color );
-  sBox->SetY1NDC( sBox->GetY1NDC() - number * 0.2 );
-  sBox->SetY2NDC( sBox->GetY2NDC() - number * 0.2 );
+  sBox->SetY1NDC( sBox->GetY1NDC() - numStats * 0.2 );
+  sBox->SetY2NDC( sBox->GetY2NDC() - numStats * 0.2 );
   sBox->Draw();
 }
 
@@ -92,7 +101,7 @@ ArrangeStatBox(
 
 vector<string>
 GetFitNames(
-	    string lFile )
+        string lFile )
 {
   vector<string> fitNames;
   
@@ -116,7 +125,7 @@ GetFitNames(
 
 void
 PrintFitNames(
-	      string lFile )
+              string lFile )
 {
   vector<string> names;
   names = GetFitNames( lFile );
@@ -124,16 +133,4 @@ PrintFitNames(
     {
       cout << names[uLoop] << endl;
     }
-}
-
-////////////////////////////////////////////////////////
-/// Returns a shortend form of the fit name
-////////////////////////////////////////////////////////
-
-string
-ShortFormName(
-	      string lFit )
-{
-  int colonPos = lFit.find_first_of( ":" );
-  return lFit.substr( 0, colonPos );
 }

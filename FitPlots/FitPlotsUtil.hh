@@ -11,6 +11,7 @@
 
 #include <TChain.h>
 #include <TH1D.h>
+#include <TVirtualPad.h>
 
 #include <string>
 #include <vector>
@@ -35,15 +36,13 @@ void
 ArrangeStatBox(
                TH1D* hHistogram,
 			   Int_t color,
-			   Int_t number );
+			   TVirtualPad* pad );
 
 
 std::vector<std::string>
 GetFitNames(
 			std::string lFile );
 
-std::string
-ShortFormName(
-			  std::string lFit );
+extern bool gIgnoreRetriggers;
 
 #endif
