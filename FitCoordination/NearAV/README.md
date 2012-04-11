@@ -16,4 +16,4 @@ For the averaged ratio for a certain window choice (220, 250):
 
 For all the ratios (not averaged) then:
 
-    python DiagnosticPlotFiles.py -a 220.0 250.0
+    python DiagnosticPlotFiles.py 220.0 250.0
