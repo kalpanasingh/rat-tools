@@ -207,6 +207,7 @@ $(XERCESCROOT)/lib/libxerces-c.a:
 	cd $(XERCESCROOT) && ./configure
 	cd $(XERCESCROOT) && $(MAKE)
 	cd $(XERCESCROOT) && $(MAKE) install prefix=$(XERCESCROOT)
+	echo '' >> $(TOPLEVEL)/libraries/geant4-config.sh # Put a line break in
 	echo 'g4gdml_xercesc_root=$(XERCESCROOT)' >> $(TOPLEVEL)/libraries/geant4-config.sh
 	echo 'with_xercesc_root=$(XERCESCROOT)' >> $(TOPLEVEL)/libraries/geant4-config.sh
 ###
