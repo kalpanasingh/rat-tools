@@ -1,0 +1,29 @@
+/glg4debug/glg4param omit_muon_processes 1.0
+/glg4debug/glg4param omit_hadronic_processes 1.0
+
+/rat/db/set MC thin_factor 3.5
+/rat/db/set DETECTOR geo_file "${GeoFile}"
+/rat/db/set GEO[scint] material "${ScintMaterial}"
+
+/run/initialize
+
+/rat/proc frontend
+/rat/proc trigger
+/rat/proc eventbuilder
+/rat/proc calibratePMT
+/rat/proc count
+/rat/procset update 50
+
+/rat/proc scintFitter
+
+/rat/proc outroot
+/rat/procset file "${OutFileName}"
+
+/generator/add combo gun:fill:poisson
+${Generator}
+/generator/pos/set 0 0 0
+/generator/rate/set 1
+
+/run/beamOn 5000
+exit
+
