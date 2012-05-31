@@ -53,7 +53,7 @@ SHELL := /bin/bash #Must use bash for source and env setting
 # To update the library add to libraries/ and update these numbers:
 CLHEP_VERSION=2.1.0.1
 ROOT_VERSION=5.32.00
-GEANT4_VERSION=4.9.4.p01
+GEANT4_VERSION=4.9.5.p01
 SCONS_VERSION=2.1.0
 SFML_VERSION=2.0
 XERCES_VERSION=3.1.1
@@ -168,9 +168,9 @@ $(CLHEP_BASE)/lib/libCLHEP.a:
 geant4: $(G4_DEPENDENCIES) $(GEANT4_BASE)/include/G4Event.hh
 
 $(GEANT4_BASE)/include/G4Event.hh: $(CLHEP_BASE)/lib/libCLHEP.a
-	cd $(GEANT4_BASE) && ./Configure -incflags -build -d -e -f ../$(G4_CONFIG)
-	cd $(GEANT4_BASE) && ./Configure -incflags -install -d -e -f ../$(G4_CONFIG)
-	cd $(GEANT4_BASE) && (./Configure || true) # Configure returns false?!
+	cd $(GEANT4_BASE) && cmake -DCMAKE_INSTALL_PREFIX=$(GEANT4_SOURCE) -DCLHEP_ROOT_DIR=$(CLHEP_BASE) -DGEANT4_INSTALL_DATA=ON -DCLHEP_CONFIG_EXECUTABLE=$(CLHEP_BASE)/clhep-config
+	cd $(GEANT4_BASE) && make
+	cd $(GEANT4_BASE) && make install
 	touch $(GEANT4_BASE)/include/G4Event.hh  # Mark that we finished
 ###
 scons: 
@@ -207,6 +207,7 @@ $(XERCESCROOT)/lib/libxerces-c.a:
 	cd $(XERCESCROOT) && ./configure
 	cd $(XERCESCROOT) && $(MAKE)
 	cd $(XERCESCROOT) && $(MAKE) install prefix=$(XERCESCROOT)
+	echo '' >> $(TOPLEVEL)/libraries/geant4-config.sh # Put a line break in
 	echo 'g4gdml_xercesc_root=$(XERCESCROOT)' >> $(TOPLEVEL)/libraries/geant4-config.sh
 	echo 'with_xercesc_root=$(XERCESCROOT)' >> $(TOPLEVEL)/libraries/geant4-config.sh
 ###

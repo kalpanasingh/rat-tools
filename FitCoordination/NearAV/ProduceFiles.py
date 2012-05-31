@@ -4,21 +4,25 @@ import os, sys, string
 
 
 def ProduceRunMacFile( options ):
-	"""Produces and then runs the appropriate mac files."""
-	inFile = open( "Base.mac", "r" )
-	rawText = string.Template( inFile.read() )
-	inFile.close()
-	for pos in sorted( [5000] + range( 5400, 6100, 100 ) ):
-		outText = rawText.substitute( SourcePos = str( pos ),
+    """Produces and then runs the appropriate mac files."""
+    inFile = open( "Base.mac", "r" )
+    rawText = string.Template( inFile.read() )
+    inFile.close()
+    energy = 3.0
+    if options.particle == "alpha":
+        energy = 10.0 # Effective 1MeVee
+    for pos in sorted( [5000] + range( 5400, 6100, 100 ) ):
+        outText = rawText.substitute( SourcePos = str( pos ),
                                       GeoFile = options.geoFile,
                                       ScintMaterial = options.scintMaterial,
-                                      Particle = options.particle )
-		outFileName = "Base_" + str(pos) + ".mac"
-		outFile = open( outFileName, "w" )
-		outFile.write( outText )
-		outFile.close()
-		os.system( "rat " + outFileName )
-		os.remove( outFileName )
+                                      Particle = options.particle,
+                                      Energy = energy )
+        outFileName = "Base_" + str(pos) + ".mac"
+        outFile = open( outFileName, "w" )
+        outFile.write( outText )
+        outFile.close()
+        os.system( "rat " + outFileName )
+        os.remove( outFileName )
 
 import optparse
 if __name__ == '__main__':
@@ -27,4 +31,4 @@ if __name__ == '__main__':
     parser.add_option( "-s", type="string", dest="scintMaterial", help="Scintillator material.", default="labppo_scintillator" )
     parser.add_option( "-p", type="string", dest="particle", help="Particle type.", default="e-" )
     (options, args) = parser.parse_args()
-	ProduceRunMacFile( options )
+    ProduceRunMacFile( options )
