@@ -176,33 +176,31 @@ MakeRespVsAngleGraphs(
 
   cout << "Hits: " << allHits->GetSumOfWeights() << " signals: " << allSignal->GetSumOfWeights() << " ratio(s/h): " << allSignal->GetSumOfWeights() / allHits->GetSumOfWeights() << endl;
 
-  int iLoop;
-  for( iLoop = 1; iLoop <= allSignal->GetNbinsX(); iLoop++ )
+  for( int iLoop = 1; iLoop <= allSignal->GetNbinsX(); iLoop++ )
     {
       if( allHits->GetBinContent( iLoop ) > 0.0 && allSignal->GetBinContent( iLoop ) > 0.0 )
-	{
-	  double binVal = allSignal->GetBinContent( iLoop ) / allHits->GetBinContent( iLoop );
-	  double errVal = sqrt( 1.0 / allSignal->GetBinContent( iLoop ) + 1.0 / allHits->GetBinContent( iLoop ) ) * binVal;
-
-	  result->SetBinContent( iLoop, binVal );
-	  result->SetBinError( iLoop, errVal );
-	}
+        {
+          double binVal = allSignal->GetBinContent( iLoop ) / allHits->GetBinContent( iLoop );
+          double errVal = sqrt( 1.0 / allSignal->GetBinContent( iLoop ) + 1.0 / allHits->GetBinContent( iLoop ) ) * binVal;
+          
+          result->SetBinContent( iLoop, binVal );
+          result->SetBinError( iLoop, errVal );
+        }
     }
 
   if( normalise )
     {
       const double normFactor = result->GetBinContent( 1 );
       const double normError = result->GetBinError( 1 );
-      int iLoop;
-      for( iLoop = 1; iLoop <= allSignal->GetNbinsX(); iLoop++ )
-	{
-	  if( result->GetBinContent( iLoop ) == 0.0 )
-	    continue;
-	  const double binVal = result->GetBinContent( iLoop ) / normFactor;
-	  const double errVal = sqrt( pow( result->GetBinError( iLoop ) / result->GetBinContent( iLoop ), 2 ) + pow( normError / normFactor, 2 ) ) * binVal;
-
-	  result->SetBinContent( iLoop, binVal );
-	  result->SetBinError( iLoop, errVal );
-	}
+      for( int iLoop = 1; iLoop <= allSignal->GetNbinsX(); iLoop++ )
+        {
+          if( result->GetBinContent( iLoop ) == 0.0 )
+            continue;
+          const double binVal = result->GetBinContent( iLoop ) / normFactor;
+          const double errVal = sqrt( pow( result->GetBinError( iLoop ) / result->GetBinContent( iLoop ), 2 ) + pow( normError / normFactor, 2 ) ) * binVal;
+          
+          result->SetBinContent( iLoop, binVal );
+          result->SetBinError( iLoop, errVal );
+        }
     }
 }
