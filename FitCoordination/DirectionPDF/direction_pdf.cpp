@@ -56,13 +56,13 @@ void PlotDirections(char* pFile)
 
   // Read out data in ratdb format
   cout << "angle: [0.0d, ";
-  for(int j=1; j<100; j++){
+  for(int j=1; j<101; j++){
     cout << hist->GetBinCenter(j) << "d, ";
   }
   cout << "3.14d,]," << endl;
-  cout << "probability: [0.0d, ";
-  for(int j=1; j<100; j++){
+  cout << "probability: [";
+  for(int j=0; j<102; j++){
     cout << hist->GetBinContent(j) << "d, ";
   }
-  cout << hist->GetBinContent(99) << "d,]," << endl;  
+  cout << "]," << endl;  
 }
