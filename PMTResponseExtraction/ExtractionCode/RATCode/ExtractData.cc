@@ -226,29 +226,29 @@ ExtractSignalData(
       
       int iLoop;
       for( iLoop = 0; iLoop < numPMTHits; iLoop++ )
-	{
-	  RAT::DS::MCPMT *rMCPMT = rMC->GetMCPMT( iLoop );
-	  int numPMTPhotons = rMCPMT->GetMCPhotonCount();
-	  int pmtID = rMCPMT->GetPMTID();
-	  
-	  // Not interested in trigger signals thus ignore 
-	  if( rPMTList->GetChannel( pmtID ) == 9190 )
-	    continue;
-
-	  //Loop over the photons
-	  int iLoop2;
-	  for( iLoop2 = 0; iLoop2 < numPMTPhotons; iLoop2++ )
-	    {
-	      RAT::DS::MCPhoton *rMCPhoton = rMCPMT->GetMCPhoton( iLoop2 );
-	      if( rMCPhoton->GetIsNoise() )
-		continue;
-	      int trackID = rMCPhoton->GetTrackID();
-	      double numPE = rMCPhoton->GetCharge();
-	      
-	      fileData.NewSignal( eventID, trackID, pmtID, numPE );
-	      totalNumSignals++;
-	    }
-	}
+        {
+          RAT::DS::MCPMT *rMCPMT = rMC->GetMCPMT( iLoop );
+          int numPMTPhotons = rMCPMT->GetMCPhotonCount();
+          int pmtID = rMCPMT->GetPMTID();
+          
+          // Not interested in trigger signals thus ignore 
+          if( pmtID == 9190 )
+            continue;
+          
+          //Loop over the photons
+          int iLoop2;
+          for( iLoop2 = 0; iLoop2 < numPMTPhotons; iLoop2++ )
+            {
+              RAT::DS::MCPhoton *rMCPhoton = rMCPMT->GetMCPhoton( iLoop2 );
+              if( rMCPhoton->GetIsNoise() )
+                continue;
+              int trackID = rMCPhoton->GetTrackID();
+              double numPE = rMCPhoton->GetCharge();
+              
+              fileData.NewSignal( eventID, trackID, pmtID, numPE );
+              totalNumSignals++;
+            }
+        }
     }
 }
 
