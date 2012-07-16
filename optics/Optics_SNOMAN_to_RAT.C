@@ -140,7 +140,7 @@ void RefIndex(double *RI, double lo_wave = 200, double hi_wave = 800 )
 /// length, ABSLENGTH (mm). The fraction of this extinction that is due to scattering is 
 /// output as the OPSCATFRAC array.
 void AbsScatNonScint(int ninp, double *wave, double *abscoeff, double RSfactor, double meanRI, 
-                     double isocomp, double lo_wave = 200, double hi_wave = 800 )
+                     double isocomp, double lo_wave = 200, double hi_wave = 800, double scaleFactor = 1.0 )
 {
 /// Arguments:
 	/// ninp	= number of input points
@@ -152,6 +152,7 @@ void AbsScatNonScint(int ninp, double *wave, double *abscoeff, double RSfactor, 
 	/// isocomp 	= Isothermal Compressibility of the material, taken from media.dat
         /// lo_wave     = Starting wavelength
         /// hi_wave     = End wavelength 
+        /// scaleFactor = abscoeff' = scaleFactor * abscoeff (almost always 1.0)
 	
 /// Output histograms and graphs:
 	/// gabsIn		= SNOMAN absorption coefficients
@@ -226,7 +227,7 @@ void AbsScatNonScint(int ninp, double *wave, double *abscoeff, double RSfactor, 
               else
                 {
                   // First find nearest index in submitted array
-		  int index = -1;
+                  int index = -1;
                   int iLoop;
                   for( iLoop = 0; iLoop <= ninp - 2; iLoop++ )
                     if( iWave >= wave[iLoop] && iWave <= wave[iLoop+1] )
@@ -241,7 +242,7 @@ void AbsScatNonScint(int ninp, double *wave, double *abscoeff, double RSfactor, 
               if( fitAbsCoef < 1e-6 )
                 fitAbsCoef = 1e-6;
 
-	      absorptionVec.push_back( Attenuation( fitAbsCoef ) );
+              absorptionVec.push_back( Attenuation( scaleFactor * fitAbsCoef ) );
             }
           gabsRAT = new TGraph(waveVec.size(),&waveVec[0],&absorptionVec[0]);
         }             
