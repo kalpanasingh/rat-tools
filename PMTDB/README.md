@@ -11,5 +11,6 @@ It will parse the csv file and output a new format PMTINFO file. The PMTINFO exp
 
 ## Produce PANELINFO.ratdb
 This will hopefully not need to be run again, but if it does just run:
-    python ProducePanelInfo.py [Path to old style PMTINFO.ratdb]
-It will parse the old style PMTINFO (releases < 3.0) and produce a PANELINFO.ratdb file.
+    python ProducePanelInfo.py
+It will parse the old style PMTINFO (releases < 4.0) in data/PMTINFO.ratdb and produce a PANELINFO.ratdb file.
+Note the panels are correctly positioned and directed for RAT, this PANELINFO file does not use the SNO assumptions.
