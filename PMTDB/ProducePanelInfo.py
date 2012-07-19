@@ -12,6 +12,12 @@ def CorrectPosition( pos, direction ):
     pos += -direction * 131.6
     return pos
 
+def FinishAxis( xAxis, zAxis ):
+    """ Ensure the xAxis is othogonal to the zAxis."""
+    yAxis = numpy.cross( zAxis, xAxis )
+    xAxis = numpy.cross( yAxis, zAxis )
+    return xAxis / numpy.linalg.norm( xAxis )
+
 def CalculateCentroid( pmtPos ):
     """ Sum over pmtPositions and get the mean pos."""
     origin = numpy.array( [0.0, 0.0, 0.0] )
@@ -46,25 +52,24 @@ def CalculateT14Coord( pmtPos ):
     origin = CalculateCentroid( pmtPos )
     # Now choose the 3 pmtPos nearest to the origin
     dists = sorted( [ [numpy.linalg.norm( pmt - origin ), index] for index, pmt in enumerate( pmtPos ) ], key=lambda tup: tup[0] )
-    return ( pmtPos[dists[0][1]] + pmtPos[dists[1][1]] + pmtPos[dists[2][1]] ) / 3.0 
+    return ( pmtPos[dists[0][1]] + pmtPos[dists[1][1]] + pmtPos[dists[2][1]] ) / 3.0
 
-def CalculateTAxis( pmtPos ):
+def CalculateTAxis( pmtPos, origin ):
     """ Calculate the T10, T14 axis, choose the furthest PMT from the origin."""
-    origin = CalculateCentroid( pmtPos )
     dists = sorted( [ [numpy.linalg.norm( pmt - origin ), index] for index, pmt in enumerate( pmtPos ) ], key=lambda tup: tup[0] )
     xAxis = pmtPos[dists[-1][1]] - origin
-    return xAxis / numpy.linalg.norm( xAxis )
+    xAxis = xAxis / numpy.linalg.norm( xAxis )
+    return xAxis
 
-def CalculateT21Axis( pmtPos ):
+def CalculateT21Axis( pmtPos, origin ):
     """ Calculate the T21 axis, use furthest pmts."""
-    origin = CalculateCentroid( pmtPos )
     # Now choose the 2 pmtPos furthest from the origin
     dists = sorted( [ [numpy.linalg.norm( pmt - origin ), index] for index, pmt in enumerate( pmtPos ) ], key=lambda tup: tup[0] )
     xAxis = ( pmtPos[dists[-1][1]] + pmtPos[dists[-2][1]] ) / 2.0 - origin
     return xAxis / numpy.linalg.norm( xAxis )
 
 # Now start parsing the file
-pmtInfoFile = open( "data/PMTINFO.ratdb", "r" )
+pmtInfoFile = open( "data/PMTINFO_rat3.ratdb", "r" )
 data = yaml.load( json_minify( pmtInfoFile.read(), False ) )
 pmtInfoFile.close()
 # Loop over the pmts, and condense data to once per panel
@@ -90,10 +95,11 @@ for x, y, z, u, v, w, number in zip( data["x"], data["y"], data["z"], data["u"],
         # Add the panel information once only
         if pmts[number] == 1:
             newData["panel_number"].append( number )
-            newData["u"].append( u )
-            newData["v"].append( v )
-            newData["w"].append( w )
             pmtDir[number] = numpy.array( [-u, -v, -w] ) # All Panel PMTs point the wrong way!
+            pmtDir[number] = pmtDir[number] / numpy.linalg.norm( pmtDir[number] )
+            newData["u"].append( float( pmtDir[number][0] ) )
+            newData["v"].append( float( pmtDir[number][1] ) )
+            newData["w"].append( float( pmtDir[number][2] ) )
             pmtPos[number] = [ CorrectPosition( numpy.array( [ x, y, z ] ), pmtDir[number] ) ]
         else:
             pmtPos[number].append( CorrectPosition( numpy.array( [ x, y, z ] ), pmtDir[number] ) )
@@ -110,25 +116,24 @@ for number in newData["panel_number"]:
     elif pmts[number] == 21: #T21 == 2
         newData["panel_type"].append( 2 )
         origin = CalculateTCoord( pmtPos[number] )
-        xAxis = CalculateT21Axis( pmtPos[number] )
+        xAxis = CalculateT21Axis( pmtPos[number], origin )
     elif pmts[number] == 14: #T14 == 3
         newData["panel_type"].append( 3 )
         origin = CalculateT14Coord( pmtPos[number] )
-        xAxis = CalculateTAxis( pmtPos[number] )
+        xAxis = CalculateTAxis( pmtPos[number], origin )
     elif pmts[number] == 10: #T10 == 4
         newData["panel_type"].append( 4 )
         origin = CalculateTCoord( pmtPos[number] )
-        xAxis = CalculateTAxis( pmtPos[number] )
+        xAxis = CalculateTAxis( pmtPos[number], origin )
     elif pmts[number] == 9 or pmts[number] == 8: #T10M == T10
         newData["panel_type"].append( 4 )
         origin = CalculateTCoord( pmtPos[number] )
-        xAxis = CalculateTAxis( pmtPos[number] )
+        xAxis = CalculateTAxis( pmtPos[number], origin  )
     elif pmts[number] == 13 or pmts[number] == 12: #T14M == T14
         newData["panel_type"].append( 3 )
         origin = CalculateT14Coord( pmtPos[number] )
-        xAxis = CalculateTAxis( pmtPos[number] )
-    if number == 64 or number == 82 or number == 100 or number == 102 or number == 106 or number == 263 or number == 576 or number == 711 or number == 712 or number == 130 or number == 139:
-        print number, ":", origin[0], ",", origin[1], ",", origin[2], "|", xAxis[0], ",", xAxis[1], ",", xAxis[2]
+        xAxis = CalculateTAxis( pmtPos[number], origin )
+    xAxis = FinishAxis( xAxis, pmtDir[number] )
     newData["r"].append( float( xAxis[0] ) )
     newData["s"].append( float( xAxis[1] ) )
     newData["t"].append( float( xAxis[2] ) )
@@ -139,8 +144,7 @@ for number in newData["panel_number"]:
 # Now have a complete dict, write to a file
 panelInfoFile = open( "PANELINFO.ratdb", "w" )
 infoText = """{
-name: \"PMTINFO\",
-index: \"sno+\",
+name: \"PANELINFO\",
 valid_begin : [0, 0],
 valid_end : [0, 0],
 """
