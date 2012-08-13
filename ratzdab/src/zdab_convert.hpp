@@ -37,10 +37,14 @@ namespace ratzdab {
     namespace unpack {
         RAT::DS::Root* event(PmtEventRecord* pev);
         RAT::DS::Run* rhdr(RunRecord* rhdr);
-        RAT::DS::TRIGInfo* trig(TriggerInfo* trig);
-        RAT::DS::EPEDInfo* eped(EpedRecord* eped);
         RAT::DS::ManipStat* cast(ManipStatus* cast);
         RAT::DS::AVStat* caac(AVStatus* caac);
+
+        // note: TRIGInfo::runID is not set
+        RAT::DS::TRIGInfo* trig(TriggerInfo* trig);
+
+        // note: EPEDInfo::runID is not set
+        RAT::DS::EPEDInfo* eped(EpedRecord* eped);
 
         // helpers
         RAT::DS::Digitiser caen(uint32_t* caen);

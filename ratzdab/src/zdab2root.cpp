@@ -75,6 +75,46 @@ int main(int argc, char* argv[]) {
                 run_active = true;
                 std::cout << "RHDR: Run " << run->GetRunID() << std::endl;
             }
+            else if (r->IsA() == RAT::DS::AVStat::Class()) {
+                if (run_active) {
+                    RAT::DS::AVStat* avstat = run->GetAVStat();
+                    *avstat = *((RAT::DS::AVStat*) r);
+                    std::cout << "AVStat: Run updated" << std::endl;
+                }
+                else {
+                    std::cerr << "Warning: Ignoring AVStat since there is no run active" << std::endl;
+                }
+            }
+            else if (r->IsA() == RAT::DS::ManipStat::Class()) {
+                if (run_active) {
+                    RAT::DS::ManipStat* mstat = run->GetManipStat();
+                    *mstat = *((RAT::DS::ManipStat*) r);
+                    std::cout << "ManipStat: Run updated" << std::endl;
+                }
+                else {
+                    std::cerr << "Warning: Ignoring ManipStat since there is no run active" << std::endl;
+                }
+            }
+            else if (r->IsA() == RAT::DS::TRIGInfo::Class()) {
+                delete current_trig;
+                current_trig = (RAT::DS::TRIGInfo*) r;
+
+                if (run_active) {
+                    current_trig->SetRunID(run->GetRunID());
+                }
+
+                std::cout << "TRIG: GTID " << current_trig->GetEventID() << std::endl;
+            }
+            else if (r->IsA() == RAT::DS::EPEDInfo::Class()) {
+                delete current_eped;
+                current_eped = (RAT::DS::EPEDInfo*) r;
+
+                if (run_active) {
+                    current_eped->SetRunID(run->GetRunID());
+                }
+
+                std::cout << "EPED: GTID " << current_eped->GetEventID() << std::endl;
+            }
             else if (r->IsA() == RAT::DS::Root::Class()) {
                 *ds = *((RAT::DS::Root*) r);
 

@@ -162,19 +162,96 @@ namespace ratzdab {
     }
 
     RAT::DS::TRIGInfo* unpack::trig(TriggerInfo* t) {
-        throw record_unknown;
+        RAT::DS::TRIGInfo* triginfo = new RAT::DS::TRIGInfo;
+
+        triginfo->SetTrigMask(t->TriggerMask);
+        triginfo->SetPulserRate(t->PulserRate);
+        triginfo->SetMTC_CSR(t->ControlRegister);
+        triginfo->SetLockoutWidth(t->reg_LockoutWidth);
+        triginfo->SetPrescaleFreq(t->reg_Prescale);
+        triginfo->SetEventID(t->GTID);
+        triginfo->SetNTrigTHold(10); // number of trigger thresholds
+        triginfo->SetNTrigZeroOffset(10); // number of trigger zero offsets
+
+        // triggers are separate members in TriggerInfo, array in TRIGInfo
+        triginfo->SetTrigTHold(0, t->n100lo);
+        triginfo->SetTrigZeroOffset(0, t->n100lo_zero);
+        triginfo->SetTrigTHold(1, t->n100med);
+        triginfo->SetTrigZeroOffset(1, t->n100med_zero);
+        triginfo->SetTrigTHold(2, t->n100hi);
+        triginfo->SetTrigZeroOffset(2, t->n100hi_zero);
+        triginfo->SetTrigTHold(3, t->n20);
+        triginfo->SetTrigZeroOffset(3, t->n20_zero);
+        triginfo->SetTrigTHold(4, t->n20lb);
+        triginfo->SetTrigZeroOffset(4, t->n20lb_zero);
+        triginfo->SetTrigTHold(5, t->esumlo);
+        triginfo->SetTrigZeroOffset(5, t->esumlo_zero);
+        triginfo->SetTrigTHold(6, t->esumhi);
+        triginfo->SetTrigZeroOffset(6, t->esumhi_zero);
+        triginfo->SetTrigTHold(7, t->owln);
+        triginfo->SetTrigZeroOffset(7, t->owln_zero);
+        triginfo->SetTrigTHold(8, t->owlelo);
+        triginfo->SetTrigZeroOffset(8, t->owlelo_zero);
+        triginfo->SetTrigTHold(9, t->owlehi);
+        triginfo->SetTrigZeroOffset(9, t->owlehi_zero);
+
+        return triginfo;
     }
 
     RAT::DS::EPEDInfo* unpack::eped(EpedRecord* e) {
-        throw record_unknown;
+        RAT::DS::EPEDInfo* eped = new RAT::DS::EPEDInfo;
+
+        eped->SetGTDelayCoarse(e->ped_delay_coarse);
+        eped->SetGTDelayFine(e->ped_delay_fine);
+        eped->SetQPedAmp(e->qinj_dacsetting);
+        eped->SetQPedWidth(e->ped_width);
+        eped->SetPatternID(e->halfCrateID);
+        eped->SetCalType(e->CalibrationType);
+        eped->SetEventID(e->GTID);
+
+        return eped;
     }
 
     RAT::DS::ManipStat* unpack::cast(ManipStatus* c) {
-        throw record_unknown;
+        RAT::DS::ManipStat* manip = new RAT::DS::ManipStat;
+
+        manip->SetSrcID(c->sourceID);
+        manip->SetSrcStatus(c->status);
+        manip->SetNRopes(c->numRopes);
+        manip->SetSrcPosUnc(c->positionError);
+        manip->SetLaserballOrient(c->orientation);
+
+        for (unsigned i=0; i<3; i++) {
+            manip->SetManipPos(i, c->position[i]);
+            manip->SetManipDest(i, c->destination[i]);
+            manip->SetSrcPosUnc(i, c->obsoletePosErr[i]);
+        }
+
+        for (unsigned i=0; i<manip->GetNRopes(); i++) {
+            manip->SetRopeID(i, c->ropeStatus[i].ropeID);
+            manip->SetRopeLength(i, c->ropeStatus[i].length);
+            manip->SetRopeTargLength(i, c->ropeStatus[i].targetLength);
+            manip->SetRopeVelocity(i, c->ropeStatus[i].velocity);
+            manip->SetRopeTension(i, c->ropeStatus[i].tension);
+            manip->SetRopeErr(i, c->ropeStatus[i].encoderError);
+        }
+
+        return manip;
     }
 
     RAT::DS::AVStat* unpack::caac(AVStatus* c) {
-        throw record_unknown;
+        RAT::DS::AVStat* av = new RAT::DS::AVStat;
+
+        for (unsigned i=0; i<3; i++) {
+            av->SetPosition(i, c->position[i]);
+            av->SetRoll(i, c->rotation[i]);
+        }
+
+        for (unsigned i=0; i<7; i++) {
+            av->SetRopeLength(i, c->ropeLength[i]);
+        }
+
+        return av;
     }
 
     RAT::DS::Digitiser unpack::caen(uint32_t* c) {
