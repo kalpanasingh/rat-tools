@@ -48,7 +48,7 @@ UpdateExecutionTime(
 				  Int_t fitNum );
 // Globals
 double gMaxExecutionTime = 0.0;
-double gMinExecutionTime = 9e999;
+double gMinExecutionTime = 9e99;
 double gMaxNhit = 0.0;
 double gMinNhit = 0.0; //Force origin
 
