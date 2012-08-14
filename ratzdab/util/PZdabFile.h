@@ -146,8 +146,10 @@ public:
 	static u_int32        * GetNcdData(PmtEventRecord *pmtRecord)
 	                            { return GetExtendedData(pmtRecord, SUB_TYPE_NCD); }
 	
-	static void				DumpRecord(u_int32 *bankData, int bankSize, u_int32 bankName, u_int32 lastGTID=0);
+#if 0
+        static void				DumpRecord(u_int32 *bankData, int bankSize, u_int32 bankName, u_int32 lastGTID=0);
 	static void				DumpRecord(nZDAB *nzdabPtr, u_int32 lastGTID=0);
+#endif
 	static void				DumpHex(nZDAB *nzdabPtr, int numToPrint=16);
 	
 	static int				GetVerbose()			{ return sVerbose; }

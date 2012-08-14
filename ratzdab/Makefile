@@ -1,12 +1,12 @@
-CFLAGS = -Wno-write-strings -DSWAP_BYTES -g
+CFLAGS = -Wno-write-strings -DSWAP_BYTES -g -fdiagnostics-show-option
 INCLUDE = -Isrc -Iutil -Iutil/include -I$(ROOTSYS)/include -I$(RATROOT)/include -I$(RATROOT)/include/RAT
 LFLAGS = -L$(ROOTSYS)/lib -L$(RATROOT)/lib
 
 CC = g++
 LIBS = -lrt -lCore -lRIO -lCint
 
-ZCONVERT_SOURCES = src/zdab_convert.cpp util/PZdabFile.cxx util/SnoStr.cxx util/error_ph.c util/time_utils.cpp
-ZFILE_SOURCES = src/zdab_file.cpp util/PZdabFile.cxx util/SnoStr.cxx util/error_ph.c util/time_utils.cpp
+ZCONVERT_SOURCES = src/zdab_convert.cpp util/PZdabFile.cxx
+ZFILE_SOURCES = src/zdab_file.cpp util/PZdabFile.cxx
 ZDISPATCH_SOURCES = src/zdab_dispatch.cpp
 Z2R_SOURCES = src/zdab2root.cpp
 

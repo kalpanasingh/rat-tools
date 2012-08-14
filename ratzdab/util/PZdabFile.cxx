@@ -17,8 +17,10 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "PZdabFile.h"
-#include "CUtils.h"
-#include "SnoStr.h"
+//#include "CUtils.h"
+#define Printf printf
+#pragma GCC diagnostic ignored "-Wformat"
+//#include "SnoStr.h" // DumpRecord is disabled
 #include "include/Record_Info.h"
 
 //#define DEBUG_RECORD_HEADERS
@@ -457,8 +459,10 @@ PmtEventRecord *PZdabFile::GetPmtRecord(nZDAB *nzdabPtr)
 		if (sVerbose) {
 			if (sVerbose > 1) {
 				DumpHex(nzdabPtr);
+#if 0
 			} else {
 				DumpRecord(nzdabPtr, mLastGTID);
+#endif
 			}
 		}
 		pmtEventPtr = NULL;	// not a valid PmtEventRecord
@@ -517,6 +521,7 @@ char *PZdabFile::BankNameString(u_int32 bank_name)
 	return(rtnString);
 }
 
+#if 0
 void PZdabFile::DumpRecord(u_int32 *bankData, int bankSize, u_int32 bankName, u_int32 lastGTID)
 {
 	char	*pt, buff[256];
@@ -643,6 +648,7 @@ void PZdabFile::DumpRecord(nZDAB *nzdabPtr, u_int32 lastGTID)
 {
 	DumpRecord((u_int32 *)(nzdabPtr + 1), nzdabPtr->data_words, nzdabPtr->bank_name, lastGTID);
 }
+#endif
 
 void PZdabFile::DumpHex(nZDAB *nzdabPtr, int numToPrint)
 {
