@@ -73,25 +73,27 @@ Python Interface
 ================
 The `ratzdab` library can also be used from Python by importing `python/ratzdab.py`.
 
-    >>> import ratzdab
-    RAT: Libraries loaded.
-    >>> f = ratzdab.zdabfile('SNO_0000020644_002.zdab')
-    >>>  o = f.next() # MAST record will fail
-    Traceback (most recent call last):
-      File "<stdin>", line 1, in <module>
-    Exception: Unable to convert unknown record type. (C++ exception)
-    >>>> o = f.next()
-    >>> o
-    <ROOT.RAT::DS::Run object ("RAT::DS::Run") at 0x215acd0>
-    >>> o.runID
-    20644
+```python
+>>> import ratzdab
+RAT: Libraries loaded.
+>>> f = ratzdab.zdabfile('SNO_0000020644_002.zdab')
+>>>  o = f.next() # MAST record will fail
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+Exception: Unable to convert unknown record type. (C++ exception)
+>>>> o = f.next()
+>>> o
+<ROOT.RAT::DS::Run object ("RAT::DS::Run") at 0x215acd0>
+>>> o.runID
+20644
+```
 
 This Python library is simply `libratzdab` wrapped by PyROOT, so the interface is identical. Specifically, `ratzdab` provides:
 
-*`ratzdab.zdabfile(filename)`: A `ratzdab::zdabfile` ZDAB file interface object
-*`ratzdab.dispatch(hostname, block=True)`: A `ratzdab::dispatch` ZDAB dispatcher interface object
-*`ratzdab.pack.*`: Packing functions from `ratzdab::pack`
-*`ratzdab.unpack.*`: Unpacking functions from `ratzdab::unpack`
+* `ratzdab.zdabfile(filename)`: A `ratzdab::zdabfile` ZDAB file interface object
+* `ratzdab.dispatch(hostname, block=True)`: A `ratzdab::dispatch` ZDAB dispatcher interface object
+* `ratzdab.pack`: Packing functions from `ratzdab::pack`
+* `ratzdab.unpack`: Unpacking functions from `ratzdab::unpack`
 
 SNO struct types are available in `ratzdab.ROOT` and RAT ROOT types are found in `ratzdab.ROOT.RAT`.
 
