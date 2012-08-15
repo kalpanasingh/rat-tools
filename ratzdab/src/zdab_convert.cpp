@@ -1,6 +1,5 @@
 #include <string>
 #include <vector>
-#include <stdlib.h>
 #include <stdint.h>
 
 #include <TObject.h>
@@ -24,14 +23,7 @@ namespace ratzdab {
         public:
             RATDB() {
                 db = RAT::DB::Get();
-
-                char* ratroot = getenv("RATROOT");
-                if (!ratroot) {
-                    throw no_rat;
-                }
-
-                std::string dbpath = std::string(ratroot) + "/data/PMTINFO.ratdb";
-                db->Load(dbpath);
+                db->Load("PMTINFO.ratdb");
 
                 pmtinfo = db->GetLink("PMTINFO", "sno+");
 
@@ -336,10 +328,9 @@ namespace ratzdab {
         return p;
     }
 
-    /* packing functions */
+    /** packing functions */
 
-    PmtEventRecord* pack::event(RAT::DS::Root *ds, int ev_id)
-    {
+    PmtEventRecord* pack::event(RAT::DS::Root *ds, int ev_id) {
         if (!ds || ev_id > ds->GetEVCount() - 1) {
             return NULL;
         }
