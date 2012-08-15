@@ -168,6 +168,8 @@ namespace ratzdab {
         triginfo->SetNTrigZeroOffset(10); // number of trigger zero offsets
 
         // triggers are separate members in TriggerInfo, array in TRIGInfo
+        triginfo->SetNTrigTHold(10);
+        triginfo->SetNTrigZeroOffset(10);
         triginfo->SetTrigTHold(0, t->n100lo);
         triginfo->SetTrigZeroOffset(0, t->n100lo_zero);
         triginfo->SetTrigTHold(1, t->n100med);
@@ -599,26 +601,47 @@ namespace ratzdab {
 
         ti->TriggerMask = triginfo->GetTrigMask();
 
-        ti->n100lo = triginfo->GetTrigTHold(0);
-        ti->n100med = triginfo->GetTrigTHold(1);
-        ti->n100hi = triginfo->GetTrigTHold(2);
-        ti->n20 = triginfo->GetTrigTHold(3);
-        ti->n20lb = triginfo->GetTrigTHold(4);
-        ti->esumlo = triginfo->GetTrigTHold(5);
-        ti->esumhi = triginfo->GetTrigTHold(6);
-        ti->owln = triginfo->GetTrigTHold(7);
-        ti->owlelo = triginfo->GetTrigTHold(8);
-        ti->owlehi = triginfo->GetTrigTHold(9);
-        ti->n100lo_zero = triginfo->GetTrigZeroOffset(0);
-        ti->n100med_zero = triginfo->GetTrigZeroOffset(1);
-        ti->n100hi_zero = triginfo->GetTrigZeroOffset(2);
-        ti->n20_zero = triginfo->GetTrigZeroOffset(3);
-        ti->n20lb_zero = triginfo->GetTrigZeroOffset(4);
-        ti->esumlo_zero = triginfo->GetTrigZeroOffset(5);
-        ti->esumhi_zero = triginfo->GetTrigZeroOffset(6);
-        ti->owln_zero = triginfo->GetTrigZeroOffset(7);
-        ti->owlelo_zero = triginfo->GetTrigZeroOffset(8);
-        ti->owlehi_zero = triginfo->GetTrigZeroOffset(9);
+        if (triginfo->GetNTrigTHold() > 0)
+            ti->n100lo = triginfo->GetTrigTHold(0);
+        if (triginfo->GetNTrigTHold() > 1)
+            ti->n100med = triginfo->GetTrigTHold(1);
+        if (triginfo->GetNTrigTHold() > 2)
+            ti->n100hi = triginfo->GetTrigTHold(2);
+        if (triginfo->GetNTrigTHold() > 3)
+            ti->n20 = triginfo->GetTrigTHold(3);
+        if (triginfo->GetNTrigTHold() > 4)
+            ti->n20lb = triginfo->GetTrigTHold(4);
+        if (triginfo->GetNTrigTHold() > 5)
+            ti->esumlo = triginfo->GetTrigTHold(5);
+        if (triginfo->GetNTrigTHold() > 6)
+            ti->esumhi = triginfo->GetTrigTHold(6);
+        if (triginfo->GetNTrigTHold() > 7)
+            ti->owln = triginfo->GetTrigTHold(7);
+        if (triginfo->GetNTrigTHold() > 8)
+            ti->owlelo = triginfo->GetTrigTHold(8);
+        if (triginfo->GetNTrigTHold() > 9)
+            ti->owlehi = triginfo->GetTrigTHold(9);
+
+        if (triginfo->GetNTrigZeroOffset() > 0)
+            ti->n100lo_zero = triginfo->GetTrigZeroOffset(0);
+        if (triginfo->GetNTrigZeroOffset() > 1)
+            ti->n100med_zero = triginfo->GetTrigZeroOffset(1);
+        if (triginfo->GetNTrigZeroOffset() > 2)
+            ti->n100hi_zero = triginfo->GetTrigZeroOffset(2);
+        if (triginfo->GetNTrigZeroOffset() > 3)
+            ti->n20_zero = triginfo->GetTrigZeroOffset(3);
+        if (triginfo->GetNTrigZeroOffset() > 4)
+            ti->n20lb_zero = triginfo->GetTrigZeroOffset(4);
+        if (triginfo->GetNTrigZeroOffset() > 5)
+            ti->esumlo_zero = triginfo->GetTrigZeroOffset(5);
+        if (triginfo->GetNTrigZeroOffset() > 6)
+            ti->esumhi_zero = triginfo->GetTrigZeroOffset(6);
+        if (triginfo->GetNTrigZeroOffset() > 7)
+            ti->owln_zero = triginfo->GetTrigZeroOffset(7);
+        if (triginfo->GetNTrigZeroOffset() > 8)
+            ti->owlelo_zero = triginfo->GetTrigZeroOffset(8);
+        if (triginfo->GetNTrigZeroOffset() > 9)
+            ti->owlehi_zero = triginfo->GetTrigZeroOffset(9);
 
         ti->PulserRate = triginfo->GetPulserRate();
         ti->ControlRegister = triginfo->GetMTC_CSR();

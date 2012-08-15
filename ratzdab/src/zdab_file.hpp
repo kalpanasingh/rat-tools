@@ -18,16 +18,16 @@ class nZDAB;
 namespace ratzdab {
 
     /** A ZDAB file */
-    class file {
+    class zdabfile {
         public:
             /** Load a ZDAB file.
              * Throws a ratzdab::zdabfile::file_read_error if an error is
              * encountered.
              */
-            file(std::string filename);
+            zdabfile(std::string filename);
 
             /** Close the ZDAB file */
-            virtual ~file();
+            virtual ~zdabfile();
 
             /** Get the next record in the file as a ROOT object */
             TObject* next();

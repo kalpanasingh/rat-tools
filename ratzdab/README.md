@@ -32,19 +32,19 @@ A C++ library for converting ZDAB blobs to RAT DS ROOT objects. `libratzdab` is 
 
 libzfile: ZDAB File I/O
 -----------------------
-`zdab_file.hpp` provides a class `file` to simplify reading ZDAB files.
+`zdab_file.hpp` provides a class `zdabfile` to simplify reading ZDAB files.
 
 It is constructed with a filename, and provides one method -- `next()`. This returns the next record in the file as a ROOT `TObject*`.
 
 If an unknown record type is encountered, a `unknown_record_error` will be thrown.
 
-If there is a problem reading the ZDAB file, `file` throws a `zdab_file_read_error`.
+If there is a problem reading the ZDAB file, `zdabfile` throws a `zdab_file_read_error`.
 
 libzdispatch: ZDAB Dispatcher I/O
 ---------------------------------
 `zdab_dispatch.hpp` provides a class `dispatch` to provide access to a dispatcher stream.
 
-It is constructed with a hostname and, optionally, a subscription string describing which types of records should be received. The default subscription is `"w RAWDATA w RECHDR"`. As in `file`, the `next()` method returns the next record in the stream as a ROOT `TObject*`.
+It is constructed with a hostname and, optionally, a subscription string describing which types of records should be received. The default subscription is `"w RAWDATA w RECHDR"`. As in `zdabfile`, the `next()` method returns the next record in the stream as a ROOT `TObject*`.
 
 `dispatch::next` takes an optional boolean argument, `block`. If `block` is true (the default), `next` will wait until data is received until returning. If false, it will return immediately, `NULL` if no data is available.
 
@@ -68,4 +68,30 @@ The TRIG, EPED, CAST, and CAAC converters are not yet implemented.
 Examples
 --------
 Example programs using libratzdab are provided in `examples`. See `examples/README.md` for details.
+
+Python Interface
+================
+The `ratzdab` library can also be used from Python by importing `python/ratzdab.py`.
+
+    >>> import ratzdab
+    RAT: Libraries loaded.
+    >>> f = ratzdab.zdabfile('SNO_0000020644_002.zdab')
+    >>>  o = f.next() # MAST record will fail
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+    Exception: Unable to convert unknown record type. (C++ exception)
+    >>>> o = f.next()
+    >>> o
+    <ROOT.RAT::DS::Run object ("RAT::DS::Run") at 0x215acd0>
+    >>> o.runID
+    20644
+
+This Python library is simply `libratzdab` wrapped by PyROOT, so the interface is identical. Specifically, `ratzdab` provides:
+
+*`ratzdab.zdabfile(filename)`: A `ratzdab::zdabfile` ZDAB file interface object
+*`ratzdab.dispatch(hostname, block=True)`: A `ratzdab::dispatch` ZDAB dispatcher interface object
+*`ratzdab.pack.*`: Packing functions from `ratzdab::pack`
+*`ratzdab.unpack.*`: Unpacking functions from `ratzdab::unpack`
+
+SNO struct types are available in `ratzdab.ROOT` and RAT ROOT types are found in `ratzdab.ROOT.RAT`.
 

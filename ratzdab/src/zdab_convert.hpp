@@ -69,14 +69,6 @@ namespace ratzdab {
             }
     } record_unknown;
 
-    /** Exception thrown if unable to handle a record */
-    static class missing_ratroot_error : public std::exception {
-        public:
-            virtual const char* what() const throw() {
-                return "Unable to find RAT. Is RATROOT set?";
-            }
-    } no_rat;
-
 } // namespace ratzdab
 
 #endif
