@@ -1,10 +1,13 @@
 ////////////////////////////////////////////////////////
-/// Plots the fit direction against the x,y and z axes
+/// Plots the fit direction against the mc direction and 
+/// expected position bias.
 ///
 /// P G Jones <p.jones22@physics.ox.ac.uk>
 /// J Amey <jjtamey@googlemail.com>
 ///
-/// 23/07/12 - New File
+/// 01/06/11 - New File
+/// 23/07/12 - Updated file and function names with "Diff"
+///          - fixed bug:  mcDirection must be made a unit vector 
 ////////////////////////////////////////////////////////
 
 #include <FitPlotsUtil.hh>
@@ -29,20 +32,19 @@ using namespace ROOT;
 using namespace std;
 
 void
-ExtractDirection(
+ExtractDiffDirection(
                  string lFile,
                  string lFit,
-                 TH1D** hCountVDirX,
-                 TH1D** hCountVDirY,
-                 TH1D** hCountVDirZ );
+                 TH1D** hCountVRes,
+                 TGraph** gResVR );
 
 TCanvas*
-PlotDirection(
+PlotDiffDirection(
               string file,
               vector<string> fits );
 
 TCanvas*
-UpdateDirection(
+UpdateDiffDirection(
                 string lFile,
                 string lFit, 
                 TCanvas* c1,
@@ -52,33 +54,33 @@ UpdateDirection(
 /// Call-able functions
 ////////////////////////////////////////////////////////
 TCanvas*
-PlotDirection(
+PlotDiffDirection(
               string lFile )
 {
-  return PlotDirection( lFile, GetFitNames( lFile ) );
+  return PlotDiffDirection( lFile, GetFitNames( lFile ) );
 }
 
 TCanvas*
-PlotDirection(
+PlotDiffDirection(
               string lFile,
               string lFit )
 {
   vector<string> fits; fits.push_back( lFit );
-  return PlotDirection( lFile, fits );
+  return PlotDiffDirection( lFile, fits );
 }
 
 TCanvas*
-PlotDirection(
+PlotDiffDirection(
               string lFile, 
               string lFit1, 
               string lFit2 )
 {
   vector<string> fits; fits.push_back( lFit1 ); fits.push_back( lFit2 );
-  return PlotDirection( lFile, fits );
+  return PlotDiffDirection( lFile, fits );
 }
 
 TCanvas*
-PlotDirection(
+PlotDiffDirection(
               string file,
               vector<string> fits )
 {
@@ -86,7 +88,7 @@ PlotDirection(
   for( unsigned int uFit = 0; uFit < fits.size(); uFit++ )
     {
       Int_t drawNum = uFit;
-      c1 = UpdateDirection( file, fits[uFit], c1, drawNum );
+      c1 = UpdateDiffDirection( file, fits[uFit], c1, drawNum );
       cout << "Plotted " << file << " fit: " << fits[uFit] << endl;
     }
   return c1;
@@ -97,7 +99,7 @@ PlotDirection(
 ////////////////////////////////////////////////////////
 
 TCanvas*
-UpdateDirection(
+UpdateDiffDirection(
                 string lFile,
                 string lFit, 
                 TCanvas* c1,
@@ -108,52 +110,40 @@ UpdateDirection(
     {
       firstDraw = true;
       c1 = new TCanvas();
-      c1->Divide( 3, 1 );
+      c1->Divide( 2, 1 );
     }
 
-  TH1D* hCountVDirX;
-  TH1D* hCountVDirY;
-  TH1D* hCountVDirZ;
+  TH1D* hCountVRes;
+  TGraph* gResVR;
 
   // First extract the data
-  ExtractDirection( lFile, lFit, &hCountVDirX, &hCountVDirY, &hCountVDirZ  );
+  ExtractDiffDirection( lFile, lFit, &hCountVRes, &gResVR );
   // Don't plot empty fits...
-  if( hCountVDirX->GetEntries() == 0 )
+  if( hCountVRes->GetEntries() == 0 )
     return c1;
 
   // Now draw the results
-  c1->cd(1);
+  TVirtualPad* cPad = NULL;
+  cPad = c1->cd(1);
   if( firstDraw )
-    hCountVDirX->Draw("S E");
+    hCountVRes->Draw("S E");
   else
     {
-      hCountVDirX->SetLineColor( fitNum + 1 );
-      hCountVDirX->Draw("SAMES E");
+      hCountVRes->SetLineColor( fitNum + 1 );
+      hCountVRes->Draw("SAMES E");
     }
   c1->Update();
-  ArrangeStatBox( hCountVDirX, fitNum + 1, c1->cd(1) );
+  ArrangeStatBox( hCountVRes, fitNum + 1, cPad );
 
   c1->cd(2);
   if( firstDraw )
-    hCountVDirY->Draw("S E");
+    gResVR->Draw("AP");
   else
     {
-       hCountVDirY->SetLineColor( fitNum + 1 );
-       hCountVDirY->Draw("SAMES E");
+      gResVR->SetMarkerColor( fitNum + 1 );
+      gResVR->Draw("P");
     }
   c1->Update();
-  ArrangeStatBox( hCountVDirY, fitNum + 1, c1->cd(2) );
-
-  c1->cd(3);
-  if( firstDraw )
-    hCountVDirZ->Draw("S E");
-  else
-    {
-      hCountVDirZ->SetLineColor( fitNum + 1 );
-      hCountVDirZ->Draw("SAMES E");
-    }
-  c1->Update();
-  ArrangeStatBox( hCountVDirZ, fitNum + 1, c1->cd(3) );
 
   c1->cd();
   return c1;  
@@ -164,12 +154,11 @@ UpdateDirection(
 ////////////////////////////////////////////////////////
 
 void
-ExtractDirection(
+ExtractDiffDirection(
                  string lFile,
                  string lFit,
-                 TH1D** hCountVDirX,
-                 TH1D** hCountVDirY,
-                 TH1D** hCountVDirZ )
+                 TH1D** hCountVRes,
+                 TGraph** gResVR )
 {
   // First new the histograms
   const int kBins = 180;
@@ -180,23 +169,14 @@ ExtractDirection(
 
   stringstream histName;
   histName << lFile << "_" << lFit << "_D";
-  *hCountVDirX = new TH1D( histName.str().c_str(), "acos #cbar Fitted Direction #cdot x #cbar", kBins, kStartBin, kEndBin );
-  (*hCountVDirX)->GetXaxis()->SetTitle( "acos #cbar Fitted Direction #cdot x #cbar [deg]" );
-  (*hCountVDirX)->GetYaxis()->SetTitle( histoBinning.str().c_str() );
+  *hCountVRes = new TH1D( histName.str().c_str(), "acos #cbar Fit(T) #cdot MC(T) #cbar", kBins, kStartBin, kEndBin );
+  (*hCountVRes)->GetXaxis()->SetTitle( "acos #cbar Fit(T) #cdot  MC(T) #cbar [deg]" );
+  (*hCountVRes)->GetYaxis()->SetTitle( histoBinning.str().c_str() );
   histName.str("");
 
-  histName << lFile << "_" << lFit << "_D";
-  *hCountVDirY = new TH1D( histName.str().c_str(), "acos #cbar Fitted Direction #cdot y #cbar", kBins, kStartBin, kEndBin );
-  (*hCountVDirY)->GetXaxis()->SetTitle( "acos #cbar Fitted Direction #cdot y #cbar [deg]" );
-  (*hCountVDirY)->GetYaxis()->SetTitle( histoBinning.str().c_str() );
-  histName.str("");
+  // Now new the graphs
+  *gResVR = new TGraph();
 
-  histName << lFile << "_" << lFit << "_D";
-  *hCountVDirZ = new TH1D( histName.str().c_str(), "acos #cbar Fitted Direction #cdot z #cbar", kBins, kStartBin, kEndBin );
-  (*hCountVDirZ)->GetXaxis()->SetTitle( "acos #cbar Fitted Direction #cdot z #cbar [deg]" );
-  (*hCountVDirZ)->GetYaxis()->SetTitle( histoBinning.str().c_str() );
-  histName.str("");
-  
   // Now extract the data
   // Load the first file
   RAT::DS::Root* rDS;
@@ -205,6 +185,8 @@ ExtractDirection(
 
   LoadRootFile( lFile, &tree, &rDS, &rPMTList );
 
+  int graphPoint = 0;
+  graphPoint++;
   for( int iLoop = 0; iLoop < tree->GetEntries(); iLoop++ )
     {
       tree->GetEntry( iLoop );
@@ -212,7 +194,7 @@ ExtractDirection(
 
       TVector3 mcPos = rMC->GetMCParticle(0)->GetPos();
       TVector3 mcDirection = rMC->GetMCParticle(0)->GetMom();
-
+      
       for( int iEvent = 0; iEvent < rDS->GetEVCount(); iEvent++ )
         {
           if( gIgnoreRetriggers && iEvent > 0 )
@@ -231,9 +213,6 @@ ExtractDirection(
             }
 
           TVector3 fitDirection;
-          TVector3 xAxis(1,0,0);
-          TVector3 yAxis(0,1,0);
-          TVector3 zAxis(0,0,1);
           try
             {
               fitDirection = rEV->GetFitResult( lFit ).GetVertex(0).GetDirection();
@@ -248,16 +227,18 @@ ExtractDirection(
               cout << lFit << " has not reconstructed a vertex." << endl;
               return;
             }
-         
-          double deltaDX = acos( fitDirection.Dot( xAxis ) ) * 180.0 / 3.14;
-          double deltaDY = acos( fitDirection.Dot( yAxis ) ) * 180.0 / 3.14;
-          double deltaDZ = acos( fitDirection.Dot( zAxis ) ) * 180.0 / 3.14;
 
-         (*hCountVDirX)->Fill( deltaDX );
-         (*hCountVDirY)->Fill( deltaDY );
-         (*hCountVDirZ)->Fill( deltaDZ );
-        
+          //fitDirection is already a unit vector. mcDirection is not a unit vector.
+          double deltaD = acos( fitDirection.Dot( mcDirection.Unit() ) ) * 180.0 / 3.14; 
+         
+          (*hCountVRes)->Fill( deltaD );
+          (*gResVR)->SetPoint( graphPoint, mcPos.Mag(), deltaD );
+
+          graphPoint++;
         }
     }
- }
+  (*gResVR)->GetXaxis()->SetTitle( "#cbar MC(r) #cbar [mm]" );
+  (*gResVR)->GetYaxis()->SetTitle( "acos #cbar Fit(D) #cdot MC(D) #cbar [deg]" );
+  (*gResVR)->SetMarkerStyle( 2 );
+}
 

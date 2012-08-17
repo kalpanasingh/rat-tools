@@ -41,11 +41,8 @@ LoadRootFile(
 {
   (*tree) = new TChain( "T" );
   // Strip the .root part
-  const int fileLen = lFile.length();
-  stringstream fileWildCard;
-  fileWildCard << lFile.substr( 0, fileLen - 5 ) << "*" << ".root";
 
-  int numFiles = (*tree)->Add( fileWildCard.str().c_str() );
+  int numFiles = (*tree)->Add( lFile.c_str() );
   cout << "Loaded " << numFiles << " files." << endl;
 
   *rDS = new RAT::DS::Root();
@@ -55,7 +52,10 @@ LoadRootFile(
   // Now the runT, only in the LAST file
   stringstream lastFile;
   if( numFiles > 1 )
-    lastFile << lFile.substr( 0, fileLen - 5 ) << "_" << numFiles - 1 << ".root";
+    {
+      const int fileLen = lFile.length();
+      lastFile << lFile.substr( 0, fileLen - 5 ) << "_" << numFiles - 1 << ".root";
+    }
   else
     lastFile << lFile;
   TFile *file = new TFile( lastFile.str().c_str() );

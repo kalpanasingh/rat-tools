@@ -1,10 +1,11 @@
 ////////////////////////////////////////////////////////
-/// Plots the fitted energy
+/// Plots the fit energy against the mc energy and 
+/// expected position bias.
 ///
 /// P G Jones <p.jones22@physics.ox.ac.uk>
-/// J Amey <jjtamey@googlemail.com>
 ///
-/// 23/07/12 - New File
+/// 01/06/11 - New File
+/// 23/07/12 - Updated file and function names with "Diff"
 ////////////////////////////////////////////////////////
 
 #include <FitPlotsUtil.hh>
@@ -29,20 +30,20 @@ using namespace ROOT;
 using namespace std;
 
 void
-
-ExtractEnergy(
+ExtractDiffEnergy(
               string lFile,
               string lFit,
-              TH1D** hCountVEnergy,
-              TGraph** gEnergyVR );
+              TH1D** hCountVRes,
+              TGraph** gResVR,
+              TGraph** gResVE );
 
 TCanvas*
-PlotEnergy(
+PlotDiffEnergy(
            string file,
            vector<string> fits );
 
 TCanvas*
-UpdateEnergy(
+UpdateDiffEnergy(
              string lFile,
              string lFit, 
              TCanvas* c1,
@@ -52,33 +53,33 @@ UpdateEnergy(
 /// Call-able functions
 ////////////////////////////////////////////////////////
 TCanvas*
-PlotEnergy(
+PlotDiffEnergy(
            string lFile )
 {
-  return PlotEnergy( lFile, GetFitNames( lFile ) );
+  return PlotDiffEnergy( lFile, GetFitNames( lFile ) );
 }
 
 TCanvas*
-PlotEnergy(
+PlotDiffEnergy(
            string lFile,
            string lFit )
 {
   vector<string> fits; fits.push_back( lFit );
-  return PlotEnergy( lFile, fits );
+  return PlotDiffEnergy( lFile, fits );
 }
 
 TCanvas*
-PlotEnergy(
+PlotDiffEnergy(
            string lFile, 
            string lFit1, 
            string lFit2 )
 {
   vector<string> fits; fits.push_back( lFit1 ); fits.push_back( lFit2 );
-  return PlotEnergy( lFile, fits );
+  return PlotDiffEnergy( lFile, fits );
 }
 
 TCanvas*
-PlotEnergy(
+PlotDiffEnergy(
            string file,
            vector<string> fits )
 {
@@ -86,7 +87,7 @@ PlotEnergy(
   for( unsigned int uFit = 0; uFit < fits.size(); uFit++ )
     {
       Int_t drawNum = uFit;
-      c1 = UpdateEnergy( file, fits[uFit], c1, drawNum );
+      c1 = UpdateDiffEnergy( file, fits[uFit], c1, drawNum );
       cout << "Plotted " << file << " fit: " << fits[uFit] << endl;
     }
   return c1;
@@ -97,7 +98,7 @@ PlotEnergy(
 ////////////////////////////////////////////////////////
 
 TCanvas*
-UpdateEnergy(
+UpdateDiffEnergy(
                string lFile,
                string lFit, 
                TCanvas* c1,
@@ -105,41 +106,54 @@ UpdateEnergy(
 {
   bool firstDraw = false;
   if( c1 == NULL )
-
     {
       firstDraw = true;
       c1 = new TCanvas();
-      c1->Divide( 2, 1 );
+      c1->Divide( 1, 2 );
     }
 
-  TH1D* hCountVEnergy;
-  TGraph* gEnergyVR;
+  TH1D* hCountVRes;
+  TGraph* gResVR;
+  TGraph* gResVE;
 
   // First extract the data
-  ExtractEnergy( lFile, lFit, &hCountVEnergy, &gEnergyVR );
+  ExtractDiffEnergy( lFile, lFit, &hCountVRes, &gResVR, &gResVE );
   // Don't plot empty fits...
-  if( hCountVEnergy->GetEntries() == 0 )
+  if( hCountVRes->GetEntries() == 0 )
     return c1;
 
   // Now draw the results
-  c1->cd(1);
+  TVirtualPad* cPad = NULL;
+  TVirtualPad* vc1 = c1->cd(1);
   if( firstDraw )
-    hCountVEnergy->Draw("S E");
+    vc1->Divide( 2, 1 );
+  cPad = vc1->cd(1);
+  if( firstDraw )
+    hCountVRes->Draw("S E");
   else
     {
-      hCountVEnergy->SetLineColor( fitNum + 1);
-      hCountVEnergy->Draw("SAMES E");
+      hCountVRes->SetLineColor( fitNum + 1);
+      hCountVRes->Draw("SAMES E");
     }
-  c1->Update();
-  ArrangeStatBox( hCountVEnergy, fitNum + 1, c1->cd(1) );
+  vc1->Update();
+  ArrangeStatBox( hCountVRes, fitNum + 1, cPad );
+
+  vc1->cd(2);
+  if( firstDraw )
+    gResVE->Draw("AP");
+  else
+    {
+      gResVE->SetMarkerColor( fitNum + 1 );
+      gResVE->Draw("P");
+    }
 
   c1->cd(2);
   if( firstDraw )
-    gEnergyVR->Draw("AP");
+    gResVR->Draw("AP");
   else
     {
-      gEnergyVR->SetMarkerColor( fitNum + 1 );
-      gEnergyVR->Draw("P");
+      gResVR->SetMarkerColor( fitNum + 1 );
+      gResVR->Draw("P");
     }
 
   c1->cd();
@@ -151,29 +165,31 @@ UpdateEnergy(
 ////////////////////////////////////////////////////////
 
 void
-ExtractEnergy(
+ExtractDiffEnergy(
               string lFile,
               string lFit,
-              TH1D** hCountVEnergy,
-              TGraph** gEnergyVR )
+              TH1D** hCountVRes,
+              TGraph** gResVR,
+              TGraph** gResVE )
 {
   // First new the histograms
   const int kBins = 200;
-  const double kStartBin = 0.0; 
-  const double kEndBin = 20.0;
+  const double kStartBin = -2.0; 
+  const double kEndBin = 2.0;
   stringstream histoBinning;
   histoBinning << "Count per " << ( kEndBin - kStartBin ) / kBins << "MeV Bin";
 
   stringstream histName;
   histName << lFile << "_" << lFit << "_E";
-  *hCountVEnergy = new TH1D( histName.str().c_str(), " Reconstructed E ", kBins, kStartBin, kEndBin );
-  (*hCountVEnergy)->GetXaxis()->SetTitle( " Reconstructed E [MeV]" );
-  (*hCountVEnergy)->GetYaxis()->SetTitle( histoBinning.str().c_str() );
+  *hCountVRes = new TH1D( histName.str().c_str(), "#cbar Fit(E) - MC(E) #cbar", kBins, kStartBin, kEndBin );
+  (*hCountVRes)->GetXaxis()->SetTitle( "#cbar Fit(E) - MC(E) #cbar [MeV]" );
+  (*hCountVRes)->GetYaxis()->SetTitle( histoBinning.str().c_str() );
   histName.str("");
 
   // Now new the graphs
-  *gEnergyVR = new TGraph();
-  
+  *gResVR = new TGraph();
+  *gResVE =  new TGraph();
+
   // Now extract the data
   // Load the first file
   RAT::DS::Root* rDS;
@@ -182,16 +198,18 @@ ExtractEnergy(
 
   LoadRootFile( lFile, &tree, &rDS, &rPMTList );
 
-  int graphPoint = 1;
-  
+  int graphPoint = 0;
+  (*gResVE)->SetPoint( graphPoint, 0.0, 0.0 );
+  graphPoint++;
   for( int iLoop = 0; iLoop < tree->GetEntries(); iLoop++ )
     {
       tree->GetEntry( iLoop );
       RAT::DS::MC *rMC = rDS->GetMC();
 
       TVector3 mcPos = rMC->GetMCParticle(0)->GetPos();
+      double mcEnergy = rMC->GetMCParticle(0)->GetKE();
       
-      
+
       for( int iEvent = 0; iEvent < rDS->GetEVCount(); iEvent++ )
         {
           if( gIgnoreRetriggers && iEvent > 0 )
@@ -224,15 +242,20 @@ ExtractEnergy(
               cout << lFit << " has not reconstructed a vertex." << endl;
               return;
             }
-         
-          (*hCountVEnergy)->Fill( fitEnergy );
-          (*gEnergyVR)->SetPoint( graphPoint, mcPos.Mag(), fitEnergy );
-         
+          double deltaE = fitEnergy - mcEnergy;
+
+          (*hCountVRes)->Fill( deltaE );
+          (*gResVR)->SetPoint( graphPoint, mcPos.Mag(), deltaE );
+          (*gResVE)->SetPoint( graphPoint, mcEnergy, deltaE );
+
           graphPoint++;
         }
     }
-  (*gEnergyVR)->GetXaxis()->SetTitle( "MC r [mm]" );
-  (*gEnergyVR)->GetYaxis()->SetTitle( "Reconstructed E [MeV]" );
-  (*gEnergyVR)->SetMarkerStyle( 2 ); 
+  (*gResVR)->GetXaxis()->SetTitle( "#cbar MC(r) #cbar [mm]" );
+  (*gResVR)->GetYaxis()->SetTitle( "#cbar Fit(E) - MC(E) #cbar [MeV]" );
+  (*gResVR)->SetMarkerStyle( 2 );
+  (*gResVE)->GetXaxis()->SetTitle( "#cbar MC(E) #cbar [MeV]" );
+  (*gResVE)->GetYaxis()->SetTitle( "#cbar Fit(E) - MC(E) #cbar [MeV]" );
+  (*gResVE)->SetMarkerStyle( 2 );
 }
 
