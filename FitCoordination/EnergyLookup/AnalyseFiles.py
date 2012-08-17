@@ -6,7 +6,7 @@ import ROOT
 import EnergyLookupUtil
 import sys
 
-def AnalyseFiles():
+def AnalyseFiles( options ):
 
     nhitPerMeVtable = EnergyLookupUtil.NhitPerMeVPosEnergy()
     print "{\nname: \"FIT_ENERGY_LOOKUP\","
