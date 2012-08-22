@@ -58,7 +58,9 @@ namespace ratzdab {
         uint64_t clockcount10 = ((uint64_t) UNPK_MTC_BC10_2(mtc_words) << 32) || UNPK_MTC_BC10_1(mtc_words);
         uint64_t clockcount50 = ((uint64_t) UNPK_MTC_BC50_2(mtc_words) << 11) || UNPK_MTC_BC50_1(mtc_words);
         uint32_t trig_error = UNPK_MTC_ERROR(mtc_words);
-        uint32_t trig_type = UNPK_MTC_TRIGGER(mtc_words);
+
+        // trigger word
+        uint32_t trig_type = ((mtc_words[3] & 0xff000000) >> 24) | ((mtc_words[4] & 0x0003ffff) << 8);
 
         ds->SetRunID(run_id);
         ds->SetSubRunID(subrun_id);

@@ -37,7 +37,7 @@ libzconvert.so:
 	mv libzconvert.so lib
 
 libzfile.so:
-	$(CC) -shared -fPIC -o libzfile.so $(ZFILE_SOURCES) $(INCLUDE) $(CFLAGS) $(CXXFLAGS) $(LFLAGS) $(LIBS)
+	$(CC) -shared -fPIC -o libzfile.so $(ZFILE_SOURCES) $(INCLUDE) $(CFLAGS) $(CXXFLAGS) $(LFLAGS) $(LIBS) -lzconvert
 	test -d lib || mkdir lib
 	mv libzfile.so lib
 
@@ -46,7 +46,7 @@ libconthost:
 	cd contrib/disp/src && make
 
 libzdispatch.so:
-	$(CC) -shared -fPIC -o libzdispatch.so $(ZDISPATCH_SOURCES) $(INCLUDE) $(CFLAGS) $(CXXFLAGS) $(LFLAGS) $(LIBS) -Icontrib/disp/include -Lcontrib/disp/lib -lconthost
+	$(CC) -shared -fPIC -o libzdispatch.so $(ZDISPATCH_SOURCES) $(INCLUDE) $(CFLAGS) $(CXXFLAGS) $(LFLAGS) $(LIBS) -Icontrib/disp/include -Lcontrib/disp/lib -lconthost -lzconvert
 	test -d lib || mkdir lib
 	mv libzdispatch.so lib
 
@@ -54,7 +54,7 @@ libratzdab.a:
 	cd lib && ar rcs libratzdab.a libzconvert.so libzfile.so libzdispatch.so
 
 _zdab2root:
-	$(CC) -o zdab2root $(Z2R_SOURCES) $(INCLUDE) $(CFLAGS) $(CXXFLAGS) $(LFLAGS) $(LIBS) -Llib -lzconvert -lzfile
+	$(CC) -o zdab2root $(Z2R_SOURCES) $(INCLUDE) $(CFLAGS) $(CXXFLAGS) $(LFLAGS) $(LIBS) -Llib -lzconvert -lzfile $(RAT_LIBS)
 	test -d bin || mkdir bin
 	mv zdab2root bin
 
