@@ -1,6 +1,5 @@
 #include <string>
 #include <vector>
-#include <stdlib.h>
 #include <stdint.h>
 
 #include <TObject.h>
@@ -24,14 +23,7 @@ namespace ratzdab {
         public:
             RATDB() {
                 db = RAT::DB::Get();
-
-                char* ratroot = getenv("RATROOT");
-                if (!ratroot) {
-                    throw no_rat;
-                }
-
-                std::string dbpath = std::string(ratroot) + "/data/PMTINFO.ratdb";
-                db->Load(dbpath);
+                db->Load("PMTINFO.ratdb");
 
                 pmtinfo = db->GetLink("PMTINFO", "sno+");
 
@@ -49,6 +41,8 @@ namespace ratzdab {
             RAT::DB* db;
     } ratdb;
 
+    /** unpacking functions */
+
     RAT::DS::Root* unpack::event(PmtEventRecord* pev) {
         RAT::DS::Root* ds = new RAT::DS::Root;
         RAT::DS::EV* ev = ds->AddNewEV();
@@ -64,7 +58,9 @@ namespace ratzdab {
         uint64_t clockcount10 = ((uint64_t) UNPK_MTC_BC10_2(mtc_words) << 32) || UNPK_MTC_BC10_1(mtc_words);
         uint64_t clockcount50 = ((uint64_t) UNPK_MTC_BC50_2(mtc_words) << 11) || UNPK_MTC_BC50_1(mtc_words);
         uint32_t trig_error = UNPK_MTC_ERROR(mtc_words);
-        uint32_t trig_type = UNPK_MTC_TRIGGER(mtc_words);
+
+        // trigger word
+        uint32_t trig_type = ((mtc_words[3] & 0xff000000) >> 24) | ((mtc_words[4] & 0x0003ffff) << 8);
 
         ds->SetRunID(run_id);
         ds->SetSubRunID(subrun_id);
@@ -174,6 +170,8 @@ namespace ratzdab {
         triginfo->SetNTrigZeroOffset(10); // number of trigger zero offsets
 
         // triggers are separate members in TriggerInfo, array in TRIGInfo
+        triginfo->SetNTrigTHold(10);
+        triginfo->SetNTrigZeroOffset(10);
         triginfo->SetTrigTHold(0, t->n100lo);
         triginfo->SetTrigZeroOffset(0, t->n100lo_zero);
         triginfo->SetTrigTHold(1, t->n100med);
@@ -332,6 +330,343 @@ namespace ratzdab {
         p.SetsPMTt(tac);
 
         return p;
+    }
+
+    /** packing functions */
+
+    PmtEventRecord* pack::event(RAT::DS::Root *ds, int ev_id) {
+        if (!ds || ev_id > ds->GetEVCount() - 1) {
+            return NULL;
+        }
+
+        RAT::DS::EV* ev = ds->GetEV(ev_id);
+        RAT::DS::MC* mc = ds->ExistMC() ? ds->GetMC() : NULL;
+        RAT::DS::Digitiser* digitizer = ev->GetDigitiser();
+
+        int npmts = ev->GetPMTUnCalCount();
+
+        // calculate buffer size (length)
+        // there is no GenericRecordHeader here, as they are only used in
+        // dispatched data, not in files
+        int length = sizeof(PmtEventRecord) + npmts * sizeof(FECReadoutData);
+
+        int nfits = 0;
+        int caen_length = 0;
+
+        // calibrated pmt data
+        if (ev->GetPMTCalCount() > 0) {
+            assert(ev->GetPMTCalCount() == ev->GetPMTUnCalCount());
+            length += npmts * sizeof(CalibratedPMT) + sizeof(SubFieldHeader);
+        }
+
+        // monte carlo data
+        if (mc) {
+            length += mc->GetMCParticleCount() * sizeof(MonteCarloVertex) + sizeof(MonteCarloHeader) + sizeof(SubFieldHeader);
+        }
+
+        // fits
+        // fit result map size not exposed by api, grumble grumble
+        std::map<std::string, RAT::DS::FitResult>::iterator it;
+        nfits = 0;
+        for (it=ev->GetFitResultIterBegin(); it!=ev->GetFitResultIterEnd(); ++it) {
+            nfits++;
+        }
+        if (nfits > 0) {
+            length += nfits * (sizeof(FittedEvent) + sizeof(SubFieldHeader));
+        }
+
+        // caen data
+        if (digitizer->GetTrigSumCount() > 0) {
+            int caen_header_length = 4 * sizeof(uint32_t);
+            int trace_length = digitizer->GetNWords();
+            int ntraces = digitizer->GetTrigSumCount();
+            caen_length = caen_header_length + ntraces * trace_length * sizeof(uint32_t);
+            length += sizeof(SubFieldHeader) + caen_length;
+        }
+
+        // allocate PmtEventRecord atop char buffer
+        char* buffer = new char[length];
+        PmtEventRecord* r = (PmtEventRecord*) buffer;
+
+        // get pointer to first MTC and FEC words
+        uint32_t* mtc_word = (uint32_t*) &(r->TriggerCardData);
+        uint32_t* fec_word = (uint32_t*) (r + 1);
+
+        r->RunNumber = ds->GetRunID();
+        r->EvNumber = ev->GetEventID();
+        r->NPmtHit = npmts;
+
+        r->PmtEventRecordInfo = PMT_EVR_RECTYPE | PMT_EVR_NOT_MC | PMT_EVR_ZDAB_VER; // from xsnoed ???
+        r->DataType = PMT_EVR_DATA_TYPE;
+        r->DaqStatus = ds->GetSubRunID();
+        r->CalPckType = PMT_EVR_PCK_TYPE | PMT_EVR_CAL_TYPE;
+
+        CalibratedPMT* cal_pmt = NULL;
+
+        uint32_t *sub_header = &(r->CalPckType);
+
+        // must set the size of this sub-field before calling AddSubField()
+        // (from the sub-field header to the end)
+        *sub_header |= ((uint32_t *)(fec_word + npmts * 3) - sub_header);
+
+        // calibrated hit information
+        if (ev->GetPMTCalCount() > 0) {
+            PZdabFile::AddSubField(&sub_header, SUB_TYPE_CALIBRATED, npmts * sizeof(CalibratedPMT));
+            cal_pmt = (CalibratedPMT*)(sub_header + 1);
+        }
+
+        // add monte carlo data
+        if (mc) {
+            int nvertices = mc->GetMCParticleCount();
+            if (nvertices > 0) {
+                PZdabFile::AddSubField(&sub_header, SUB_TYPE_MONTE_CARLO, sizeof(MonteCarloHeader) + nvertices * sizeof(MonteCarloVertex));
+
+                // get pointer to start of monte-carlo data and vertices
+                MonteCarloHeader *mc_hdr = (MonteCarloHeader*)(sub_header + 1);
+                MonteCarloVertex *mc_vtx = (MonteCarloVertex*)(mc_hdr + 1);
+
+                // fill in the monte carlo data values
+                mc_hdr->nVertices = nvertices;
+                for (int i=0; i<nvertices; i++, mc_vtx++) {
+                    RAT::DS::MCParticle *p = mc->GetMCParticle(i);
+                    mc_vtx->energy = p->GetKE();
+                    mc_vtx->x = p->GetPos()[0]/10;
+                    mc_vtx->y = p->GetPos()[1]/10;
+                    mc_vtx->z = p->GetPos()[2]/10;
+                    mc_vtx->u = p->GetMom()[0];
+                    mc_vtx->v = p->GetMom()[1];
+                    mc_vtx->w = p->GetMom()[2];
+                    //mc_vtx->particle = p->GetIDP();
+                    mc_vtx->int_code = p->GetPDGCode();
+                    //mc_vtx->parent = p->GetIndex();
+                    mc_vtx->time = p->GetTime();
+                }
+            }
+        }
+
+        // add all available fits
+        for (it=ev->GetFitResultIterBegin(); it!=ev->GetFitResultIterEnd(); it++) {
+            PZdabFile::AddSubField(&sub_header, SUB_TYPE_FIT, sizeof(FittedEvent));
+
+            // get pointer to start of fit data
+            FittedEvent *fit = (FittedEvent*)(sub_header + 1);
+            RAT::DS::FitResult *rfit = &(*it).second;
+
+            if (rfit->GetVertexCount() == 0) {
+                continue;
+            }
+
+            RAT::DS::FitVertex rv = rfit->GetVertex(0); // FIXME can zdab handle >1 vertices?
+            if (rv.ContainsPosition()) {
+                fit->x = rv.GetPosition()[0]/10;
+                fit->y = rv.GetPosition()[1]/10;
+                fit->z = rv.GetPosition()[2]/10;
+            }
+            if (rv.ContainsDirection()) {
+                fit->u = rv.GetDirection()[0];
+                fit->v = rv.GetDirection()[1];
+                fit->w = rv.GetDirection()[2];
+            }
+            if (rv.ContainsTime()) {
+                fit->time = rv.GetTime();
+            }
+            fit->quality = rfit->GetFOM((*it).first);
+            fit->npmts = npmts;
+            fit->spare = 0;
+            const char *pt = (*it).first.c_str();
+            char buff[256];
+            if (!pt) pt = "<null>";
+            sprintf(buff,"%s", pt);
+            memset(fit->name, 0, 32); // initialize the name to all zeros
+            strncpy(fit->name,buff,31); // copy fit name (31 chars max)
+        }
+
+        // caen digitizer waveforms
+        if (caen_length) {
+            PZdabFile::AddSubField(&sub_header, SUB_TYPE_CAEN, caen_length);
+            uint32_t *caen = sub_header + 1;
+            // not yet implemented
+        }
+
+        // trigger
+        uint32_t gtid = ev->GetEventID();
+        uint32_t trigger = ev->GetTrigType();
+        double time_10mhz = ev->GetClockCount10();
+        double time_50mhz = ev->GetClockCount50();
+        uint32_t hi10mhz = (uint32_t)(time_10mhz / 4294967296.0);
+        uint32_t hi50mhz = (uint32_t)(time_50mhz / 2048.0);
+
+        uint32_t peak = ev->GetESumPeak() & 0x03ff;
+        uint32_t inte = ev->GetESumInt()  & 0x03ff;
+        uint32_t diff = ev->GetESumDiff() & 0x03ff;
+
+        *(mtc_word++) = (uint32_t)(time_10mhz - hi10mhz * 4294967296.0);
+        *(mtc_word++) = ((uint32_t)(time_50mhz - hi50mhz * 2048.0) << 21) | hi10mhz;
+        *(mtc_word++) = hi50mhz;
+        *(mtc_word++) = ((trigger & 0x000000ffUL) << 24) | gtid;
+        *(mtc_word++) = ((trigger & 0x07ffff00UL) >> 8) | (peak << 19) | (diff << 29);
+        *(mtc_word++) = (inte << 7) | (diff >> 3);
+
+        // pmts
+        for (int i=0; i<npmts; i++) {
+            RAT::DS::PMTUnCal* pmt = ev->GetPMTUnCal(i);
+
+            uint32_t crate_id = (uint32_t) ((pmt->GetID() >> 9) & 0x1f);
+            uint32_t card_id = (uint32_t) ((pmt->GetID() >> 5) & 0xf);
+            uint32_t channel_id = (uint32_t) (pmt->GetID() & 0x1f);
+            uint32_t cell_id = (uint32_t) (pmt->GetCellID());
+
+            *(fec_word++) = (card_id << 26) | (crate_id << 21) | (channel_id << 16) | (gtid & 0xffffUL);
+
+            *(fec_word++) = (((uint32_t)pmt->GetsQHS() ^ 0x800) << 16) | (cell_id << 12) |
+                (((uint32_t)pmt->GetsQLX() ^ 0x800));
+
+            *(fec_word++) = ((gtid & 0x00f00000UL) << 8) |
+                (((uint32_t)pmt->GetsPMTt() ^ 0x800) << 16) |
+                ((gtid & 0x000f0000UL) >> 4) |
+                (((uint32_t)pmt->GetsQHL() ^ 0x800));
+
+            // fill in calibrated PmtEventRecord entries if available
+            if (cal_pmt) {
+                RAT::DS::PMTCal* rpmtcal = ev->GetPMTCal(i);
+                cal_pmt->tac = rpmtcal->GetsPMTt();
+                cal_pmt->qhs = rpmtcal->GetsQHS();
+                cal_pmt->qhl = rpmtcal->GetsQHL();
+                cal_pmt->qlx = rpmtcal->GetsQLX();
+                cal_pmt++;
+            }
+        }
+
+        return r;
+    }
+
+    RunRecord* pack::rhdr(RAT::DS::Run* run) {
+        RunRecord* rr = new RunRecord;
+
+        rr->Date = run->GetDate();
+        rr->Time = run->GetTime();
+        rr->DAQCodeVersion = run->GetDAQVer();
+        rr->RunNumber = run->GetRunID();
+        rr->CalibrationTrialNumber = run->GetCalibTrialID();
+        rr->SourceMask = run->GetSrcMask();
+        rr->RunMask = run->GetRunType();
+        rr->GTCrateMsk = run->GetCrateMask();
+        rr->FirstGTID = run->GetFirstEventID();
+        rr->ValidGTID = run->GetValidEventID();
+
+        return rr;
+    }
+
+    ManipStatus* pack::cast(RAT::DS::ManipStat* manip) {
+        ManipStatus* ms = new ManipStatus;
+
+        ms->sourceID = manip->GetSrcID();
+        ms->status = manip->GetSrcStatus();
+        ms->numRopes = manip->GetNRopes();
+        ms->positionError = manip->GetSrcPosUnc();
+
+        for (unsigned i=0; i<3; i++) {
+            ms->position[0] = manip->GetManipPos(i);
+            ms->destination[0] = manip->GetManipDest(i);
+            ms->obsoletePosErr[0] = manip->GetSrcPosUnc(i);
+        }
+
+        for (unsigned i=0; i<kMaxManipulatorRopes; i++) {
+            ms->ropeStatus[i].ropeID = manip->GetRopeID(i);
+            ms->ropeStatus[i].length = manip->GetRopeLength(i);
+            ms->ropeStatus[i].targetLength = manip->GetRopeTargLength(i);
+            ms->ropeStatus[i].velocity = manip->GetRopeVelocity(i);
+            ms->ropeStatus[i].tension = manip->GetRopeTension(i);
+            ms->ropeStatus[i].encoderError = manip->GetRopeErr(i);
+        }
+
+        return ms;
+    }
+
+    AVStatus* pack::caac(RAT::DS::AVStat* avstat) {
+        AVStatus* as = new AVStatus;
+
+        for (unsigned i=0; i<3; i++) {
+            as->position[i] = avstat->GetPosition(i);
+            as->rotation[i] = avstat->GetRoll(i);
+        }
+
+        for (unsigned i=0; i<7; i++) {
+            as->ropeLength[i] = avstat->GetRopeLength(i);
+        }
+
+        return as;
+    }
+
+    TriggerInfo* pack::trig(RAT::DS::TRIGInfo* triginfo) {
+        TriggerInfo* ti = new TriggerInfo;
+
+        ti->TriggerMask = triginfo->GetTrigMask();
+
+        if (triginfo->GetNTrigTHold() > 0)
+            ti->n100lo = triginfo->GetTrigTHold(0);
+        if (triginfo->GetNTrigTHold() > 1)
+            ti->n100med = triginfo->GetTrigTHold(1);
+        if (triginfo->GetNTrigTHold() > 2)
+            ti->n100hi = triginfo->GetTrigTHold(2);
+        if (triginfo->GetNTrigTHold() > 3)
+            ti->n20 = triginfo->GetTrigTHold(3);
+        if (triginfo->GetNTrigTHold() > 4)
+            ti->n20lb = triginfo->GetTrigTHold(4);
+        if (triginfo->GetNTrigTHold() > 5)
+            ti->esumlo = triginfo->GetTrigTHold(5);
+        if (triginfo->GetNTrigTHold() > 6)
+            ti->esumhi = triginfo->GetTrigTHold(6);
+        if (triginfo->GetNTrigTHold() > 7)
+            ti->owln = triginfo->GetTrigTHold(7);
+        if (triginfo->GetNTrigTHold() > 8)
+            ti->owlelo = triginfo->GetTrigTHold(8);
+        if (triginfo->GetNTrigTHold() > 9)
+            ti->owlehi = triginfo->GetTrigTHold(9);
+
+        if (triginfo->GetNTrigZeroOffset() > 0)
+            ti->n100lo_zero = triginfo->GetTrigZeroOffset(0);
+        if (triginfo->GetNTrigZeroOffset() > 1)
+            ti->n100med_zero = triginfo->GetTrigZeroOffset(1);
+        if (triginfo->GetNTrigZeroOffset() > 2)
+            ti->n100hi_zero = triginfo->GetTrigZeroOffset(2);
+        if (triginfo->GetNTrigZeroOffset() > 3)
+            ti->n20_zero = triginfo->GetTrigZeroOffset(3);
+        if (triginfo->GetNTrigZeroOffset() > 4)
+            ti->n20lb_zero = triginfo->GetTrigZeroOffset(4);
+        if (triginfo->GetNTrigZeroOffset() > 5)
+            ti->esumlo_zero = triginfo->GetTrigZeroOffset(5);
+        if (triginfo->GetNTrigZeroOffset() > 6)
+            ti->esumhi_zero = triginfo->GetTrigZeroOffset(6);
+        if (triginfo->GetNTrigZeroOffset() > 7)
+            ti->owln_zero = triginfo->GetTrigZeroOffset(7);
+        if (triginfo->GetNTrigZeroOffset() > 8)
+            ti->owlelo_zero = triginfo->GetTrigZeroOffset(8);
+        if (triginfo->GetNTrigZeroOffset() > 9)
+            ti->owlehi_zero = triginfo->GetTrigZeroOffset(9);
+
+        ti->PulserRate = triginfo->GetPulserRate();
+        ti->ControlRegister = triginfo->GetMTC_CSR();
+        ti->reg_LockoutWidth = triginfo->GetLockoutWidth();
+        ti->reg_Prescale = triginfo->GetPrescaleFreq();
+        ti->GTID = triginfo->GetEventID();
+
+        return ti;
+    }
+
+    EpedRecord* pack::eped(RAT::DS::EPEDInfo* epedinfo) {
+        EpedRecord* er = new EpedRecord;
+
+        er->ped_width = epedinfo->GetQPedWidth();
+        er->ped_delay_coarse = epedinfo->GetGTDelayCoarse();
+        er->ped_delay_fine = epedinfo->GetGTDelayFine();
+        er->qinj_dacsetting = epedinfo->GetQPedAmp();
+        er->halfCrateID = epedinfo->GetPatternID();
+        er->CalibrationType = epedinfo->GetCalType();
+        er->GTID = epedinfo->GetEventID();
+        er->Flag = 0;
+
+        return er;
     }
 
 } // namespace ratzdab

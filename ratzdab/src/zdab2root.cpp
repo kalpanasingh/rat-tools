@@ -26,7 +26,7 @@ int main(int argc, char* argv[]) {
     }
     // set up zdab input
     const char* infile = argv[1];
-    ratzdab::file zdab(infile);
+    ratzdab::zdabfile zdab(infile);
 
     // set up root output
     std::string outfile_name;

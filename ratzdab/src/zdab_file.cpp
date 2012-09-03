@@ -8,7 +8,7 @@ class TObject;
 
 namespace ratzdab {
 
-    file::file(std::string filename) {
+    zdabfile::zdabfile(std::string filename) {
         f = fopen(filename.c_str(), "rb");
         if (!f) {
             throw zfileex;
@@ -20,12 +20,12 @@ namespace ratzdab {
         }
     }
 
-    file::~file() {
+    zdabfile::~zdabfile() {
         delete p;
         fclose(f);
     }
 
-    TObject* file::next() {
+    TObject* zdabfile::next() {
         nZDAB* z = p->NextRecord();
 
         if (!z) {
@@ -35,7 +35,7 @@ namespace ratzdab {
         return convert(z);
     }
 
-    TObject* file::convert(nZDAB* z) {
+    TObject* zdabfile::convert(nZDAB* z) {
         if (z->bank_name == ZDAB_RECORD) {
             PmtEventRecord* o = (PmtEventRecord*) p->GetBank(z);
             return (TObject*) unpack::event(o);
