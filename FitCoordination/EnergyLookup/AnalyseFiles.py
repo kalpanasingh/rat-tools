@@ -13,7 +13,7 @@ def AnalyseFiles( options ):
     print "index: \"%s\"," % options.index
     print "valid_begin : [0, 0],\nvalid_end : [0, 0],"
     
-    print "energies: [",
+    print "energies: [0.0d,",
     for energy in EnergyLookupUtil.EnergySet:
         outText = "%f" % energy
         outText = ToRATDB( outText )
@@ -29,6 +29,7 @@ def AnalyseFiles( options ):
 
     print "nhit_energy_radius: [",
     for energyList in nhitPerMeVtable:
+        sys.stdout.write( "0.0d, " )
         for nhit in energyList:
             outText = "%e" % nhit
             outText = ToRATDB( outText )
