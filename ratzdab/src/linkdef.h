@@ -22,6 +22,7 @@
 
 // sno structs
 #pragma link C++ struct PmtEventRecord!;
+#pragma link C++ struct MTCReadoutData!;
 #pragma link C++ struct RunRecord!;
 #pragma link C++ struct ManipStatus!;
 #pragma link C++ struct ManipRopeStatus!;
