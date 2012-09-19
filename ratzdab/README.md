@@ -66,13 +66,20 @@ libzconvert: ZDAB-ROOT Conversions
 `zdab_convert.hpp` provides the following conversion functions:
 
     RAT::DS::Root* unpack::event(PmtEventRecord* pev)
-    RAT::DS::Run* unpack::rhdr(RunRecord* rhdr);
-    RAT::DS::TRIGInfo* unpack::trig(TriggerInfo* trig);
-    RAT::DS::EPEDInfo* unpack::eped(EpedRecord* eped);
-    RAT::DS::ManipStat* unpack::cast(ManipStatus* cast);
-    RAT::DS::AVStat* unpack::caac(AVStatus* caac);
+    RAT::DS::Run* unpack::rhdr(RunRecord* rhdr)
+    RAT::DS::TRIGInfo* unpack::trig(TriggerInfo* trig)
+    RAT::DS::EPEDInfo* unpack::eped(EpedRecord* eped)
+    RAT::DS::ManipStat* unpack::cast(ManipStatus* cast)
+    RAT::DS::AVStat* unpack::caac(AVStatus* caac)
+    RAT::DS::Digitiser unpack::caen(uint32_t* p)
+    RAT::DS::PMTUnCal unpack::pmt(uint32_t* p)
 
-The TRIG, EPED, CAST, and CAAC converters are not yet implemented.
+    PmtEventRecord* pack::event(RAT::DS::Root* o, int ev_id=0)
+    RunRecord* rhdr(RAT::DS::Run* o)
+    ManipStatus* cast(RAT::DS:ManipStat* o)
+    AVStatus* caac(RAT::DS::AVStat* o)
+    TriggerInfo* trig(RAT::DS::TRIGInfo* o)
+    EpedRecord* eped(RAT::DS::EPEDInfo* o)
 
 Examples
 --------
