@@ -5,7 +5,7 @@ void Run(char* option)
 	SetUp();
 	if( option == "" ) // Print out possible values
 	  {
-	    cout << "Options available: h20, d2o, acrylic, acrylic_dark, glass, pcppo, labppo, ndlabppo_noscatt_noabs, ndlabppo_noscatt, ndlabppo_noabs" << endl;
+	    cout << "Options available: h20, d2o, acrylic, acrylic_dark, glass, air, pcppo, labppo, ndlabppo_noscatt_noabs, ndlabppo_noscatt, ndlabppo_noabs" << endl;
 	    cout << "Salt Phase: h2o_salt, d2o_salt, acrylic_salt" << endl;
 	  }
 
@@ -98,6 +98,20 @@ void Run(char* option)
 	    double absco_acr[10] = {0.4642, 0.1678, 0.118, 0.0872, 0.062, 0.0438, 0.0314, 0.017, 0.0117, 0.0097};
 	    AbsScatNonScint(10, wave_acr, absco_acr, RSf_acr, meanRI_acr, isocomp_acr, 200, 800, scale_acr);
       }
+    if( option == "air" )
+      {
+        double RI_air[3] = {1.00029, 0.0, 0.0 };
+	    RefIndex(RI_air);
+	    // air absorption and scattering (from media.dat in SNOMAN 5_0294)
+	    double meanRI_acr = 1.00029;
+	    double RSf_acr = 1.0;
+	    double isocomp_acr = 1.0e-13;
+        double scale_acr = 1.0; // Scaling of attenuation value (almost always 1)
+	    double wave_acr[2] = {220.0, 800.0};
+	    double absco_acr[2] = {1.0e-6, 1.0e-6};
+	    AbsScatNonScint(2, wave_acr, absco_acr, RSf_acr, meanRI_acr, isocomp_acr, 200, 800, scale_acr);
+      }
+    
 	if(option == "glass"){
 		// glass_sno refractive index
 		double RI_glass[3] = {1.458, 0.0, 0.0 };

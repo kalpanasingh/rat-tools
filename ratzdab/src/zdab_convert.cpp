@@ -54,28 +54,35 @@ namespace ratzdab {
         uint16_t datatype = pev->DataType;
         MTCReadoutData mtc = pev->TriggerCardData;
         uint32_t* mtc_words = (uint32_t*) (&mtc);
-        uint64_t clockstat10 = ((mtc_words[4] & 0x0f000000) >> 24); // fixme check this
-        uint64_t clockcount10 = ((uint64_t) UNPK_MTC_BC10_2(mtc_words) << 32) || UNPK_MTC_BC10_1(mtc_words);
-        uint64_t clockcount50 = ((uint64_t) UNPK_MTC_BC50_2(mtc_words) << 11) || UNPK_MTC_BC50_1(mtc_words);
+        uint64_t clockcount10 = ((uint64_t) UNPK_MTC_BC10_2(mtc_words) << 32) | ((uint64_t) UNPK_MTC_BC10_1(mtc_words));
+        uint64_t clockcount50 = ((uint64_t) UNPK_MTC_BC50_2(mtc_words) << 11) | ((uint64_t) UNPK_MTC_BC50_1(mtc_words));
         uint32_t trig_error = UNPK_MTC_ERROR(mtc_words);
-        uint32_t trig_type = UNPK_MTC_TRIGGER(mtc_words);
+        uint32_t esumpeak = UNPK_MTC_PEAK(mtc_words);
+        uint32_t esumdiff = UNPK_MTC_DIFF(mtc_words);
+        uint32_t esumint = UNPK_MTC_INT(mtc_words);
+
+        // trigger word
+        uint32_t trig_type = ((mtc_words[3] & 0xff000000) >> 24) | ((mtc_words[4] & 0x3ffff) << 8);
 
         ds->SetRunID(run_id);
         ds->SetSubRunID(subrun_id);
 
-        ev->SetClockStat10(clockstat10);
+        ev->SetClockStat10(0); // what is this?
         ev->SetTrigError(trig_error);
+        ev->SetESumPeak(esumpeak);
+        ev->SetESumDiff(esumdiff);
+        ev->SetESumInt(esumint);
         ev->SetTrigType(trig_type);
         ev->SetEventID(evorder);
         ev->SetClockCount50(clockcount50);
         ev->SetClockCount10(clockcount10);
 
         // set ut from 10mhz clock
-        uint32_t total = clockcount10 * 100;
-        uint32_t ns = total % ((uint64_t) 1e9);
-        uint32_t s = total / 1e9;
-        uint32_t d = ns / 86400;
-        ns -= 86400 * d;
+        uint64_t total = clockcount10 * 100;
+        uint64_t ns = total % ((uint64_t) 1e9);
+        uint64_t s = total / 1e9;
+        uint64_t d = s / 86400;
+        s -= (86400 * d);
 
         ev->SetUTDays(d);
         ev->SetUTSecs(s);
@@ -87,7 +94,7 @@ namespace ratzdab {
             *d = unpack::caen(caen_data);
         }
 
-        uint32_t* hits = (uint32_t*) (pev) + 1;
+        uint32_t* hits = (uint32_t*) (pev + 1);
         for (unsigned i=0; i<nhit; i++) {
             unsigned crate_id = UNPK_CRATE_ID(hits);
             unsigned board_id = UNPK_BOARD_ID(hits);
@@ -95,10 +102,11 @@ namespace ratzdab {
 
             if (crate_id > 18 || board_id > 15 || channel_id > 31) {
                 if (VERBOSE) {
-                    std::cerr << "Invalid hit PMT c/c/c: " << crate_id << "/"
-                        << board_id << "/"
-                        << channel_id
-                        << std::endl;
+                    std::cerr << "Invalid hit PMT c/c/c: "
+                              << crate_id << "/"
+                              << board_id << "/"
+                              << channel_id
+                              << std::endl;
                 }
             }
             else {
@@ -116,6 +124,12 @@ namespace ratzdab {
     }
 
     RAT::DS::Run* unpack::rhdr(RunRecord* r) {
+        // sno DAQCodeVersion is uint32, rat DAQVer is char
+        if (r->DAQCodeVersion > 0xff) {
+            std::cerr << "ratzdab::unpack::rhdr: DAQCodeVersion overflows char type" << std::endl;
+            return NULL;
+        }
+
         RAT::DS::Run* run = new RAT::DS::Run;
 
         run->SetDate(r->Date);
@@ -308,11 +322,11 @@ namespace ratzdab {
         int lcn = 16 * 32 * crate_id + 32 * board_id + channel_id;
         int cell = UNPK_CELL_ID(hits);
         char flags = UNPK_CGT_ES_16(hits)    << 0 ||
-            UNPK_CGT_ES_24(hits)    << 1 ||
-            UNPK_MISSED_COUNT(hits) << 2 ||
-            UNPK_NC_CC(hits)        << 3 ||
-            UNPK_LGI_SELECT(hits)   << 4 ||
-            UNPK_CMOS_ES_16(hits)   << 5;
+                     UNPK_CGT_ES_24(hits)    << 1 ||
+                     UNPK_MISSED_COUNT(hits) << 2 ||
+                     UNPK_NC_CC(hits)        << 3 ||
+                     UNPK_LGI_SELECT(hits)   << 4 ||
+                     UNPK_CMOS_ES_16(hits)   << 5;
 
         uint32_t qhs = UNPK_QHS(hits);
         uint32_t qhl = UNPK_QHL(hits);
@@ -455,28 +469,47 @@ namespace ratzdab {
             }
 
             RAT::DS::FitVertex rv = rfit->GetVertex(0); // FIXME can zdab handle >1 vertices?
+
             if (rv.ContainsPosition()) {
                 fit->x = rv.GetPosition()[0]/10;
                 fit->y = rv.GetPosition()[1]/10;
                 fit->z = rv.GetPosition()[2]/10;
             }
+            else {
+                fit->x = -9999;
+                fit->y = -9999;
+                fit->z = -9999;
+            }
+
             if (rv.ContainsDirection()) {
                 fit->u = rv.GetDirection()[0];
                 fit->v = rv.GetDirection()[1];
                 fit->w = rv.GetDirection()[2];
             }
+            else {
+                fit->u = 0;
+                fit->v = 0;
+                fit->w = 0;
+            }
+
             if (rv.ContainsTime()) {
                 fit->time = rv.GetTime();
             }
+            else {
+                fit-> time = -9999;
+            }
+
             fit->quality = rfit->GetFOM((*it).first);
             fit->npmts = npmts;
             fit->spare = 0;
             const char *pt = (*it).first.c_str();
             char buff[256];
-            if (!pt) pt = "<null>";
+            if (!pt) {
+                pt = "<null>";
+            }
             sprintf(buff,"%s", pt);
             memset(fit->name, 0, 32); // initialize the name to all zeros
-            strncpy(fit->name,buff,31); // copy fit name (31 chars max)
+            strncpy(fit->name, buff, 31); // copy fit name (31 chars max)
         }
 
         // caen digitizer waveforms
@@ -489,21 +522,18 @@ namespace ratzdab {
         // trigger
         uint32_t gtid = ev->GetEventID();
         uint32_t trigger = ev->GetTrigType();
-        double time_10mhz = ev->GetClockCount10();
-        double time_50mhz = ev->GetClockCount50();
-        uint32_t hi10mhz = (uint32_t)(time_10mhz / 4294967296.0);
-        uint32_t hi50mhz = (uint32_t)(time_50mhz / 2048.0);
+        uint32_t error = ev->GetTrigError();
 
         uint32_t peak = ev->GetESumPeak() & 0x03ff;
-        uint32_t inte = ev->GetESumInt()  & 0x03ff;
+        uint32_t inte = ev->GetESumInt() & 0x03ff;
         uint32_t diff = ev->GetESumDiff() & 0x03ff;
 
-        *(mtc_word++) = (uint32_t)(time_10mhz - hi10mhz * 4294967296.0);
-        *(mtc_word++) = ((uint32_t)(time_50mhz - hi50mhz * 2048.0) << 21) | hi10mhz;
-        *(mtc_word++) = hi50mhz;
-        *(mtc_word++) = ((trigger & 0x000000ffUL) << 24) | gtid;
-        *(mtc_word++) = ((trigger & 0x07ffff00UL) >> 8) | (peak << 19) | (diff << 29);
-        *(mtc_word++) = (inte << 7) | (diff >> 3);
+        *(mtc_word++) = (uint32_t) ev->GetClockCount10();
+        *(mtc_word++) = ((ev->GetClockCount10() >> 32) & 0x7fffff) | ((ev->GetClockCount50() & 0x7ff) << 21);
+        *(mtc_word++) = (uint32_t) (ev->GetClockCount50() >> 11);
+        *(mtc_word++) = ((trigger & 0x000000ff) << 24) | (gtid & 0xffffff);
+        *(mtc_word++) = ((trigger & 0x07ffff00) >> 8) | (peak << 19) | (diff << 29);
+        *(mtc_word++) = ((error & 0x3fff) << 17) | (inte << 7) | (diff >> 3);
 
         // pmts
         for (int i=0; i<npmts; i++) {
@@ -539,6 +569,12 @@ namespace ratzdab {
     }
 
     RunRecord* pack::rhdr(RAT::DS::Run* run) {
+        // run type is 64-bit in rat, but 32-bit in sno
+        if (run->GetRunType() > 0xffffffff) {
+            std::cerr << "ratzdab::pack::rhdr: Run type overflows 32-bit int" << std::endl;
+            return NULL;
+        }
+
         RunRecord* rr = new RunRecord;
 
         rr->Date = run->GetDate();
@@ -556,17 +592,24 @@ namespace ratzdab {
     }
 
     ManipStatus* pack::cast(RAT::DS::ManipStat* manip) {
+        // length of ManipStatus::ropeStatus is bounded by kMaxManipulatorRopes
+        if (manip->GetNRopes() > kMaxManipulatorRopes) {
+            std::cerr << "ratzdab::pack::cast: ManipStatus defines more than kMaxManiplatorRopes ropes" << std::endl;
+            return NULL;
+        }
+
         ManipStatus* ms = new ManipStatus;
 
         ms->sourceID = manip->GetSrcID();
         ms->status = manip->GetSrcStatus();
         ms->numRopes = manip->GetNRopes();
         ms->positionError = manip->GetSrcPosUnc();
+        ms->orientation = manip->GetLaserballOrient();
 
         for (unsigned i=0; i<3; i++) {
-            ms->position[0] = manip->GetManipPos(i);
-            ms->destination[0] = manip->GetManipDest(i);
-            ms->obsoletePosErr[0] = manip->GetSrcPosUnc(i);
+            ms->position[i] = manip->GetManipPos(i);
+            ms->destination[i] = manip->GetManipDest(i);
+            ms->obsoletePosErr[i] = manip->GetSrcPosUnc(i);
         }
 
         for (unsigned i=0; i<kMaxManipulatorRopes; i++) {
@@ -597,6 +640,11 @@ namespace ratzdab {
     }
 
     TriggerInfo* pack::trig(RAT::DS::TRIGInfo* triginfo) {
+        // TriggerInfo needs exactly 10 triggers
+        if (triginfo->GetNTrigTHold() != 10 || triginfo->GetNTrigZeroOffset() != 10) {
+            std::cerr << "ratzdab::pack::trig: TriggerInfo requires exactly 10 triggers defined" << std::endl;
+            return NULL;
+        }
         TriggerInfo* ti = new TriggerInfo;
 
         ti->TriggerMask = triginfo->GetTrigMask();

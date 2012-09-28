@@ -1,0 +1,5 @@
+### Ignore backup and generated files
+*~
+*.so
+*.d
+*.pyc

@@ -14,6 +14,15 @@ To build everything (except examples), run `make`. You can also choose to build 
 
 Be sure to add `lib` to your `$LD_LIBRARY_PATH`, and also `contrib/disp/lib` if using libconthost. `env.sh` sets these for you. 
 
+Testing
+-------
+Testing your installation is recommended:
+
+    $ cd tests
+    $ python -m unittest discover
+
+Note: This requires that the `ratzdab` module be in your `PYTHONPATH`. Sourcing `env.sh` will do that for you.
+
 CLI Tools
 =========
 zdab2root
