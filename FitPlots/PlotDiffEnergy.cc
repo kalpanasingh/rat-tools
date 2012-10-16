@@ -205,10 +205,14 @@ ExtractDiffEnergy(
     {
       tree->GetEntry( iLoop );
       RAT::DS::MC *rMC = rDS->GetMC();
+	  int npart = rMC->GetMCParticleCount();
 
-      TVector3 mcPos = rMC->GetMCParticle(0)->GetPos();
-      double mcEnergy = rMC->GetMCParticle(0)->GetKE();
-      
+      // assume even if multiple particles in vertex - define position by first particle
+	  TVector3 mcPos = rMC->GetMCParticle(0)->GetPos();
+	  double mcEnergy = 0;
+	  for(int ipart=0;ipart<npart;++ipart){
+        mcEnergy += rMC->GetMCParticle(ipart)->GetKE();
+      }
 
       for( int iEvent = 0; iEvent < rDS->GetEVCount(); iEvent++ )
         {
