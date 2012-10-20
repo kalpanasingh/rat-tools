@@ -3,7 +3,7 @@ INCLUDE = -Isrc -Iutil -Iutil/include -I$(ROOTSYS)/include -I$(RATROOT)/include 
 LFLAGS = -Llib -L$(ROOTSYS)/lib -L$(RATROOT)/lib
 
 CC = g++
-LIBS = -lrt -lCore -lRIO -lCint -lTree
+LIBS = -lCore -lRIO -lCint -lTree
 RAT_LIBS = -lRATEvent_$(shell uname)-g++
 
 ZCONVERT_SOURCES = src/zdab_convert.cpp util/PZdabFile.cxx
@@ -14,17 +14,21 @@ Z2R_SOURCES = src/zdab2root.cpp
 RAT_INC = $(RATROOT)/include/RAT
 DICT_SOURCES = src/zdab_dispatch.hpp src/zdab_file.hpp src/zdab_convert.hpp $(RAT_INC)/DS/Digitiser.hh $(RAT_INC)/DS/PMTUnCal.hh $(RAT_INC)/Extensible.hh util/include/Record_Info.h src/linkdef.h
 
+
 all: libzconvert.so libzfile.so libconthost libzdispatch.so libratzdab.a zdab2root rootlib
 
-libzconvert: libzconvert.so
+libzconvert: libzconvert.so lib
 
-libzfile: libzconvert.so libzfile.so
+libzfile: libzconvert.so libzfile.so lib
 
-libzdispatch: libconthost libzconvert.so libzdispatch.so
+libzdispatch: libconthost libzconvert.so libzdispatch.so lib
 
-zdab2root: libzconvert.so libzfile.so _zdab2root
+zdab2root: libzconvert.so libzfile.so _zdab2root lib
 
 examples: all _examples
+
+lib:
+	test -d lib || mkdir lib
 
 rootlib:
 	test -d build || mkdir build
