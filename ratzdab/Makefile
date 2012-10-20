@@ -3,7 +3,7 @@ INCLUDE = -Isrc -Iutil -Iutil/include -I$(ROOTSYS)/include -I$(RATROOT)/include 
 LFLAGS = -Llib -L$(ROOTSYS)/lib -L$(RATROOT)/lib
 
 CC = g++
-LIBS = -lCore -lRIO -lCint -lTree
+LIBS = $(shell root-config --libs)
 RAT_LIBS = -lRATEvent_$(shell uname)-g++
 
 ZCONVERT_SOURCES = src/zdab_convert.cpp util/PZdabFile.cxx
