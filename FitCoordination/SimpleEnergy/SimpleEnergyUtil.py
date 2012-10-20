@@ -23,7 +23,7 @@ def ProduceNhitRadiusGraph():
 def ProduceNhitOriginHistogram():
 	"""Histogram the origin mc events."""
 
-	nhitOriginHisto = ROOT.TH1D( "NhitOrigin", "NhitOrigin", 200, 300, 500 )
+	nhitOriginHisto = ROOT.TH1D( "NhitOrigin", "NhitOrigin", 1000, 0, 1000 )
 	for ds in rat.dsreader( "E1MeV.root" ):
 		mc = ds.GetMC()
 		if( ds.GetEVCount() == 0 ):
