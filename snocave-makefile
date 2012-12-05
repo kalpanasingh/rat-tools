@@ -47,46 +47,47 @@
 #          02 February 2012 Removed VARIANT variable as obsolete,
 #                           as git has branches. Also removed the 
 #                           sasquatch folder.
+#          02 August   2012 Final version for Geant4.9.5, now move
+#                           to snoing.
 #####################################################
 SHELL := /bin/bash #Must use bash for source and env setting
 
 # To update the library add to libraries/ and update these numbers:
 CLHEP_VERSION=2.1.0.1
-ROOT_VERSION=5.32.00
+ROOT_VERSION=5.32.03
 GEANT4_VERSION=4.9.5.p01
 SCONS_VERSION=2.1.0
 SFML_VERSION=2.0
 XERCES_VERSION=3.1.1
-ZEROMQ_VERSION=2.1.11
+ZEROMQ_VERSION=2.2.0
 
 #########
 # Set the global environment variables
 TOPLEVEL=$(shell pwd)
 export CLHEP_BASE=$(TOPLEVEL)/libraries/clhep-$(CLHEP_VERSION)
 CLHEP_SRC=$(CLHEP_BASE)/CLHEP
+export CLHEP_LIB_DIR=CLHEP_BASE/lib
 export ROOTSYS=$(TOPLEVEL)/libraries/root-$(ROOT_VERSION)
 export GEANT4_BASE=$(TOPLEVEL)/libraries/geant$(GEANT4_VERSION)
+export GEANT4_SOURCE=$(TOPLEVEL)/libraries/geant$(GEANT4_VERSION)-source
 G4OSNAME=$(shell uname)
 G4SYSTEM=$(G4OSNAME)-g++
 export G4OSNAME G4SYSTEM
 export SCONSROOT=$(TOPLEVEL)/libraries/scons-$(SCONS_VERSION)
 export RAT_SCONS=$(SCONSROOT)
 export ZEROMQROOT=$(TOPLEVEL)/libraries/zeromq-$(ZEROMQ_VERSION)
+export XERCESCROOT=$(TOPLEVEL)/libraries/xerces-c-$(XERCES_VERSION)
 # Version free, downloaded on installation below:
 export RAT_BASE=$(TOPLEVEL)/rat
 export AVALANCHEROOT=$(TOPLEVEL)/libraries/avalanche
+grid=true #Temp necessity, use snoing...
 #########
 # Below are the variables that change if a grid build is required over a normal build
 ifeq ($(grid), true)
-	G4_CONFIG=geant4-grid-config.sh # Grid build
-	G4_DEPENDENCIES= # No extra graphical dependencies
-	LOCAL_LIB_PATH=$(ZEROMQROOT)/lib # Only the zeromq library
+	LOCAL_LIB_PATH=$(XERCESCROOT)/lib:$(ZEROMQROOT)/lib # Only the zeromq library
 else
-	export XERCESCROOT=$(TOPLEVEL)/libraries/xerces-c-$(XERCES_VERSION)
-	G4_CONFIG=geant4-config.sh # Graphical build
-	G4_DEPENDENCIES=$(XERCESCROOT)/lib/libxerces-c.a # Extra Graphical dependencies, Xerces is required for gdml in graphical version
 	LOCAL_LIB_PATH=$(XERCESCROOT)/lib:$(ZEROMQROOT)/lib # Add xerces and zeromq to library path
-	GRAPHICAL_DEPENDENCIES=xercesc sfml snogoggles
+	GRAPHICAL_DEPENDENCIES= sfml snogoggles
 # Extra installed library locations
 	export SFMLROOT=$(TOPLEVEL)/libraries/sfml-$(SFML_VERSION)
 	export VIEWERROOT=$(TOPLEVEL)/snogoggles
@@ -99,7 +100,7 @@ endif
 
 .PHONY: all libraries update root clhep geant4 scons rat sfml xercesc zeromq avalanche snogoggles docs tools
 
-all: root geant4 zeromq avalanche scons rat docs tools $(GRAPHICAL_DEPENDENCIES) 
+all: root geant4 zeromq avalanche scons rat docs tools xercesc $(GRAPHICAL_DEPENDENCIES) 
 
 libraries: root geant4 zeromq avalanche scons $(GRAPHICAL_DEPENDENCIES)
 
@@ -109,10 +110,10 @@ env.sh:
 	rm -f env.sh
 	echo '#!/bin/bash' > env.sh
 	echo '#ratcage environment' >> env.sh
-	echo 'source $(GEANT4_BASE)/env.sh' >> env.sh
+	echo 'source $(GEANT4_BASE)/bin/geant4.sh' >> env.sh
 	echo 'export ROOTSYS=$(ROOTSYS)' >> env.sh
 # Add viewer line
-	echo 'export PATH=$(ROOTSYS)/bin:$$PATH' >> env.sh
+	echo 'export PATH=$(CLHEP_BASE)/bin:$(ROOTSYS)/bin:$$PATH' >> env.sh
 	echo 'export AVALANCHEROOT=$(AVALANCHEROOT)' >> env.sh
 	echo 'export ZEROMQROOT=$(ZEROMQROOT)' >> env.sh
 	echo 'export LD_LIBRARY_PATH=$$LD_LIBRARY_PATH:$(CLHEP_BASE)/lib:$(ROOTSYS)/lib:$(AVALANCHEROOT)/lib/cpp:$(LOCAL_LIB_PATH)' >> env.sh
@@ -126,10 +127,10 @@ env.csh:
 	rm -f env.csh
 	echo '#!/bin/csh' > env.csh
 	echo '#ratcage environment' >> env.csh
-	echo 'source $(GEANT4_BASE)/env.csh' >> env.csh
+	echo 'source $(GEANT4_BASE)/bin/geant4.csh' >> env.csh
 	echo 'setenv ROOTSYS $(ROOTSYS)' >> env.csh
 # Add viewer line
-	echo 'setenv PATH $(ROOTSYS)/bin:$${PATH}' >> env.csh
+	echo 'setenv PATH $(CLHEP_BASE)/bin:$(ROOTSYS)/bin:$${PATH}' >> env.csh
 	echo 'setenv AVALANCHEROOT $(AVALANCHEROOT)' >> env.csh
 	echo 'setenv ZEROMQROOT $(ZEROMQROOT)' >> env.csh
 	echo 'if ( $${?LD_LIBRARY_PATH} )  then' >> env.csh
@@ -167,8 +168,8 @@ $(CLHEP_BASE)/lib/libCLHEP.a:
 ###
 geant4: $(G4_DEPENDENCIES) $(GEANT4_BASE)/include/G4Event.hh
 
-$(GEANT4_BASE)/include/G4Event.hh: $(CLHEP_BASE)/lib/libCLHEP.a
-	cd $(GEANT4_BASE) && cmake -DCMAKE_INSTALL_PREFIX=$(GEANT4_SOURCE) -DCLHEP_ROOT_DIR=$(CLHEP_BASE) -DGEANT4_INSTALL_DATA=ON -DCLHEP_CONFIG_EXECUTABLE=$(CLHEP_BASE)/clhep-config
+$(GEANT4_BASE)/include/G4Event.hh: $(CLHEP_BASE)/lib/libCLHEP.a $(XERCESCROOT)/lib/libxerces-c.a
+	cd $(GEANT4_BASE) && cmake -DCMAKE_INSTALL_PREFIX=$(GEANT4_BASE) -DCLHEP_ROOT_DIR=$(CLHEP_BASE) -DXERCESC_ROOT_DIR=$(XERCESCROOT) -DGEANT4_INSTALL_DATA=ON -DCLHEP_CONFIG_EXECUTABLE=$(CLHEP_BASE)/bin/clhep-config $(GEANT4_SOURCE)
 	cd $(GEANT4_BASE) && make
 	cd $(GEANT4_BASE) && make install
 	touch $(GEANT4_BASE)/include/G4Event.hh  # Mark that we finished
@@ -191,7 +192,7 @@ endif
 endif
 
 $(RAT_BASE)/bin/rat_$(G4SYSTEM): $(TOPLEVEL)/rat env.sh env.csh $(GEANT4_BASE)/include/G4Event.hh $(ROOTSYS)/bin/root.exe scons
-	cd $(RAT_BASE) && source $(GEANT4_BASE)/env.sh && ./configure
+	cd $(RAT_BASE) && source $(GEANT4_BASE)/bin/geant4.sh && ./configure
 	cd $(RAT_BASE) && git pull git@github.com:snoplus/rat.git master
 	cd $(RAT_BASE) && source $(TOPLEVEL)/env.sh && $(MAKE)
 ###
