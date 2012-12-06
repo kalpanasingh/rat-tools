@@ -22,6 +22,8 @@
 /rat/proc calibratePMT
 /rat/proc fitter
 /rat/procset method "quad"
+/rat/proc prune 
+/rat/procset prune "mc.hit,mc.pmt.photon"
 /rat/proc outroot
 /rat/procset file "quad_${Speed}.root"
 

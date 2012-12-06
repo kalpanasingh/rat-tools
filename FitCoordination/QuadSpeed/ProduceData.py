@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-# Run rat and produce data for each position in the posSet
-# Author P G Jones - 13/03/2011 <p.jones22@physics.ox.ac.uk>
+# Run rat and produce data for each effective speed
+# Author I T Coulter - 9/11/2012
 import os
 import sys
 import string
