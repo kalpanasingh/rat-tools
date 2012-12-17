@@ -23,9 +23,14 @@ namespace ratzdab {
         public:
             RATDB() {
                 db = RAT::DB::Get();
-                db->Load("PMTINFO.ratdb");
+                assert(db);
 
-                pmtinfo = db->GetLink("PMTINFO", "sno+");
+                std::string data = getenv("GLG4DATA");
+                assert(data != "");
+                db->Load(data + "/pmt/airfill2.ratdb");
+
+                pmtinfo = db->GetLink("PMTINFO");
+                assert(pmtinfo);
 
                 // cache this for performance
                 pmttype = pmtinfo->GetIArray("type");
@@ -244,8 +249,6 @@ namespace ratzdab {
         // load pmt position and orientation from the database
         RAT::DS::PMTProperties* prop = run->GetPMTProp();
 
-        vector<int> snomannumber = ratdb.pmtinfo->GetIArray("snomannumber");
-        prop->SetSNOMANNumber(snomannumber);
         vector<int> panelnumber = ratdb.pmtinfo->GetIArray("panelnumber");
         prop->SetPanelNumber(panelnumber);
         vector<int> type = ratdb.pmtinfo->GetIArray("type");
