@@ -4,6 +4,7 @@
 
 #include <TObject.h>
 #include <RAT/DB.hh>
+#include <RAT/Log.hh>
 #include <RAT/DS/Root.hh>
 #include <RAT/DS/Run.hh>
 #include <RAT/DS/AVStat.hh>
@@ -22,6 +23,8 @@ namespace ratzdab {
     static class RATDB {
         public:
             RATDB() {
+                RAT::Log::Init("/dev/null");
+
                 db = RAT::DB::Get();
                 assert(db);
 
