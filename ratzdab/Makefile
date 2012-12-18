@@ -23,7 +23,7 @@ libzfile: libzconvert.so libzfile.so lib
 
 libzdispatch: libconthost libzconvert.so libzdispatch.so lib
 
-zdab2root: libzconvert.so libzfile.so _zdab2root lib
+zdab2root: lib libzconvert.so libzfile.so _zdab2root
 
 examples: all _examples
 
@@ -33,20 +33,20 @@ lib:
 rootlib:
 	test -d build || mkdir build
 	$(ROOTSYS)/bin/rootcint -f ./build/ratzdab_dict.cxx -c -p -Isrc $(INCLUDE) $(DICT_SOURCES)
-	$(CC) -o lib/ratzdab_root.so -shared -fPIC $(CFLAGS) build/ratzdab_dict.cxx src/zdab_convert.cpp src/zdab_file.cpp src/zdab_dispatch.cpp util/PZdabFile.cxx -I. -Icontrib/disp/include $(INCLUDE) -Lcontrib/disp/lib $(LFLAGS) $(LIBS) -lconthost
+	$(CC) -o lib/ratzdab_root.so -shared -fPIC $(CFLAGS) build/ratzdab_dict.cxx src/zdab_convert.cpp src/zdab_file.cpp src/zdab_dispatch.cpp util/PZdabFile.cxx -I. -Icontrib/disp/include $(INCLUDE) -Lcontrib/disp/lib $(LFLAGS) $(RAT_LIBS) $(LIBS) -lconthost
 
 libzconvert.so:
-	$(CC) -shared -fPIC -o libzconvert.so $(ZCONVERT_SOURCES) $(INCLUDE) $(CFLAGS) $(CXXFLAGS) $(LFLAGS) $(LIBS) $(RAT_LIBS)
+	$(CC) -shared -fPIC -o libzconvert.so $(ZCONVERT_SOURCES) $(INCLUDE) $(CFLAGS) $(CXXFLAGS) $(LFLAGS) $(RAT_LIBS) $(LIBS)
 	test -d lib || mkdir lib
 	mv libzconvert.so lib
 
 libzfile.so:
-	$(CC) -shared -fPIC -o libzfile.so $(ZFILE_SOURCES) $(INCLUDE) $(CFLAGS) $(CXXFLAGS) $(LFLAGS) $(LIBS) -lzconvert
+	$(CC) -shared -fPIC -o libzfile.so $(ZFILE_SOURCES) $(INCLUDE) $(CFLAGS) $(CXXFLAGS) $(LFLAGS) -lzconvert $(LIBS)
 	test -d lib || mkdir lib
 	mv libzfile.so lib
 
 libconthost:
-	test -d contrib/disp || (cd contrib && tar zxf disp.tar.gz && cd disp/src && patch -p0 < ../../disp_patch.diff)
+	test -d contrib/disp || (cd contrib && tar zxf disp.tar.gz && cd disp && patch -p0 < ../disp_patch.diff && cd src && make clean)
 	cd contrib/disp/src && make
 
 libzdispatch.so:
@@ -58,7 +58,7 @@ libratzdab.a:
 	cd lib && ar rcs libratzdab.a libzconvert.so libzfile.so libzdispatch.so
 
 _zdab2root:
-	$(CC) -o zdab2root $(Z2R_SOURCES) $(INCLUDE) $(CFLAGS) $(CXXFLAGS) $(LFLAGS) $(LIBS) -Llib -lzconvert -lzfile $(RAT_LIBS)
+	$(CC) $(CFLAGS) -o zdab2root $(Z2R_SOURCES) $(INCLUDE) $(CXXFLAGS) $(LFLAGS) -Llib -lzfile -lzconvert $(RAT_LIBS) $(LIBS)
 	test -d bin || mkdir bin
 	mv zdab2root bin
 
@@ -69,5 +69,5 @@ clean:
 	if test -d contrib/disp; then cd contrib/disp/src && make clean; fi
 	cd examples && make clean
 	-$(RM) *.o lib/*.so lib/*.a bin/* python/*.pyc
-	-$(RM) -rf build
+	-$(RM) -rf build *.dSYM lib/*.dSYM
 

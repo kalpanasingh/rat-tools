@@ -4,6 +4,7 @@
 
 #include <TObject.h>
 #include <RAT/DB.hh>
+#include <RAT/Log.hh>
 #include <RAT/DS/Root.hh>
 #include <RAT/DS/Run.hh>
 #include <RAT/DS/AVStat.hh>
@@ -22,10 +23,17 @@ namespace ratzdab {
     static class RATDB {
         public:
             RATDB() {
-                db = RAT::DB::Get();
-                db->Load("PMTINFO.ratdb");
+                RAT::Log::Init("/dev/null");
 
-                pmtinfo = db->GetLink("PMTINFO", "sno+");
+                db = RAT::DB::Get();
+                assert(db);
+
+                std::string data = getenv("GLG4DATA");
+                assert(data != "");
+                db->Load(data + "/pmt/airfill2.ratdb");
+
+                pmtinfo = db->GetLink("PMTINFO");
+                assert(pmtinfo);
 
                 // cache this for performance
                 pmttype = pmtinfo->GetIArray("type");
@@ -244,8 +252,6 @@ namespace ratzdab {
         // load pmt position and orientation from the database
         RAT::DS::PMTProperties* prop = run->GetPMTProp();
 
-        vector<int> snomannumber = ratdb.pmtinfo->GetIArray("snomannumber");
-        prop->SetSNOMANNumber(snomannumber);
         vector<int> panelnumber = ratdb.pmtinfo->GetIArray("panelnumber");
         prop->SetPanelNumber(panelnumber);
         vector<int> type = ratdb.pmtinfo->GetIArray("type");
@@ -491,9 +497,11 @@ namespace ratzdab {
         // caen data
         if (digitizer->GetTrigSumCount() > 0) {
             int caen_header_length = 4 * sizeof(uint32_t);
-            int trace_length = digitizer->GetNWords();
-            int ntraces = digitizer->GetTrigSumCount();
-            caen_length = caen_header_length + ntraces * trace_length * sizeof(uint32_t);
+            int caen_total_sample_count = 0;
+            for (int i=0; i<digitizer->GetTrigSumCount(); i++) {
+                caen_total_sample_count += digitizer->GetTrigSum(i)->GetSampleCount();
+            }
+            caen_length = caen_header_length + caen_total_sample_count * sizeof(uint16_t);
             length += sizeof(SubFieldHeader) + caen_length;
         }
 
@@ -635,13 +643,11 @@ namespace ratzdab {
             *(caen++) = trigger_time;
 
             // copy samples
+            uint16_t* psample = (uint16_t*) caen;
             for (unsigned i=0; i<d->GetTrigSumCount(); i++) {
                 RAT::DS::TrigSum* s = d->GetTrigSum(i);
-                unsigned trace_length = s->GetSampleCount();
-                uint16_t* pword = (uint16_t*) (caen + i * trace_length);
-
-                for (unsigned j=0; j<trace_length; j++) {
-                    *(pword++) = s->GetSample(j);
+                for (unsigned j=0; j<s->GetSampleCount(); j++) {
+                    *(psample++) = (uint16_t) s->GetSample(j);
                 }
             }
         }
