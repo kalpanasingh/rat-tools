@@ -1,0 +1,45 @@
+# Parameters
+/glg4debug/glg4param omit_muon_processes 1.0
+/glg4debug/glg4param omit_hadronic_processes 1.0
+/glg4debug/glg4param omit_neutron_hp 1.0
+
+/rat/db/set MC thin_factor 3.5
+
+/rat/db/set DETECTOR geo_file "${GeoFile}"
+/rat/db/set GEO[scint] material "${ScintMaterial}"
+/rat/db/set EFFECTIVE_VELOCITY["${ScintMaterial}" ScintVg ${Speed}d
+
+## use for labppo_scintillator or unknown material
+#/rat/db/set EFFECTIVE_VELOCITY ScintVg ${Speed}d
+
+/run/initialize
+
+/rat/proc frontend
+/rat/proc trigger
+/rat/proc eventbuilder
+/rat/proc count
+/rat/procset update 100
+/rat/proc calibratePMT
+/rat/proc fitter
+/rat/procset method "quad"
+/rat/proc fitter
+/rat/procset method "simpleLikelihood"
+/rat/procset optimiser "powell"
+/rat/procset pdf "et1d-labppo_scintillator"
+/rat/procset seed "quad"
+/rat/proc prune 
+/rat/procset prune "mc.hit,mc.pmt.photon"
+/rat/proc outroot
+/rat/procset file "scintFit_${Speed}.root"
+
+# Generator
+
+/generator/add combo gun:fill
+/generator/vtx/set ${Particle} 0 0 0 3.0
+
+/generator/pos/set 0.0 0.0 0.0
+/generator/rate/set 1
+
+/run/beamOn 500
+
+exit
