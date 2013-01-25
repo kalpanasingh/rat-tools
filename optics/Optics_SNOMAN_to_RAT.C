@@ -808,6 +808,7 @@ void ScintEmissionSpec(char filename[50]){
 /// multi-component scintillator. The normalisation of output intensity is nominally 1, 
 /// but only the shape is considered in RAT anyway. The input format is 401 values
 /// specifying the cumulative emission probability from 200-600nm in 10nm steps.
+/// Data can also be used for primary emission for LABPPO as same as PPO reemission spec.
 void ScintReemissionSpec(char filename[50]){
 /// Arguments:
 	/// filename 	= name of text file containing the input data in the SNOMAN format
@@ -825,7 +826,7 @@ void ScintReemissionSpec(char filename[50]){
     int nvals_input 	= 400;		// total number of input values
 	double in_lo_wave 	= 200;		// starting wavelength input
 	double in_hi_wave 	= 600;		// last wavelength input
-	const int nvals_output 	= 40;	// how many values do we want to output?
+	const int nvals_output 	= 200;	// how many values do we want to output?
 	bool verbose 		= false;	// output more info if true 
 	
 	// open the input file
@@ -873,8 +874,23 @@ void ScintReemissionSpec(char filename[50]){
 	// And draw the output histogram
 	Crem->cd(2);
     hremOut->Draw();
-    
-	// Now to output the text in RAT format
+    // Now to output the text in RAT format for primary emission
+    cout << "SCINTILLATION_option: \"dy_dwavelength\", " << endl ;
+    cout << "SCINTILLATION_value1: [";
+    double wave[nvals_output];
+    for(int i=0; i<nvals_output; ++i){
+            wave[i] = hremOut->GetBinCenter(i+1);
+            if(i==0) wave[i] = hremOut->GetBinLowEdge(i+1);
+            cout << FormatRatD(wave[i]) << ", ";    
+    }
+    cout << "800d, ], " << endl;                            // want data to go up to 800nm 
+cout << "SCINTILLATION_value2: [";
+    for(int i=0; i<nvals_output; ++i){
+            val = hremOut->GetBinContent(i+1);
+            cout << FormatRatD(val) << ", ";
+    }
+    cout << "0d, ], " << endl;                              // set intensity at 800nm to be 0.          
+	// Now to output the text in RAT format for reemission
 	cout << "SCINTILLATION_WLS_option: \"dy_dwavelength\", " << endl ;
 	cout << "SCINTILLATION_WLS_value1: [";
 	double wave[nvals_output];
