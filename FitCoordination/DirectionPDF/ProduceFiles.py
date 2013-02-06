@@ -4,13 +4,13 @@ import os, sys, string
 
 def ProduceRunMacFile( options ):
 	"""Produces and then runs the appropriate mac files."""
-	inFile = open( "Data_for_ntuple.mac", "r" )
+	inFile = open( "Data_for_PDF.mac", "r" )
 	rawText = string.Template( inFile.read() )
 	inFile.close()
 	outText = rawText.substitute( GeoFile = options.geoFile,
                                       ScintMaterial = options.scintMaterial,
 				      Particle = options.particle )
-        outFileName = "Data_for_ntuple__" + options.scintMaterial + ".mac"
+        outFileName = "Data_for_PDF__" + options.scintMaterial + ".mac"
         outFile = open( outFileName, "w" )
         outFile.write( outText )
         outFile.close()

@@ -15,8 +15,10 @@
 /rat/proc count
 /rat/procset update 10
 /rat/proc calibratePMT
+/rat/proc prune 
+/rat/procset prune "mc.hit,mc.pmt.photon"
 /rat/proc outroot
-/rat/procset file "PDF_10MeV_5k.root"
+/rat/procset file "data_for_pdf_1.root"
 
 # Generator
 

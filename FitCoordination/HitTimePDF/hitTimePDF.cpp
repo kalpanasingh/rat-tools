@@ -123,7 +123,7 @@ void GetScintPDF()
   // Create and fill time residual histogram
   TH1D* hist = new TH1D("H","",400,-99.5,300.5);
   TH1D* hist2 = new TH1D("H2","",400,-99.5,300.5);
-  FillScintTimeResiduals("/data/snoplus/coulter/SimplePDF_data/data_for_pdf_1.root",hist);
+  FillScintTimeResiduals("data_for_pdf_1.root",hist);
 
   // Read out data in ratdb format
   cout << "time: [";
@@ -163,7 +163,7 @@ void GetH2OPDF()
   TH1D* hist = new TH1D("H","",800,-99.875,100.125);
   TH1D* hist2 = new TH1D("G","",800,-99.875,100.125);
 
-  FillH2OTimeResiduals("/data/snoplus/coulter/SimplePDF_data/data_for_pdf_1.root",hist);
+  FillH2OTimeResiduals("data_for_pdf_1.root",hist);
 
   // Read out data in ratdb format
   cout << "time: [";

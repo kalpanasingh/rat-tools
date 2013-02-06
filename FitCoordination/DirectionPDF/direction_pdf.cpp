@@ -11,7 +11,7 @@
 #include <RAT/DS/Root.hh>
 #include <RAT/DS/Run.hh>
 
-void PlotDirections(char* pFile)
+void FillDirection(char* pFile, TH1D* hist)
 {
   TFile *file = new TFile(pFile);
   TTree *tree = (TTree*) file->Get("T");
@@ -25,7 +25,6 @@ void PlotDirections(char* pFile)
   runtree->GetEntry();
   RAT::DS::PMTProperties *pmtProp = pmtds->GetPMTProp();
 
-  TH1D* hist = new TH1D("dir","dir",100,0,3.14);
   for(int iLoop =0; iLoop < tree->GetEntries(); iLoop++ )
     {
       tree->GetEntry( iLoop );
@@ -38,6 +37,8 @@ void PlotDirections(char* pFile)
       RAT::DS::EV *pev= rds->GetEV(0);
       int PMThits = pev->GetPMTCalCount();
 
+      //cout << PMThits << endl;
+
       for(int jLoop=0; jLoop<PMThits; jLoop++)
 	{
 	  RAT::DS::PMTCal *pCal = pev->GetPMTCal(jLoop);
@@ -49,10 +50,15 @@ void PlotDirections(char* pFile)
 	  hist->Fill(theta);
 	}
     }
+}
+
+void GetDirectionPDF()
+{
+  TH1D* hist = new TH1D("dir","dir",100,0,3.14);
+
+  FillDirection("data_for_pdf_1.root",hist);
+
   hist->Scale(1/hist->Integral());
-  hist->GetYaxis()->SetTitle("Probability");
-  hist->GetXaxis()->SetTitle("Angle of PMT relative to initial direction");
-  hist->Draw();
 
   // Read out data in ratdb format
   cout << "angle: [0.0d, ";
