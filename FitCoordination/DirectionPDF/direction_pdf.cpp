@@ -37,8 +37,6 @@ void FillDirection(char* pFile, TH1D* hist)
       RAT::DS::EV *pev= rds->GetEV(0);
       int PMThits = pev->GetPMTCalCount();
 
-      //cout << PMThits << endl;
-
       for(int jLoop=0; jLoop<PMThits; jLoop++)
 	{
 	  RAT::DS::PMTCal *pCal = pev->GetPMTCal(jLoop);
