@@ -25,6 +25,6 @@
 /generator/pos/set 0.0 0.0 0.0
 /generator/rate/set 1
 
-/run/beamOn 5000
+/rat/run/start 5000
 
 exit

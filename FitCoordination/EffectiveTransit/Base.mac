@@ -30,6 +30,6 @@
 /generator/pos/set 0.0 ${SourcePos} 0.0
 /generator/rate/set 1
 
-/run/beamOn 500
+/rat/run/start 500
 
 exit

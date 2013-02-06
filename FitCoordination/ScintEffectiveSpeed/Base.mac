@@ -7,7 +7,7 @@
 
 /rat/db/set DETECTOR geo_file "${GeoFile}"
 /rat/db/set GEO[scint] material "${ScintMaterial}"
-/rat/db/set EFFECTIVE_VELOCITY["${ScintMaterial}" ScintVg ${Speed}d
+/rat/db/set EFFECTIVE_VELOCITY[${ScintMaterial}] ScintVg ${Speed}d
 
 ## use for labppo_scintillator or unknown material
 #/rat/db/set EFFECTIVE_VELOCITY ScintVg ${Speed}d
@@ -40,6 +40,6 @@
 /generator/pos/set 0.0 0.0 0.0
 /generator/rate/set 1
 
-/run/beamOn 500
+/rat/run/start 500
 
 exit
