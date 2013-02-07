@@ -38,15 +38,15 @@ void FillDirection(char* pFile, TH1D* hist)
       int PMThits = pev->GetPMTCalCount();
 
       for(int jLoop=0; jLoop<PMThits; jLoop++)
-	{
-	  RAT::DS::PMTCal *pCal = pev->GetPMTCal(jLoop);
-	  TVector3 pmtPos = pmtProp->GetPos(pCal->GetID());
-	  TVector3 photonDir = (pmtPos-mcPos);
-	  double ctheta = (photonDir.Unit()).Dot(mcDir);
-	  double theta = acos(ctheta);
+        {
+          RAT::DS::PMTCal *pCal = pev->GetPMTCal(jLoop);
+          TVector3 pmtPos = pmtProp->GetPos(pCal->GetID());
+          TVector3 photonDir = (pmtPos-mcPos);
+          double ctheta = (photonDir.Unit()).Dot(mcDir);
+          double theta = acos(ctheta);
 
-	  hist->Fill(theta);
-	}
+          hist->Fill(theta);
+        }
     }
 }
 

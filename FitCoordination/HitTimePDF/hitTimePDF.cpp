@@ -46,22 +46,22 @@ void FillScintTimeResiduals( char* pFile, TH1D* hist )
 
       // Loop over each PMT hit and get time
       for( Int_t loop=0; loop < PMThits; loop++)
-	{
-	  RAT::DS::PMTCal *pCal = pev->GetPMTCal(loop);
-	  double pmtTime = pCal->GetsPMTt();
-	  TVector3 pmtPos = pmtProp->GetPos(pCal->GetID());
+        {
+          RAT::DS::PMTCal *pCal = pev->GetPMTCal(loop);
+          double pmtTime = pCal->GetsPMTt();
+          TVector3 pmtPos = pmtProp->GetPos(pCal->GetID());
 
-	  // Get straight line travel time to PMT
-	  double distInScint, distInAV, distInWater;
-	  pmtds->GetStraightLinePath()->CalcByPosition( mc_pos, pmtPos, distInScint, distInAV, distInWater);
-	  double straightTime = pmtds->GetEffectiveVelocityTime()->CalcByDistance( distInScint, distInAV, distInWater);
+          // Get straight line travel time to PMT
+          double distInScint, distInAV, distInWater;
+          pmtds->GetStraightLinePath()->CalcByPosition( mc_pos, pmtPos, distInScint, distInAV, distInWater);
+          double straightTime = pmtds->GetEffectiveVelocityTime()->CalcByDistance( distInScint, distInAV, distInWater);
 
-	  // Finally, get time residual
-	  double tres= pmtTime - straightTime - eventTime;
+          // Finally, get time residual
+          double tres= pmtTime - straightTime - eventTime;
 
-	  // Fill histogram with those within a fiducial volume of 5.5m
-	  if(mc_pos.Mag() < 5500)  hist->Fill(tres);
-	}
+          // Fill histogram with those within a fiducial volume of 5.5m
+          if(mc_pos.Mag() < 5500)  hist->Fill(tres);
+        }
     }
 }
 
@@ -100,21 +100,21 @@ void FillH2OTimeResiduals( char* pFile, TH1D* hist )
 
       // Loop over each PMT hit and get time
       for( Int_t loop=0; loop < PMThits; loop++)
-	{
-	  RAT::DS::PMTCal *pCal = pev->GetPMTCal(loop);
-	  double pmtTime = pCal->GetsPMTt();
-	  TVector3 pmtPos = pmtProp->GetPos(pCal->GetID());
+        {
+          RAT::DS::PMTCal *pCal = pev->GetPMTCal(loop);
+          double pmtTime = pCal->GetsPMTt();
+          TVector3 pmtPos = pmtProp->GetPos(pCal->GetID());
 
-	  double distInScint, distInAV, distInWater;
-	  pmtds->GetStraightLinePath()->CalcByPosition( mc_pos, pmtPos, distInScint, distInAV, distInWater);
-	  double straightTime = pmtds->GetGroupVelocityTime()->CalcByDistance(distInScint,distInAV,distInWater);
+          double distInScint, distInAV, distInWater;
+          pmtds->GetStraightLinePath()->CalcByPosition( mc_pos, pmtPos, distInScint, distInAV, distInWater);
+          double straightTime = pmtds->GetGroupVelocityTime()->CalcByDistance(distInScint,distInAV,distInWater);
 
-	  // Finally, get time residual
-	  double tres= pmtTime - straightTime - eventTime;
+          // Finally, get time residual
+          double tres= pmtTime - straightTime - eventTime;
 
-	  // Fill histogram with a fiducial volume of 5.5m
-	  if(mc_pos.Mag() < 5500)  hist->Fill(tres);
-	}
+          // Fill histogram with a fiducial volume of 5.5m
+          if(mc_pos.Mag() < 5500)  hist->Fill(tres);
+        }
     }
 }
 
