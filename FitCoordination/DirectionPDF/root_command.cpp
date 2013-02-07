@@ -1,5 +1,5 @@
 {
   gROOT->ProcessLine(".L direction_pdf.cpp+");
-  PlotDirections("PDF_10MeV_5k.root");
+  GetDirectionPDF();
   gROOT->ProcessLine(".q");
 }
