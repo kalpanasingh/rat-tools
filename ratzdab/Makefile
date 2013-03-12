@@ -4,7 +4,7 @@ LFLAGS = -Llib -L$(ROOTSYS)/lib -L$(RATROOT)/lib
 
 CC = g++
 LIBS = $(shell root-config --libs)
-RAT_LIBS = -lRATEvent_$(shell uname)-g++
+RAT_LIBS = -lRATEvent_$(shell uname)
 
 ZCONVERT_SOURCES = src/zdab_convert.cpp util/PZdabFile.cxx
 ZFILE_SOURCES = src/zdab_file.cpp util/PZdabFile.cxx
