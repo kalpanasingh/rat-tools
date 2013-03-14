@@ -382,3 +382,9 @@ TH1D* ErrorHist(char* infile, double lowNhits, double lowRatio, TH1D* histo)
 
 	return histo;
 }
+
+
+int main(int argc, char* argv[])
+{
+	Coordination("electrons_5000mm.root", "electrons_5300mm.root", "electrons_5400mm.root", "electrons_5500mm.root", "electrons_5600mm.root", "electrons_5700mm.root", "electrons_5800mm.root", "electrons_5900mm.root");
+}
