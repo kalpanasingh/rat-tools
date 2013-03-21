@@ -58,10 +58,11 @@ namespace ratzdab {
         unsigned nhit = pev->NPmtHit;
         uint32_t run_id = pev->RunNumber;
         uint16_t subrun_id = pev->DaqStatus; // seriously
-        uint32_t evorder = pev->EvNumber;
+        //uint32_t evorder = pev->EvNumber;  // unused in RAT
         uint16_t datatype = pev->DataType;
         MTCReadoutData mtc = pev->TriggerCardData;
         uint32_t* mtc_words = (uint32_t*) (&mtc);
+        uint32_t gtid = (uint32_t) UNPK_MTC_GT_ID(mtc_words);
         uint64_t clockcount10 = ((uint64_t) UNPK_MTC_BC10_2(mtc_words) << 32) | ((uint64_t) UNPK_MTC_BC10_1(mtc_words));
         uint64_t clockcount50 = ((uint64_t) UNPK_MTC_BC50_2(mtc_words) << 11) | ((uint64_t) UNPK_MTC_BC50_1(mtc_words));
         uint32_t trig_error = UNPK_MTC_ERROR(mtc_words);
@@ -81,7 +82,7 @@ namespace ratzdab {
         ev->SetESumDiff(esumdiff);
         ev->SetESumInt(esumint);
         ev->SetTrigType(trig_type);
-        ev->SetEventID(evorder);
+        ev->SetEventID(gtid);
         ev->SetClockCount50(clockcount50);
         ev->SetClockCount10(clockcount10);
 
