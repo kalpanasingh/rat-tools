@@ -5,11 +5,10 @@
 #define VERBOSE false
 #endif
 
+#include <zdab_convert.hpp>
 #include <stdio.h>
 #include <exception>
 #include <string>
-
-#include <zdab_convert.hpp>
 
 class TObject;
 class PZdabFile;
@@ -41,13 +40,13 @@ namespace ratzdab {
 
         protected:
             /** Convert a ZDAB record of any type */
-            TObject* convert(nZDAB* z);
+            TObject* convert(nZDAB* const z);
 
             FILE* f;
             PZdabFile* p;
     };
 
-} // namespace ratzdab
+}  // namespace ratzdab
 
-#endif
+#endif  // __ZDAB_FILE__
 

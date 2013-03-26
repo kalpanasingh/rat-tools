@@ -24,7 +24,7 @@ class TestEvent(unittest.TestCase):
         ds = ROOT.RAT.DS.Root()
         ev = ds.AddNewEV()
 
-        ev.eventID = 0x10101011
+        ev.eventID = 0xa01011  # 24 bits
         ev.clockCount50 = 0x7f0f1f2f3ff  # 43 bits
         ev.clockCount10 = 0x1f1f2f3f4f5f6f  # 53 bits
         ev.eSumPeak = 0x1ff  # 9 bits

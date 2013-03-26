@@ -1,12 +1,17 @@
-#include <string>
+#include <zdab_convert.hpp>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <string>
+#include <zdab_dispatch.hpp>
 #include <Record_Info.h>
 #include <dispatch.h>
-
-#include <zdab_convert.hpp>
-#include <zdab_dispatch.hpp>
+#include <RAT/DS/Root.hh>
+#include <RAT/DS/Run.hh>
+#include <RAT/DS/TRIGInfo.hh>
+#include <RAT/DS/EPEDInfo.hh>
+#include <RAT/DS/AVStat.hh>
+#include <RAT/DS/ManipStat.hh>
 
 namespace ratzdab {
 
@@ -30,15 +35,15 @@ namespace ratzdab {
         // get data with recv
         char data[BUFFER_SIZE];
         std::string tag;
-        size_t len = recv(tag, (void*)&data, block);
+        size_t len = recv(&tag, static_cast<void*>(&data), block);
 
         if (!block && len == 0) {
-            return NULL;
+            return static_cast<TObject*>(NULL);
         }
 
         // determine record type
         swap_int32(data, 3);
-        aGenericRecordHeader* header = (aGenericRecordHeader*) data;
+        aGenericRecordHeader* header = reinterpret_cast<aGenericRecordHeader*>(data);
         uint32_t id = header->RecordID;
         swap_int32(data, 3);
 
@@ -46,27 +51,27 @@ namespace ratzdab {
         char* o = data + sizeof(aGenericRecordHeader);
 
         if (id == PMT_RECORD) {
-            return (TObject*) unpack::event((PmtEventRecord*) o);
+            return dynamic_cast<TObject*>(unpack::event(reinterpret_cast<PmtEventRecord*>(o)));
         }
         else if (id == RUN_RECORD) {
             // fixme check (len < sizeof(aGenericRecordHeader) + sizeof(aRunRecord))
-            return (TObject*) unpack::rhdr((RunRecord*) o);
+            return dynamic_cast<TObject*>(unpack::rhdr(reinterpret_cast<RunRecord*>(o)));
         }
         else if (id == TRIG_RECORD) {
             // fixme check (len < sizeof(aGenericRecordHeader) + sizeof(aTriggerInfo))
-            return (TObject*) unpack::trig((TriggerInfo*) o);
+            return dynamic_cast<TObject*>(unpack::trig(reinterpret_cast<TriggerInfo*>(o)));
         }
         else if (id == EPED_RECORD) {
             // fixme check (len < sizeof(aGenericRecordHeader) + sizeof(aTriggerInfo))
-            return (TObject*) unpack::eped((EpedRecord*) o);
+            return dynamic_cast<TObject*>(unpack::eped(reinterpret_cast<EpedRecord*>(o)));
         }
         else if (id == CAST_RECORD) {
             // fixme check (len < sizeof(aGenericRecordHeader) + sizeof(aTriggerInfo))
-            return (TObject*) unpack::cast((ManipStatus*) o);
+            return dynamic_cast<TObject*>(unpack::cast(reinterpret_cast<ManipStatus*>(o)));
         }
         else if (id == CAAC_RECORD) {
             // fixme check (len < sizeof(aGenericRecordHeader) + sizeof(aTriggerInfo))
-            return (TObject*) unpack::caac((AVStatus*) o);
+            return dynamic_cast<TObject*>(unpack::caac(reinterpret_cast<AVStatus*>(o)));
         }
         else {
             throw record_unknown;
@@ -75,7 +80,7 @@ namespace ratzdab {
         throw record_unknown;
     }
 
-    size_t dispatch::recv(std::string& tag, void* data, bool block) {
+    size_t dispatch::recv(std::string* tag, void* data, bool block) {
         int rc;
         int nbytes;
         char dtag[TAGSIZE + 1];
@@ -100,7 +105,7 @@ namespace ratzdab {
             }
         }
 
-        tag = std::string(dtag);
+        *tag = std::string(dtag);
 
         return (size_t) nbytes;
     }
@@ -123,5 +128,5 @@ namespace ratzdab {
 #endif
     }
 
-} // namespace ratzdab
+}  // namespace ratzdab
 

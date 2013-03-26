@@ -5,8 +5,8 @@
 #define VERBOSE false
 #endif
 
-#include <exception>
 #include <stdint.h>
+#include <exception>
 
 class TObject;
 
@@ -35,30 +35,30 @@ namespace ratzdab {
 
     /** Convert nZDAB pointers to various RAT ROOT objects */
     namespace unpack {
-        RAT::DS::Root* event(PmtEventRecord* o);
-        RAT::DS::Run* rhdr(RunRecord* o);
-        RAT::DS::ManipStat* cast(ManipStatus* o);
-        RAT::DS::AVStat* caac(AVStatus* o);
+        RAT::DS::Root* event(PmtEventRecord* const o);
+        RAT::DS::Run* rhdr(RunRecord* const o);
+        RAT::DS::ManipStat* cast(ManipStatus* const o);
+        RAT::DS::AVStat* caac(AVStatus* const o);
 
         // note: TRIGInfo::runID is not set
-        RAT::DS::TRIGInfo* trig(TriggerInfo* o);
+        RAT::DS::TRIGInfo* trig(TriggerInfo* const o);
 
         // note: EPEDInfo::runID is not set
-        RAT::DS::EPEDInfo* eped(EpedRecord* o);
+        RAT::DS::EPEDInfo* eped(EpedRecord* const o);
 
         // helpers
-        RAT::DS::Digitiser caen(uint32_t* p);
-        RAT::DS::PMTUnCal pmt(uint32_t* p);
+        RAT::DS::Digitiser caen(uint32_t* const p);
+        RAT::DS::PMTUnCal pmt(uint32_t* const p);
     }
 
     /** Convert RAT ROOT objects to ZDAB records */
     namespace pack {
         PmtEventRecord* event(RAT::DS::Root* o, int ev_id=0);
-        RunRecord* rhdr(RAT::DS::Run* o);
-        ManipStatus* cast(RAT::DS::ManipStat* o);
-        AVStatus* caac(RAT::DS::AVStat* o);
-        TriggerInfo* trig(RAT::DS::TRIGInfo* o);
-        EpedRecord* eped(RAT::DS::EPEDInfo* o);
+        RunRecord* rhdr(RAT::DS::Run* const o);
+        ManipStatus* cast(RAT::DS::ManipStat* const o);
+        AVStatus* caac(RAT::DS::AVStat* const o);
+        TriggerInfo* trig(RAT::DS::TRIGInfo* const o);
+        EpedRecord* eped(RAT::DS::EPEDInfo* const o);
     }
 
     /** Exception thrown if unable to handle a record */
@@ -69,7 +69,7 @@ namespace ratzdab {
             }
     } record_unknown;
 
-} // namespace ratzdab
+}  // namespace ratzdab
 
-#endif
+#endif  // __ZDAB_CONVERT__
 

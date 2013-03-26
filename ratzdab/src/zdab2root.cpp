@@ -1,29 +1,33 @@
 /*********************************************************
  * ZDAB to RAT ROOT converter
  *
- * Converts SNO/SNO+ ZDAB files to full-DS RAT ROOT files,
- * including CAEN data if present. Currently SNOMAN MC,
- * fits, NCD data, and other SNO-specific things are
- * excluded.
+ * Converts SNO/SNO+ ZDAB files to full-DS RAT ROOT files
  *
  * A. Mastbaum <mastbaum@hep.upenn.edu>, 8/2012
- *
  *********************************************************/
+#include <zdab_file.hpp>
+#include <iostream>
+#include <string>
 #include <TFile.h>
 #include <TTree.h>
-
 #include <RAT/DB.hh>
 #include <RAT/DS/Root.hh>
 #include <RAT/DS/Run.hh>
-
-#include <zdab_file.hpp>
+#include <RAT/DS/TRIGInfo.hh>
+#include <RAT/DS/EPEDInfo.hh>
+#include <RAT/DS/AVStat.hh>
+#include <RAT/DS/ManipStat.hh>
 
 int main(int argc, char* argv[]) {
-    if (argc < 2 or argc > 3) {
-        printf("Usage: %s input.zdab [output.root]\n", argv[0]);
-        printf("If output filename is not specified, the input filename with a ROOT extension is used.\n");
+    if (argc < 2 || argc > 3) {
+        std::cout << "Usage: " << argv[0] << " input.zdab [output.root]"
+                  << std::endl
+                  << "If output filename is not specified, the input filename "
+                  << "with a ROOT extension is used."
+                  << std::endl;
         return 1;
     }
+
     // set up zdab input
     const char* infile = argv[1];
     ratzdab::zdabfile zdab(infile);
@@ -38,7 +42,7 @@ int main(int argc, char* argv[]) {
         outfile_name.erase(outfile_name.end()-5, outfile_name.end());
         outfile_name += ".root";
     }
-    printf("Writing to %s\n", outfile_name.c_str());
+    std::cout << "Writing to " << outfile_name << std::endl;
     TFile outfile(outfile_name.c_str(), "recreate");
     outfile.cd();
 
@@ -53,15 +57,15 @@ int main(int argc, char* argv[]) {
     runtree->Branch("run", run->ClassName(), &run, 32000, 99);
 
     // containers for data that spans multiple events
-    RAT::DS::TRIGInfo* current_trig = NULL;
-    RAT::DS::EPEDInfo* current_eped = NULL;
+    RAT::DS::TRIGInfo* current_trig = static_cast<RAT::DS::TRIGInfo*>(NULL);
+    RAT::DS::EPEDInfo* current_eped = static_cast<RAT::DS::EPEDInfo*>(NULL);
 
     unsigned record_count = 0;
     unsigned event_count = 0;
     bool run_active = false;
     bool run_level_data_set = false;
 
-    while(true) {
+    while (true) {
         try {
             TObject* r = zdab.next();
 
@@ -71,14 +75,14 @@ int main(int argc, char* argv[]) {
 
             // handle record types
             if (r->IsA() == RAT::DS::Run::Class()) {
-                *run = *((RAT::DS::Run*) r);
+                *run = *(dynamic_cast<RAT::DS::Run*>(r));
                 run_active = true;
                 std::cout << "RHDR: Run " << run->GetRunID() << std::endl;
             }
             else if (r->IsA() == RAT::DS::AVStat::Class()) {
                 if (run_active) {
                     RAT::DS::AVStat* avstat = run->GetAVStat();
-                    *avstat = *((RAT::DS::AVStat*) r);
+                    *avstat = *(dynamic_cast<RAT::DS::AVStat*>(r));
                     std::cout << "AVStat: Run updated" << std::endl;
                 }
                 else {
@@ -88,7 +92,7 @@ int main(int argc, char* argv[]) {
             else if (r->IsA() == RAT::DS::ManipStat::Class()) {
                 if (run_active) {
                     RAT::DS::ManipStat* mstat = run->GetManipStat();
-                    *mstat = *((RAT::DS::ManipStat*) r);
+                    *mstat = *(dynamic_cast<RAT::DS::ManipStat*>(r));
                     std::cout << "ManipStat: Run updated" << std::endl;
                 }
                 else {
@@ -97,7 +101,7 @@ int main(int argc, char* argv[]) {
             }
             else if (r->IsA() == RAT::DS::TRIGInfo::Class()) {
                 delete current_trig;
-                current_trig = (RAT::DS::TRIGInfo*) r;
+                current_trig = dynamic_cast<RAT::DS::TRIGInfo*>(r);
 
                 if (run_active) {
                     current_trig->SetRunID(run->GetRunID());
@@ -107,7 +111,7 @@ int main(int argc, char* argv[]) {
             }
             else if (r->IsA() == RAT::DS::EPEDInfo::Class()) {
                 delete current_eped;
-                current_eped = (RAT::DS::EPEDInfo*) r;
+                current_eped = dynamic_cast<RAT::DS::EPEDInfo*>(r);
 
                 if (run_active) {
                     current_eped->SetRunID(run->GetRunID());
@@ -116,14 +120,14 @@ int main(int argc, char* argv[]) {
                 std::cout << "EPED: GTID " << current_eped->GetEventID() << std::endl;
             }
             else if (r->IsA() == RAT::DS::Root::Class()) {
-                *ds = *((RAT::DS::Root*) r);
+                *ds = *(dynamic_cast<RAT::DS::Root*>(r));
 
                 // some run-level data has to come from an event
                 if (run_active && !run_level_data_set) {
                     run->SetSubRunID(ds->GetSubRunID());
-                    run->SetMCFlag(0); // no mc zdabs
-                    run->SetPackVer(0); // not in event, maybe MAST?
-                    run->SetDataType(0); // ???
+                    run->SetMCFlag(0);  // no mc zdabs
+                    run->SetPackVer(0);  // not in event, maybe MAST?
+                    run->SetDataType(0);  // ???
                 }
 
                 // set event headers if available
@@ -148,9 +152,9 @@ int main(int argc, char* argv[]) {
             }
 
             if (record_count % 1000 == 0) {
-                printf("Processed record %u (%u events)\n", record_count, event_count);
+                std::cout << "Processed record " << record_count
+                          << " (" << event_count << " events)" << std::endl;
             }
-
         }
         catch(ratzdab::unknown_record_error& e) {
             if (VERBOSE) {
