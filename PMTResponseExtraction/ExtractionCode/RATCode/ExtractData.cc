@@ -9,6 +9,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <cmath>
 using namespace std;
 
 #include <RAT/DS/Root.hh>
