@@ -20,21 +20,10 @@ def faeq(energy_alpha,nu_energy):
 
 ## sums the flux over many energy levels 
 def sum_faeq(nu_energy,alpha_list):
-	##alpha_list = [12.0,15.0,18.0,18.0,18.0,18.0] ##in MeV 
 	summ = 0.0 
 	for j in range(0,len(alpha_list)): 
 		summ = summ + faeq(alpha_list[j],nu_energy)
 	return summ 
-
-def CrossSection(nu_energy,t_energy):
-	crossA = 4.83
-	t_energy_max = 2.0*math.pow(nu_energy,2.0)/938.0
-	if (nu_energy != 0.0):
-		mass_proton = 938.0
-		cross_Section = crossA*1e-42*(1.0 + 466.0*t_energy/(math.pow(nu_energy,2.0)))
-	else:
-		cross_Section = 4.83*1e-42
-	return cross_Section
 
 nu_energy_max = 50.0 	
 
