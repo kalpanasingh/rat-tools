@@ -6,6 +6,7 @@
 #endif
 
 #include <stdint.h>
+#include <map>
 #include <exception>
 
 class TObject;
@@ -33,7 +34,7 @@ namespace RAT {
 
 namespace ratzdab {
 
-    /** Convert nZDAB pointers to various RAT ROOT objects */
+    /** Convert ZDAB records to RAT ROOT objects */
     namespace unpack {
         RAT::DS::Root* event(PmtEventRecord* const o);
         RAT::DS::Run* rhdr(RunRecord* const o);
@@ -60,6 +61,12 @@ namespace ratzdab {
         TriggerInfo* trig(RAT::DS::TRIGInfo* const o);
         EpedRecord* eped(RAT::DS::EPEDInfo* const o);
     }
+
+    /** Mapping from PDG to SNOMAN particle code */
+    std::map<int, int> get_pdg_to_snoman_map();
+
+    /** Mapping from PDG code to mass, to compute total energy */
+    std::map<int, float> get_pdg_to_mass_map();
 
     /** Exception thrown if unable to handle a record */
     static class unknown_record_error : public std::exception {

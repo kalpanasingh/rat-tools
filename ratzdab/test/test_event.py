@@ -64,6 +64,14 @@ class TestEvent(unittest.TestCase):
         pmtc.sQLX = 0xf3f
         pmtc.sPMTt = 0xf4f
 
+        mc = ds.GetMC()
+        mcparticle = mc.AddNewMCParticle()
+        mcparticle.pdgCode = -11
+        mcparticle.ke = 123
+        mcparticle.pos = ROOT.TVector3(1,2,3)
+        mcparticle.mom = ROOT.TVector3(3,2,1)
+        mcparticle.time = 42
+
         zdab_event = ratzdab.pack.event(ds, 0)
         ds_converted = ratzdab.unpack.event(zdab_event)
         ev_converted = ds_converted.GetEV(0)
@@ -109,6 +117,16 @@ class TestEvent(unittest.TestCase):
         self.assertTrue(pmtc.sQHL == pmtc_converted.sQHL)
         self.assertTrue(pmtc.sQLX == pmtc_converted.sQLX)
         self.assertTrue(pmtc.sPMTt == pmtc_converted.sPMTt)
+
+        mc_converted = ds_converted.GetMC()
+        self.assertTrue(mc_converted.GetMCParticleCount() == mc.GetMCParticleCount())
+        mcparticle_converted = mc.GetMCParticle(0)
+        self.assertTrue(mcparticle_converted.pdgCode == mcparticle.pdgCode)
+        self.assertTrue(mcparticle_converted.ke == mcparticle.ke)
+        self.assertTrue(mcparticle_converted.pos == mcparticle.pos)
+        self.assertTrue(mcparticle_converted.mom == mcparticle.mom)
+        self.assertTrue(mcparticle_converted.time == mcparticle.time)
+        self.assertTrue(mcparticle_converted.pdgCode == mcparticle.pdgCode)
 
 
 if __name__ == '__main__':

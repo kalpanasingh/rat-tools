@@ -50,5 +50,10 @@
 #pragma link C++ function ratzdab::pack::eped(RAT::DS::EPEDInfo*);
 #pragma link C++ class ratzdab::pack;
 
+// utility functions
+#pragma link C++ function ratzdab::get_pdg_to_snoman_map();
+#pragma link C++ function ratzdab::get_pdg_to_mass_map();
+#pragma link C++ class ratzdab;
+
 #endif
 

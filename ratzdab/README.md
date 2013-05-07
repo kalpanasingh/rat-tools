@@ -81,6 +81,11 @@ libzconvert: ZDAB-ROOT Conversions
     TriggerInfo* trig(RAT::DS::TRIGInfo* o)
     EpedRecord* eped(RAT::DS::EPEDInfo* o)
 
+The following functions return maps for converting particle properties:
+
+    get_pdg_to_mass_map()    // map from PDG code to mass in MeV/c^2 (incomplete list)
+    get_pdg_to_snoman_map()  // map from PDG code to SNOMAN particle code (incomplete list)
+
 Examples
 --------
 Example programs using libratzdab are provided in `examples`. See `examples/README.md` for details.
@@ -110,6 +115,8 @@ This Python library is simply `libratzdab` wrapped by PyROOT, so the interface i
 * `ratzdab.dispatch(hostname, block=True)`: A `ratzdab::dispatch` ZDAB dispatcher interface object
 * `ratzdab.pack`: Packing functions from `ratzdab::pack`
 * `ratzdab.unpack`: Unpacking functions from `ratzdab::unpack`
+* `ratzdab.get_pdg_to_snoman_map`: Get a map of PDG code to SNOMAN particle code
+* `ratzdab.get_pdg_to_mass_map`: Get a map of PDG code to particle mass in MeV/c^2
 
 SNO struct types are available in `ratzdab.ROOT` and RAT ROOT types are found in `ratzdab.ROOT.RAT`.
 

@@ -1,10 +1,13 @@
 #include <zdab_convert.hpp>
 #include <stdint.h>
+#include <utility>
 #include <string>
 #include <vector>
 #include <map>
+#include <algorithm>
 #include <PZdabFile.h>
 #include <TObject.h>
+#include <TMath.h>
 #include <RAT/DB.hh>
 #include <RAT/Log.hh>
 #include <RAT/DS/Root.hh>
@@ -18,7 +21,8 @@
 
 namespace ratzdab {
 
-    /** RATDB instance to get at PMTINFO */
+    /** RATDB instance to get at PMTINFO, since PMT type is needed to
+        populate the RAT DS. */
     static class RATDB {
         public:
             RATDB() {
@@ -47,6 +51,66 @@ namespace ratzdab {
         protected:
             RAT::DB* db;
     } ratdb;
+
+    /** initialize static maps */
+
+    std::map<int, int> get_pdg_to_snoman_map() {
+        std::map<int, int> m;
+        m[0] = 1;  // Photon, G4 also uses 0 for geantino and unknown
+        m[22] = 2;  // Gamma
+        m[11] = 20;  // Electron
+        m[-11] = 21;  // Positron
+        m[13] = 22;  // Mu-
+        m[-13] = 23;  // Mu+
+        m[15] = 24;  // Tau-
+        m[-15] = 25;  // Tau+
+        m[12] = 30;  // Nu-e
+        m[-12] = 31;  // Nu-e-bar
+        m[14] = 32;  // Nu-mu
+        m[-14] = 33;  // Nu-mu-bar
+        m[16] = 34;  // Nu-tau
+        m[-16] = 35;  // Nu-tau-bar
+        m[111] = 40;  // Pi0
+        m[211] = 41;  // Pi+
+        m[-211] = 42;  // Pi-
+        m[311] = 50;  // K0
+        m[-311] = 51;  // K0-bar
+        m[321] = 52;  // K+
+        m[-321] = 53;  // K-
+        m[2212] = 80;  // Proton
+        m[2112] = 81;  // Neutron
+        return m;
+    }
+    static std::map<int, int> pdg_to_snoman = get_pdg_to_snoman_map();
+
+    std::map<int, float> get_pdg_to_mass_map() {
+        std::map<int, float> m;
+        m[0] = 0;  // Photon, G4 also uses 0 for geantino and unknown
+        m[22] = 0;  // Gamma
+        m[11] = 0.510998928;  // Electron
+        m[-11] = 0.510998928;  // Positron
+        m[13] = 105.6583715;  // Mu-
+        m[-13] = 105.6583715;  // Mu+
+        m[15] = 1776.82;  // Tau-
+        m[-15] = 1776.82;  // Tau+
+        m[12] = 0;  // Nu-e
+        m[-12] = 0;  // Nu-e-bar
+        m[14] = 0;  // Nu-mu
+        m[-14] = 0;  // Nu-mu-bar
+        m[16] = 0;  // Nu-tau
+        m[-16] = 0;  // Nu-tau-bar
+        m[111] = 134.9766;  // Pi0
+        m[211] = 139.57018;  // Pi+
+        m[-211] = 139.57018;  // Pi-
+        m[311] = 497.648;  // K0
+        m[-311] = 497.648;  // K0-bar
+        m[321] = 493.667;  // K+
+        m[-321] = 493.667;  // K-
+        m[2212] = 938.272046;  // Proton
+        m[2112] = 939.565378;  // Neutron
+        return m;
+    }
+    static std::map<int, float> pdg_to_mass = get_pdg_to_mass_map();
 
     /** unpacking functions */
 
@@ -77,7 +141,7 @@ namespace ratzdab {
         ds->SetRunID(run_id);
         ds->SetSubRunID(subrun_id);
 
-        ev->SetClockStat10(0);  // what is this?
+        ev->SetClockStat10(0);  // FIXME: what is this?
         ev->SetTrigError(trig_error);
         ev->SetESumPeak(esumpeak);
         ev->SetESumDiff(esumdiff);
@@ -181,7 +245,8 @@ namespace ratzdab {
         if (extrahitinfo) {
             ExtraHitData* ehd = reinterpret_cast<ExtraHitData*>(extrahitinfo);
             float* p = reinterpret_cast<float*>(ehd + 1);
-            std::cerr << "ratzdab::unpack::event: Extra hit data of type " << ehd->name << " not converted." << std::endl;
+            std::cerr << "ratzdab::unpack::event: Extra hit data of type "
+                      << ehd->name << " not converted." << std::endl;
             if (false) {
                 for (unsigned i=0; i<nhit; i++) {
                     //float f = *p;  // set something somewhere
@@ -195,7 +260,8 @@ namespace ratzdab {
             ExtraEventData* eed = reinterpret_cast<ExtraEventData*>(extraeventinfo);
             char* name = eed->name;
             float value = eed->value;
-            std::cerr << "ratzdab::unpack::event: Extra event data " << name << " = " << value << " not converted." << std::endl;
+            std::cerr << "ratzdab::unpack::event: Extra event data " << name
+                      << " = " << value << " not converted." << std::endl;
         }
 
         // monte carlo data
@@ -204,11 +270,49 @@ namespace ratzdab {
             MonteCarloVertex* mcvtx = reinterpret_cast<MonteCarloVertex*>(mchdr + 1);
             for (unsigned i=0; i<mchdr->nVertices; i++, ++mcvtx) {
                 RAT::DS::MCParticle* p = ds->GetMC()->AddNewMCParticle();
-                p->SetPDGCode(mcvtx->int_code);
+                int snoman_code = mcvtx->particle;
+
+                // convert cm -> mm
+                p->SetPos(TVector3(mcvtx->x * 10, mcvtx->y * 10, mcvtx->z * 10));
+
+                // convert SNOMAN code to PDG
+                int pdgcode = 0;
+                bool found_code = false;
+                std::map<int, int>::const_iterator it_code;
+                for (it_code=ratzdab::pdg_to_snoman.begin(); it_code!=ratzdab::pdg_to_snoman.end(); it_code++) {
+                    if (it_code->second == snoman_code) {
+                        pdgcode = it_code->first;
+                        found_code = true;
+                        break;
+                    }
+                }
+                if (!found_code) {
+                    cerr << "ratzdab::pack::event: No PDG code available for SNOMAN code "
+                         << snoman_code << ", using zero." << std::endl;
+                }
+                p->SetPDGCode(pdgcode);
+
+                // convert total energy to kinetic
+                float mass = 0;
+                std::map<int, float>::const_iterator it_mass = ratzdab::pdg_to_mass.find(pdgcode);
+                if (it_mass != ratzdab::pdg_to_mass.end()) {
+                    mass = it_mass->second;
+                }
+                else {
+                    cerr << "ratzdab::pack::event: No mass code available for PDG code "
+                         << pdgcode << ", using zero." << std::endl;
+                }
+                float momentum = mcvtx->energy * mcvtx->energy - mass * mass;
+                float ke = momentum * momentum / (2 * mass);
+                p->SetKE(ke);
+
+                // convert direction cosines to cartesian momentum vector
+                double px = momentum * TMath::Cos(mcvtx->u);
+                double py = momentum * TMath::Cos(mcvtx->v);
+                double pz = momentum * TMath::Cos(mcvtx->w);
+                p->SetMom(TVector3(px, py, pz));
+
                 p->SetTime(mcvtx->time);
-                p->SetPos(TVector3(mcvtx->x, mcvtx->y, mcvtx->z));
-                p->SetKE(mcvtx->energy);  // FIXME probably total mass from snoman
-                p->SetMom(TVector3(mcvtx->u, mcvtx->v, mcvtx->w));  // FIXME (u,v,w) are direction cosines
             }
         }
 
@@ -235,7 +339,9 @@ namespace ratzdab {
     RAT::DS::Run* unpack::rhdr(RunRecord* const r) {
         // sno DAQCodeVersion is uint32, rat DAQVer is char
         if (r->DAQCodeVersion > 0xff) {
-            std::cerr << "ratzdab::unpack::rhdr: DAQCodeVersion (" << std::hex << r->DAQCodeVersion << std::dec << ") overflows char type" << std::endl;
+            std::cerr << "ratzdab::unpack::rhdr: DAQCodeVersion ("
+                      << std::hex << r->DAQCodeVersion << std::dec
+                      << ") overflows char type" << std::endl;
         }
 
         RAT::DS::Run* run = new RAT::DS::Run;
@@ -482,7 +588,19 @@ namespace ratzdab {
 
         // monte carlo data
         if (mc) {
-            length += mc->GetMCParticleCount() * sizeof(MonteCarloVertex) + sizeof(MonteCarloHeader) + sizeof(SubFieldHeader);
+            int nvertices = 0;
+            if (mc->GetMCTrackCount() > 0) {
+                for (int itrack=0; itrack<mc->GetMCTrackCount(); itrack++) {
+                    RAT::DS::MCTrack* track = mc->GetMCTrack(itrack);
+                    for (int istep=0; istep<track->GetMCTrackStepCount(); istep++) {
+                        nvertices++;
+                    }
+                }
+            }
+            else {
+                nvertices = mc->GetMCParticleCount();
+            }
+            length += nvertices * sizeof(MonteCarloVertex) + sizeof(MonteCarloHeader) + sizeof(SubFieldHeader);
         }
 
         // fits
@@ -540,40 +658,174 @@ namespace ratzdab {
 
         // add monte carlo data
         if (mc) {
-            int nvertices = mc->GetMCParticleCount();
-            if (nvertices > 0) {
-                PZdabFile::AddSubField(&sub_header, SUB_TYPE_MONTE_CARLO, sizeof(MonteCarloHeader) + nvertices * sizeof(MonteCarloVertex));
+            // if tracking is enabled, add track steps. otherwise, just add
+            // the primary vertex MCParticles
+            if (mc->GetMCTrackCount() > 0) {
+                // build table to look up sequential vertex id by track and step index
+                std::map<std::pair<int, int>, int> step_to_vertex_id;
+                std::map<int, int> track_id_to_index;
+                int nvertices = 0;
+                for (int itrack=0; itrack<mc->GetMCTrackCount(); itrack++) {
+                    RAT::DS::MCTrack* track = mc->GetMCTrack(itrack);
+                    track_id_to_index[track->GetTrackID()] = itrack;
+                    for (int istep=0; istep<track->GetMCTrackStepCount(); istep++) {
+                        step_to_vertex_id[std::make_pair(itrack, istep)] = nvertices++;
+                    }
+                }
+                assert(nvertices == step_to_vertex_id.size());
 
-                // get pointer to start of monte-carlo data and vertices
-                MonteCarloHeader *mc_hdr = reinterpret_cast<MonteCarloHeader*>(sub_header + 1);
-                MonteCarloVertex *mc_vtx = reinterpret_cast<MonteCarloVertex*>(mc_hdr + 1);
+                if (nvertices > 0) {
+                    PZdabFile::AddSubField(&sub_header, SUB_TYPE_MONTE_CARLO, sizeof(MonteCarloHeader) + nvertices * sizeof(MonteCarloVertex));
 
-                // fill in the monte carlo data values
-                mc_hdr->nVertices = nvertices;
-                for (int i=0; i<nvertices; i++, mc_vtx++) {
-                    RAT::DS::MCParticle *p = mc->GetMCParticle(i);
-                    mc_vtx->energy = p->GetKE();  // FIXME use total E for consistency
-                    mc_vtx->x = p->GetPos()[0]/10;
-                    mc_vtx->y = p->GetPos()[1]/10;
-                    mc_vtx->z = p->GetPos()[2]/10;
-                    mc_vtx->u = p->GetMom()[0];
-                    mc_vtx->v = p->GetMom()[1];
-                    mc_vtx->w = p->GetMom()[2];
-                    //mc_vtx->particle = p->GetIDP();
-                    mc_vtx->int_code = p->GetPDGCode();
-                    //mc_vtx->parent = p->GetIndex();
-                    mc_vtx->time = p->GetTime();
+                    // get pointer to start of monte-carlo data and vertices
+                    MonteCarloHeader* mc_hdr = reinterpret_cast<MonteCarloHeader*>(sub_header + 1);
+                    MonteCarloVertex* mc_vtx = reinterpret_cast<MonteCarloVertex*>(mc_hdr + 1);
+
+                    // fill in the monte carlo data
+                    mc_hdr->nVertices = nvertices;
+
+                    int vertex_id = 0;
+                    for (int itrack=0; itrack<mc->GetMCTrackCount(); itrack++) {
+                        RAT::DS::MCTrack* track = mc->GetMCTrack(itrack);
+                        for (int istep=0; istep<track->GetMCTrackStepCount(); istep++) {
+                            RAT::DS::MCTrackStep* step = track->GetMCTrackStep(istep);
+
+                            int pdgcode = track->GetPDGCode();
+                            float momentum = step->GetMom().Mag();
+
+                            // convert kinetic to total energy
+                            double mass = 0;
+                            std::map<int, float>::const_iterator it_mass = ratzdab::pdg_to_mass.find(pdgcode);
+                            if (it_mass != ratzdab::pdg_to_mass.end()) {
+                                mass = it_mass->second;
+                            }
+                            else {
+                                cerr << "ratzdab::unpack::event: No mass available for PDG code "
+                                     << pdgcode << ", using zero." << std::endl;
+                            }
+                            mc_vtx->energy = TMath::Sqrt(mass*mass + momentum*momentum);  // all MeV, c=1
+
+                            // convert mm -> cm
+                            mc_vtx->x = step->GetEndPos()[0] / 10;
+                            mc_vtx->y = step->GetEndPos()[1] / 10;
+                            mc_vtx->z = step->GetEndPos()[2] / 10;
+
+                            // u, v, w are direction cosines
+                            mc_vtx->u = step->GetMom()[0] / momentum;
+                            mc_vtx->v = step->GetMom()[1] / momentum;
+                            mc_vtx->w = step->GetMom()[2] / momentum;
+
+                            // convert from PDG to SNOMAN code
+                            int code = 0;  // 0 indicates unknown particle
+                            std::map<int, int>::const_iterator it_code = ratzdab::pdg_to_snoman.find(pdgcode);
+                            if (it_code != ratzdab::pdg_to_snoman.end()) {
+                                code = it_code->second;
+                            }
+                            mc_vtx->particle = code;
+
+                            mc_vtx->int_code = 100;  // interaction code; FIXME: 100 = start
+
+                            // parent is previous step, or if this is the first
+                            // step in the track, look up parent track and
+                            // fuzzy match to determine which step
+                            int parent = vertex_id - 1;
+                            if (istep == 0) {
+                                int parent_track_id = track->GetParentID();
+                                std::map<int, int>::iterator it_ptid = track_id_to_index.find(parent_track_id);
+                                if (it_ptid == track_id_to_index.end()) {
+                                    parent = -1;
+                                }
+                                else {
+                                    RAT::DS::MCTrack* parent_track = mc->GetMCTrack(it_ptid->second);
+
+                                    assert(parent_track->GetMCTrackStepCount() > 0);
+                                    double closest_distance = (parent_track->GetMCTrackStep(0)->GetEndPos() - step->GetEndPos()).Mag();
+                                    int closest_step_id = 0;
+                                    for (int jstep=0; jstep<parent_track->GetMCTrackStepCount(); jstep++) {
+                                        RAT::DS::MCTrackStep* parent_step = parent_track->GetMCTrackStep(jstep);
+                                        double dist = (parent_step->GetEndPos() - step->GetEndPos()).Mag();
+                                        if (dist < closest_distance) {
+                                            closest_distance = dist;
+                                            closest_step_id = jstep;
+                                        }
+                                    }
+                                    parent = step_to_vertex_id[std::make_pair(it_ptid->second, closest_step_id)];
+                                }
+                            }
+
+                            mc_vtx->parent = parent;
+
+                            mc_vtx->time = step->GetGlobalTime();
+                            mc_vtx->flags = 0;
+
+                            vertex_id++;
+                            mc_vtx++;
+                        }
+                    }
+                }
+            }
+            else {
+                int nvertices = mc->GetMCParticleCount();
+                if (nvertices > 0) {
+                    PZdabFile::AddSubField(&sub_header, SUB_TYPE_MONTE_CARLO, sizeof(MonteCarloHeader) + nvertices * sizeof(MonteCarloVertex));
+
+                    // get pointer to start of monte-carlo data and vertices
+                    MonteCarloHeader* mc_hdr = reinterpret_cast<MonteCarloHeader*>(sub_header + 1);
+                    MonteCarloVertex* mc_vtx = reinterpret_cast<MonteCarloVertex*>(mc_hdr + 1);
+
+                    // fill in the monte carlo data values
+                    mc_hdr->nVertices = nvertices;
+                    for (int i=0; i<nvertices; i++, mc_vtx++) {
+                        RAT::DS::MCParticle* p = mc->GetMCParticle(i);
+                        int pdgcode = p->GetPDGCode();
+                        float momentum = p->GetMom().Mag();
+     
+                        // convert kinetic to total energy
+                        double mass = 0;
+                        std::map<int, float>::const_iterator it_mass = ratzdab::pdg_to_mass.find(pdgcode);
+                        if (it_mass != ratzdab::pdg_to_mass.end()) {
+                            mass = it_mass->second;
+                        }
+                        else {
+                            cerr << "ratzdab::unpack::event: No mass available for PDG code "
+                                 << pdgcode << ", using zero." << std::endl;
+                        }
+                        mc_vtx->energy = TMath::Sqrt(mass*mass + momentum*momentum);  // all MeV, c=1
+     
+                        // convert mm -> cm
+                        mc_vtx->x = p->GetPos()[0] / 10;
+                        mc_vtx->y = p->GetPos()[1] / 10;
+                        mc_vtx->z = p->GetPos()[2] / 10;
+     
+                        // u, v, w are direction cosines
+                        mc_vtx->u = p->GetMom()[0] / momentum;
+                        mc_vtx->v = p->GetMom()[1] / momentum;
+                        mc_vtx->w = p->GetMom()[2] / momentum;
+     
+                        // convert from PDG to SNOMAN code
+                        int code = 0;  // 0 indicates unknown particle
+                        std::map<int, int>::const_iterator it_code = ratzdab::pdg_to_snoman.find(pdgcode);
+                        if (it_code != ratzdab::pdg_to_snoman.end()) {
+                            code = it_code->second;
+                        }
+                        mc_vtx->particle = code;
+     
+                        mc_vtx->int_code = 100;  // interaction code; FIXME: 100 = start
+                        mc_vtx->parent = -1;  // p->GetIndex() in QSNO
+                        mc_vtx->time = p->GetTime();
+                        mc_vtx->flags = 0;
+                    }
                 }
             }
         }
-
+     
         // add all available fits
         for (it=ev->GetFitResultIterBegin(); it!=ev->GetFitResultIterEnd(); ++it) {
             PZdabFile::AddSubField(&sub_header, SUB_TYPE_FIT, sizeof(FittedEvent));
 
             // get pointer to start of fit data
-            FittedEvent *fit = reinterpret_cast<FittedEvent*>(sub_header + 1);
-            RAT::DS::FitResult *rfit = &(*it).second;
+            FittedEvent* fit = reinterpret_cast<FittedEvent*>(sub_header + 1);
+            RAT::DS::FitResult* rfit = &(*it).second;
 
             if (rfit->GetVertexCount() == 0) {
                 continue;

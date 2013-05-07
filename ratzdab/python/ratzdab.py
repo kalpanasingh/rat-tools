@@ -30,4 +30,6 @@ zdabfile = ROOT.ratzdab.zdabfile
 dispatch = ROOT.ratzdab.dispatch
 pack = ROOT.ratzdab.pack
 unpack = ROOT.ratzdab.unpack
+get_pdg_to_mass_map = ROOT.ratzdab.get_pdg_to_mass_map
+get_pdg_to_snoman_map = ROOT.ratzdab.get_pdg_to_snoman_map
 
