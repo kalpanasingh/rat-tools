@@ -76,7 +76,6 @@ int main(int argc, char* argv[]) {
             // handle record types
             if (r->IsA() == RAT::DS::Run::Class()) {
                 *run = *(dynamic_cast<RAT::DS::Run*>(r));
-                runtree->Fill();
                 run_active = true;
                 std::cout << "RHDR: Run " << run->GetRunID() << std::endl;
             }
@@ -167,6 +166,7 @@ int main(int argc, char* argv[]) {
     }
 
     outfile.cd();
+    runtree->Fill();
     runtree->Write();
     tree->Write();
     outfile.Close();
