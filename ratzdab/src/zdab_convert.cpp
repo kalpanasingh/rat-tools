@@ -28,7 +28,12 @@ namespace ratzdab {
                 db = RAT::DB::Get();
                 assert(db);
 
-                std::string data = getenv("GLG4DATA");
+                char* glg4data = getenv("GLG4DATA");
+                if (glg4data == static_cast<char*>(NULL)) {
+                    std::cerr << "ratzdab::ratdb: Environment variable $GLG4DATA must be set" << std::endl;
+                    assert(glg4data);
+                }
+                std::string data = std::string(glg4data);
                 assert(data != "");
                 db->Load(data + "/pmt/airfill2.ratdb");
 
@@ -139,7 +144,8 @@ namespace ratzdab {
 
             if (crate_id > 18 || board_id > 15 || channel_id > 31) {
                 if (VERBOSE) {
-                    std::cerr << "Invalid hit PMT c/c/c: "
+                    std::cerr << "ratzdab::unpack::event: "
+                              << "Invalid hit PMT c/c/c: "
                               << crate_id << "/"
                               << board_id << "/"
                               << channel_id
