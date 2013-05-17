@@ -8,11 +8,10 @@ transitTime = [170.0, 175.0, 180.0, 185.0, 190.0, 195.0, 200.0,]
 fiducialCut = 5500
 
 def UpdateData( filename ):
-    #run = rat.runreader( filename )
     biasPlot = ROOT.TH1D( "RadialBias", "RadialBias", 200, -1000.0, 1000.0, )
     biasFit = ROOT.TF1("biasFit","gaus",-1000,1000)
     eventNum = 0
-    for ds in rat.dsreader( filename ):
+    for ds, run in rat.dsreader( filename ):
         eventNum += 1
         evc = ds.GetEVCount()
         if(evc):

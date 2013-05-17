@@ -12,7 +12,7 @@ def NhitsHistogram( fileName ):
 
     nhitHist = ROOT.TH1D( fileName, "Nhit", 300, 0.0, 3000.0 )
 
-    for ds in rat.dsreader( fileName ):
+    for ds, run in rat.dsreader( fileName ):
         if( ds.GetEVCount() == 0 ):
             continue
         nhitHist.Fill( ds.GetEV(0).GetPMTCalCount() )

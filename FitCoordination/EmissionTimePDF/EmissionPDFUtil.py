@@ -8,7 +8,7 @@ def ProducePDF():
 
 	emissionTimes = ROOT.TH1D( "emissionTime", "emissionTime", 600, -100.5, 499.5 )
 	eventNum = 0
-	for ds in rat.dsreader( "Tracks.root" ):
+	for ds, run in rat.dsreader( "Tracks.root" ):
 		print eventNum
 		eventNum += 1
 		mc = ds.GetMC()
