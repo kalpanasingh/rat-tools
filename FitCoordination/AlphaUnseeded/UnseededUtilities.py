@@ -14,7 +14,7 @@ def ProduceRatioHistogram(filename, tailfrac):
 	# produces the overall histogram of the ratio of PMTs in the Trigger Time Tail to total PMTs in the event, for the specified rootfile
 	Histogram = ROOT.TH1D(filename, filename + ": Trigger Times Tail PMTs/Total PMTs in Event", 100, 0.0, 1.0)
 
-	for ds in rat.dsreader(filename):
+	for ds, run in rat.dsreader(filename):
 		if ds.GetEVCount() == 0:
 			continue
 		ev = ds.GetEV(0)

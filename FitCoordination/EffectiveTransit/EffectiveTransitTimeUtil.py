@@ -9,13 +9,13 @@ posSet = [ 0.0, 1000.0, 2000.0, 3000.0, 4000.0, 5000.0, 5500.0, 5600.0, 5700.0, 
 def UpdateData( filename, fullPlot ):
     """ Open one of the data files and extract the transit time difference between forward and backward
     photons. Consider those within 10degrees of the event axis only."""
-    run = rat.runreader( filename )
-    straightPath = run.GetStraightLinePath()
-    groupVeloTime = run.GetGroupVelocityTime()
-    pmtProp = run.GetPMTProp()
-
+    
     eventNum = 0
-    for ds in rat.dsreader( filename ):
+    for ds, run in rat.dsreader( filename ):
+        straightPath = run.GetStraightLinePath()
+        groupVeloTime = run.GetGroupVelocityTime()
+        pmtProp = run.GetPMTProp()
+	
         if( eventNum % 100  == 0 ):
             print eventNum
         eventNum += 1
@@ -70,13 +70,13 @@ def ProduceProfile():
 
 def UpdateProfile( filename, profile ):
     """ Old, obsolete profile method."""
-    run = rat.runreader( filename )
-    straightPath = run.GetStraightLinePath()
-    groupVeloTime = run.GetGroupVelocityTime()
-    pmtProp = run.GetPMTProp()
     
     eventNum = 0
-    for ds in rat.dsreader( filename ):
+    for ds, run in rat.dsreader( filename ):
+        straightPath = run.GetStraightLinePath()
+        groupVeloTime = run.GetGroupVelocityTime()
+        pmtProp = run.GetPMTProp()
+	
         if( eventNum % 100  == 0 ):
             print eventNum
         eventNum += 1
