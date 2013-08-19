@@ -3,14 +3,16 @@ import ROOT, rat
 # Useful utility functions
 # Author P G Jones - 13/09/2011 <p.jones22@physics.ox.ac.uk>
 
-PosSet = [ 0.0, 2000.0, 4000.0, 5000.0, 5500.0, 5750.0, 5950.0 ]
+PosSet = [ 0.0, 2000.0, 4000.0, 5000.0, 5500.0, 5750.0, 5950.0, 6100.0, 6500.0, 7000.0, 7500.0, 8000.0 ]
 EnergySet = [ 1.0, 2.0, 3.0, 3.5, 4.0, 5.0 ]
+## Energies if using water-filled detector
+#EnergySet = [ 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0 ]
 
 def NhitsHistogram( fileName ):
 
     nhitHist = ROOT.TH1D( fileName, "Nhit", 300, 0.0, 3000.0 )
 
-    for ds in rat.dsreader( fileName ):
+    for ds, run in rat.dsreader( fileName ):
         if( ds.GetEVCount() == 0 ):
             continue
         nhitHist.Fill( ds.GetEV(0).GetPMTCalCount() )

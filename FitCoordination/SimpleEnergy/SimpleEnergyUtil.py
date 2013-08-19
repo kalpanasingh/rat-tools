@@ -8,7 +8,7 @@ def ProduceNhitRadiusGraph():
 
 	plotPoint = 0
 	nhitRadiusPlot = ROOT.TGraph()
-	for ds in rat.dsreader( "E1MeV.root" ):
+	for ds, run in rat.dsreader( "E1MeV.root" ):
 		mc = ds.GetMC()
 		if( ds.GetEVCount() == 0 ):
 			continue
@@ -24,7 +24,7 @@ def ProduceNhitOriginHistogram():
 	"""Histogram the origin mc events."""
 
 	nhitOriginHisto = ROOT.TH1D( "NhitOrigin", "NhitOrigin", 1000, 0, 1000 )
-	for ds in rat.dsreader( "E1MeV.root" ):
+	for ds, run in rat.dsreader( "E1MeV.root" ):
 		mc = ds.GetMC()
 		if( ds.GetEVCount() == 0 ):
 			continue

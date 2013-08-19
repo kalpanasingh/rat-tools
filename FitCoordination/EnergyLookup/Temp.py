@@ -21,7 +21,7 @@ def NHitEnergyHistogram( fileName ):
 	nhitHist = ROOT.TH1D( fileName, "NHit", 300, 0.0, 3000.0 )
 	energyHist = ROOT.TH1D( fileName, "Energy", 600, 0.0, 6.0 )
 
-	for ds in rat.dsreader( fileName ):
+	for ds, run in rat.dsreader( fileName ):
 		if( ds.GetEVCount() == 0 ):
 			continue
 		if( ds.GetEV(0).GetFitResult( "energyLookup:scintFitter" ).GetValid() ):
