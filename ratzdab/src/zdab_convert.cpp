@@ -891,7 +891,7 @@ namespace ratzdab {
             uint16_t channel_mask = d->GetChanMask();
             uint16_t pattern = d->GetIOPins();
             uint16_t pack_flag = d->GetBit24();
-            uint32_t word_count = 4 + d->GetNWords() * d->GetTrigSumCount();
+            uint32_t word_count = d->GetNWords();
             uint32_t board_id = d->GetBoardID();
             uint32_t event_id = d->GetDigEventID();
             uint32_t trigger_time = d->GetTrigTagTime();
