@@ -343,19 +343,13 @@ namespace ratzdab {
     }
 
     RAT::DS::Run* unpack::rhdr(RunRecord* const r) {
-        // sno DAQCodeVersion is uint32, rat DAQVer is char
-        if (r->DAQCodeVersion > 0xff) {
-            std::cerr << "ratzdab::unpack::rhdr: DAQCodeVersion ("
-                      << std::hex << r->DAQCodeVersion << std::dec
-                      << ") overflows char type" << std::endl;
-        }
-
         RAT::DS::Run* run = new RAT::DS::Run;
 
         run->SetDate(r->Date);
         run->SetTime(r->Time);
-        run->SetDAQVer(r->DAQCodeVersion);
+        run->SetDAQVer(0);
         run->SetRunID(r->RunNumber);
+        run->SetSubRunID(r->DAQCodeVersion); //seriously
         run->SetCalibTrialID(r->CalibrationTrialNumber);
         run->SetSrcMask(r->SourceMask);
         run->SetRunType(r->RunMask);
@@ -427,6 +421,11 @@ namespace ratzdab {
     }
 
     RAT::DS::EPEDInfo* unpack::eped(EpedRecord* const e) {
+        if (e->Flag == 0x01000000) { //orca subrun record
+            TObject* feped = new TObject();
+            return reinterpret_cast<RAT::DS::EPEDInfo*>(feped);
+        }
+
         RAT::DS::EPEDInfo* eped = new RAT::DS::EPEDInfo;
 
         eped->SetGTDelayCoarse(e->ped_delay_coarse);
