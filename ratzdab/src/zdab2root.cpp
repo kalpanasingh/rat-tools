@@ -124,10 +124,11 @@ int main(int argc, char* argv[]) {
 
                 // some run-level data has to come from an event
                 if (run_active && !run_level_data_set) {
-                    run->SetSubRunID(ds->GetSubRunID());
                     run->SetMCFlag(0);  // no mc zdabs
                     run->SetPackVer(0);  // not in event, maybe MAST?
                     run->SetDataType(0);  // ???
+
+                    run_level_data_set = true;
                 }
 
                 // set event headers if available
@@ -146,6 +147,9 @@ int main(int argc, char* argv[]) {
                 tree->Fill();
 
                 event_count++;
+            }
+            else if (r->IsA() == TObject::Class()) {
+                //a record has been swallowed by converter on purpose
             }
             else {
                 std::cerr << "Unhandled ROOT object of type " << r->ClassName() << std::endl;
