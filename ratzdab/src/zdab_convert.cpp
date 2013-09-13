@@ -332,7 +332,6 @@ namespace ratzdab {
 
                 RAT::DS::FitResult fr;
                 fr.SetFOM("quality", fitdata->quality);
-                fr.SetValid(true);
                 fr.SetVertex(0, fv);
 
                 ev->SetFitResult(fitdata->name, fr);
