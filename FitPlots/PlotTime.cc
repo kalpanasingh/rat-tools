@@ -176,31 +176,26 @@ ExtractTime(
             continue;
 
           RAT::DS::EV *rEV = rDS->GetEV( iEvent );
-          try
-            {
-              if( rEV->GetFitResult( lFit ).GetValid() == false )
-                continue;
-            }
-          catch( std::runtime_error& e )
-            {
-              cout << lFit << " failed for event " << iEvent << ". Continuing..." << endl;
-              continue;
-            }
-
           double fitTime;
           try
             {
-              fitTime = rEV->GetFitResult( lFit ).GetVertex(0).GetTime();
-            }
-          catch( RAT::DS::FitVertex::NoValueError& e )
-            {
-              cout << lFit << " fitter has not reconstructed a time." << endl;
-              return;
+              DS::FitVertex fitVertex =rEV->GetFitResult( lFit ).GetVertex(0);
+              if( fitVertex.ContainsTime()&& fitVertex.ValidTime() )
+                fitTime = fitVertex.GetTime();
+              else if( !fitVetex.ContainsTime() )
+                cout <<lFit <<" has not reconstructed time." << endl;
+              else if( !fitVertex.ValidTime() )
+                cout <<lFit <<": Invalid time reconstruction." << endl;
             }
           catch( RAT::DS::FitResult::NoVertexError& e )
             {
               cout << lFit << " has not reconstructed a vertex." << endl;
               return;
+            }
+          catch( std::runtime_error& e )
+            {
+              cout << lFit << " failed for event " << iEvent << ". Continuing..." << endl;
+              continue;
             }
           
           (*hCountVTime)->Fill( fitTime );

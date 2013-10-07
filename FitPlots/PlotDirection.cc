@@ -219,34 +219,29 @@ ExtractDirection(
             continue;
 
           RAT::DS::EV *rEV = rDS->GetEV( iEvent );
-          try
-            {
-              if( rEV->GetFitResult( lFit ).GetValid() == false )
-                continue;
-            }
-          catch( std::runtime_error& e )
-            {
-              cout << lFit << " failed for event " << iEvent << ". Continuing..." << endl;
-              continue;
-            }
-
           TVector3 fitDirection;
           TVector3 xAxis(1,0,0);
           TVector3 yAxis(0,1,0);
           TVector3 zAxis(0,0,1);
           try
             {
-              fitDirection = rEV->GetFitResult( lFit ).GetVertex(0).GetDirection();
-            }
-          catch( RAT::DS::FitVertex::NoValueError& e )
-            {
-              cout << lFit << " fitter has not reconstructed a direction." << endl;
-              return;
+              DS::FitVertex fitVertex =rEV->GetFitResult( lFit ).GetVertex(0);
+              if( fitVertex.ContainsDirection()&& fitVertex.ValidDirection() )
+                fitDirection = fitVertex.GetDirection();
+              else if( !fitVetex.ContainsDirection() )
+                cout <<lFit <<" has not reconstructed direction." << endl;
+              else if( !fitVertex.ValidDirection() )
+                cout <<lFit <<": Invalid direction reconstruction." << endl;
             }
           catch( RAT::DS::FitResult::NoVertexError& e )
             {
               cout << lFit << " has not reconstructed a vertex." << endl;
               return;
+            }
+          catch( std::runtime_error& e )
+            {
+              cout << lFit << " failed for event " << iEvent << ". Continuing..." << endl;
+              continue;
             }
          
           double deltaDX = acos( fitDirection.Dot( xAxis ) ) * 180.0 / 3.14;

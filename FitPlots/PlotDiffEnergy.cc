@@ -220,31 +220,26 @@ ExtractDiffEnergy(
             continue;
 
           RAT::DS::EV *rEV = rDS->GetEV( iEvent );
-          try
-            {
-              if( rEV->GetFitResult( lFit ).GetValid() == false )
-                continue;
-            }
-          catch( std::runtime_error& e )
-            {
-              cout << lFit << " failed for event " << iEvent << ". Continuing..." << endl;
-              continue;
-            }
-
           double fitEnergy;
           try
             {
-              fitEnergy = rEV->GetFitResult( lFit ).GetVertex(0).GetEnergy();
-            }
-          catch( RAT::DS::FitVertex::NoValueError& e )
-            {
-              cout << lFit << " fitter has not reconstructed an energy." << endl;
-              return;
+              DS::FitVertex fitVertex =rEV->GetFitResult( lFit ).GetVertex(0);
+              if( fitVertex.ContainsEnergy()&& fitVertex.ValidEnergy() )
+                fitEnergy = fitVertex.GetEnergy();
+              else if( !fitVetex.ContainsEnergy() )
+                cout <<lFit <<" has not reconstructed energy." << endl;
+              else if( !fitVertex.ValidEnergy() )
+                cout <<lFit <<": Invalid energy reconstruction." << endl;
             }
           catch( RAT::DS::FitResult::NoVertexError& e )
             {
               cout << lFit << " has not reconstructed a vertex." << endl;
               return;
+            }
+          catch( std::runtime_error& e )
+            {
+              cout << lFit << " failed for event " << iEvent << ". Continuing..." << endl;
+              continue;
             }
           double deltaE = fitEnergy - mcEnergy;
 

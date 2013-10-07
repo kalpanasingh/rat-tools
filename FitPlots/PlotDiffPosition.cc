@@ -279,31 +279,26 @@ ExtractDiffPosition(
             continue;
 
           RAT::DS::EV *rEV = rDS->GetEV( iEvent );
-          try
-            {
-              if( rEV->GetFitResult( lFit ).GetValid() == false )
-                continue;
-            }
-          catch( std::runtime_error& e )
-            {
-              cout << lFit << " failed for event " << iEvent << ". Continuing..." << endl;
-              continue;
-            }
-
           TVector3 fitPos;
           try
             {
-              fitPos = rEV->GetFitResult( lFit ).GetVertex(0).GetPosition();
-            }
-          catch( RAT::DS::FitVertex::NoValueError& e )
-            {
-              cout << lFit << " fitter has not reconstructed a position." << endl;
-              return;
+              DS::FitVertex fitVertex =rEV->GetFitResult( lFit ).GetVertex(0);
+              if( fitVertex.ContainsPosition()&& fitVertex.ValidPosition() )
+                fitPos = fitVertex.GetPosition();
+              else if( !fitVetex.ContainsPosition() )
+                cout <<lFit <<" has not reconstructed position." << endl;
+              else if( !fitVertex.ValidPosition() )
+                cout <<lFit <<": Invalid position reconstruction." << endl;
             }
           catch( RAT::DS::FitResult::NoVertexError& e )
             {
               cout << lFit << " has not reconstructed a vertex." << endl;
               return;
+            }
+          catch( std::runtime_error& e )
+            {
+              cout << lFit << " failed for event " << iEvent << ". Continuing..." << endl;
+              continue;
             }
           TVector3 deltaR = fitPos - mcPos;
 
