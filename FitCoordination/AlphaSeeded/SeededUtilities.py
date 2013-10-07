@@ -13,12 +13,11 @@ def ProduceRatioHistogram(filename, t1, t2):
 	# produces the overall histogram of the ratio of PMTs in the Prompt Region to total PMTs in the event, for the specified rootfile
 	Histogram = ROOT.TH1D(filename, filename + ": Prompt PMTs/Total PMTs in Event", 100, 0.0, 1.0)
 
-	run = rat.runreader(filename)
-	effectiveTime = run.GetEffectiveVelocityTime()
-	straightPath = run.GetStraightLinePath()
-	pmtProp = run.GetPMTProp()
-
-	for ds in rat.dsreader(filename):
+	for ds, run in rat.dsreader(filename):
+		effectiveTime = run.GetEffectiveVelocityTime()
+		straightPath = run.GetStraightLinePath()
+		pmtProp = run.GetPMTProp()
+	
 		if ds.GetEVCount() == 0:
 			continue
 		ev = ds.GetEV(0)

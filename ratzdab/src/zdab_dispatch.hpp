@@ -26,7 +26,7 @@ namespace ratzdab {
 
         protected:
             /** Receive the next block of bytes from the stream */
-            virtual size_t recv(std::string& tag, void* data, bool block=true);
+            virtual size_t recv(std::string* tag, void* data, bool block=true);
     };
 
     void swap_int32(char* data, size_t n);
@@ -43,7 +43,7 @@ namespace ratzdab {
         }
     } insufficient_buffer;
 
-} // namespace ratzdab
+}  // namespace ratzdab
 
-#endif
+#endif  // __ZDAB_DISPATCH__
 
