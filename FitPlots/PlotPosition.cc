@@ -249,10 +249,10 @@ ExtractPosition(
           TVector3 fitPos;
           try
             {
-              DS::FitVertex fitVertex =rEV->GetFitResult( lFit ).GetVertex(0);
+              RAT::DS::FitVertex fitVertex =rEV->GetFitResult( lFit ).GetVertex(0);
               if( fitVertex.ContainsPosition()&& fitVertex.ValidPosition() )
                 fitPos = fitVertex.GetPosition();
-              else if( !fitVetex.ContainsPosition() )
+              else if( !fitVertex.ContainsPosition() )
                 cout <<lFit <<" has not reconstructed position." << endl;
               else if( !fitVertex.ValidPosition() )
                 cout <<lFit <<": Invalid position reconstruction." << endl;

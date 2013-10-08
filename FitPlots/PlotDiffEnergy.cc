@@ -223,10 +223,10 @@ ExtractDiffEnergy(
           double fitEnergy;
           try
             {
-              DS::FitVertex fitVertex =rEV->GetFitResult( lFit ).GetVertex(0);
+              RAT::DS::FitVertex fitVertex =rEV->GetFitResult( lFit ).GetVertex(0);
               if( fitVertex.ContainsEnergy()&& fitVertex.ValidEnergy() )
                 fitEnergy = fitVertex.GetEnergy();
-              else if( !fitVetex.ContainsEnergy() )
+              else if( !fitVertex.ContainsEnergy() )
                 cout <<lFit <<" has not reconstructed energy." << endl;
               else if( !fitVertex.ValidEnergy() )
                 cout <<lFit <<": Invalid energy reconstruction." << endl;

@@ -225,10 +225,10 @@ ExtractDirection(
           TVector3 zAxis(0,0,1);
           try
             {
-              DS::FitVertex fitVertex =rEV->GetFitResult( lFit ).GetVertex(0);
+              RAT::DS::FitVertex fitVertex =rEV->GetFitResult( lFit ).GetVertex(0);
               if( fitVertex.ContainsDirection()&& fitVertex.ValidDirection() )
                 fitDirection = fitVertex.GetDirection();
-              else if( !fitVetex.ContainsDirection() )
+              else if( !fitVertex.ContainsDirection() )
                 cout <<lFit <<" has not reconstructed direction." << endl;
               else if( !fitVertex.ValidDirection() )
                 cout <<lFit <<": Invalid direction reconstruction." << endl;

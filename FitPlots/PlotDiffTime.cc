@@ -200,10 +200,10 @@ ExtractDiffTime(
           double fitTime;
           try
             {
-              DS::FitVertex fitVertex =rEV->GetFitResult( lFit ).GetVertex(0);
+              RAT::DS::FitVertex fitVertex =rEV->GetFitResult( lFit ).GetVertex(0);
               if( fitVertex.ContainsTime()&& fitVertex.ValidTime() )
                 fitTime = fitVertex.GetTime();
-              else if( !fitVetex.ContainsTime() )
+              else if( !fitVertex.ContainsTime() )
                 cout <<lFit <<" has not reconstructed time." << endl;
               else if( !fitVertex.ValidTime() )
                 cout <<lFit <<": Invalid time reconstruction." << endl;
