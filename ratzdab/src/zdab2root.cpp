@@ -49,8 +49,6 @@ int main(int argc, char* argv[]) {
     RAT::DS::Root* ds = new RAT::DS::Root();
     TTree* tree = new TTree("T", "RAT Tree");
     tree->Branch("ds", ds->ClassName(), &ds, 32000, 99);
-    tree->SetAutoFlush(10);
-    tree->SetAutoSave(10000);
 
     RAT::DS::Run* run = new RAT::DS::Run();
     TTree* runtree = new TTree("runT", "RAT Run Tree");
