@@ -31,7 +31,7 @@ def execute(command, *args):
             cmdArgs += arg
         else:
             cmdArgs += [arg]
-    rtc, out, err = execute(command, cmdArgs)
+    rtc, out, err = execute_command(command, cmdArgs)
     return rtc, out, err
 
 
@@ -81,7 +81,7 @@ def proxy_check(*args):
     '''Check a proxy with whatever args.
     '''
     command = 'voms-proxy-info'
-    rtc, out, err = cmdexec.simple(command, *args)
+    rtc, out, err = execute(command, *args)
     return rtc, out, err
 
 
@@ -90,7 +90,7 @@ def proxy_time():
     '''
     rtc, out, err = proxy_check('-timeleft')
     tleft = 0
-    if rtc:
+    if not rtc:
         tleft = int(out[0])
     return tleft
 
@@ -115,6 +115,14 @@ def proxy_roles():
 def copy(url, local):
     '''Copy a file listed at a LFN/SURL to a local filename/path
     '''
-    rtc, out, err = cmdexec.simple('lcg-cp', url, local)
+    rtc, out, err = execute('lcg-cp', url, local)
     if rtc:
         raise Exception('Unable to copy %s to %s'%(url, local))
+
+def list_reps(guid):
+    """Get the SURLS of a file.
+    """
+    rtc, out, err = execute("lcg-lr", guid)
+    if rtc:
+        raise Exception('Cannot find replicas for %s' % (guid))
+    return out

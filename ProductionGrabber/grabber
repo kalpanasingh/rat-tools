@@ -12,6 +12,7 @@
 
 import os
 import sys
+import zlib
 import argparse
 
 import grid
@@ -20,14 +21,44 @@ _kB = 1024.
 _MB = 1024. * _kB
 _GB = 1024. * _MB
 
+adler32_block = 33554432
+pow2_32 = 4294967296
 
-def download_file(directory, filename, guid):
+def get_adler32(filename):
+    """Get the adler32sum of a file.
+    """
+    val = 1
+    f = open(filename, "rb")
+    while True:
+        line = f.read(adler32_block)
+        if len(line) == 0:
+            break
+        val = zlib.adler32(line, val)
+        if val < 0:
+            val += pow2_32
+    f.close()
+    return hex(val)[2:10].zfill(8).lower()
+
+
+def download_file(directory, filename, guid, adler32):
     """Download a file to the given directory.
     """
-    print "Downloading: %s" % filename
     if not os.path.exists(directory):
-        os.mkdirs(directory)
-    lcgtools.copy(guid, filename)
+        os.makedirs(directory)
+    download_path = os.path.join(directory, filename)
+    #handle any files that have already been downloaded
+    if os.path.exists(download_path):
+        #compare checksums
+        local_adler32 = get_adler32(download_path)
+        if local_adler32!=adler32:
+            print "Checksum mismatch: %s " % filename
+            print "Delete and re-download"
+            os.unlink(download_path)
+        else:
+            print "Already downloaded: %s" % filename
+            return
+    print "Downloading: %s" % filename
+    grid.copy(guid, os.path.join(directory, filename))
 
 
 if __name__=="__main__":
@@ -38,23 +69,26 @@ if __name__=="__main__":
                        default="downloaded")
    args = parser.parse_args()
    # First, check for a proxy
-   if not voms.proxy_time():
+   if not grid.proxy_time():
        print "Need to generate a grid proxy"
        sys.exit()
    # Now, check the downloads
    files = []
    sizes = []
    guids = []
+   adlers = []
    fin = open(args.list, "r")
    for line in fin.readlines():
-       f, s, g = line.split().strip()
-       files.append(f)
-       sizes.append(int(s))
-       guids.append(g)
+       f, s, g, a = line.split()
+       files.append(f.strip())
+       sizes.append(int(s.strip()))
+       guids.append(g.strip())
+       adlers.append(a.strip())
    response = raw_input("Will download %.1f GB, OK? [y/N]: " % (sum(sizes)/_GB))
    if response!="y" and response!="Y":
        print "OK, quit!"
        sys.exit()
    # Now, download files
    for i, f in enumerate(files):
-       download_file(args.dest, f, giuds[i])
+       download_file(args.dest, f, guids[i], adlers[i])
+   print "Downloads complete"
