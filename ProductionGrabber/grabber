@@ -1,0 +1,60 @@
+#!/usr/bin/env python
+#######################
+#
+# grabber:
+#
+# Script to get data from grid storage.
+#
+# Author: Matt Mottram
+#         <m.mottram@sussex.ac.uk>
+#
+#######################
+
+import os
+import sys
+import argparse
+
+import grid
+
+_kB = 1024.
+_MB = 1024. * _kB
+_GB = 1024. * _MB
+
+
+def download_file(directory, filename, guid):
+    """Download a file to the given directory.
+    """
+    print "Downloading: %s" % filename
+    if not os.path.exists(directory):
+        os.mkdirs(directory)
+    lcgtools.copy(guid, filename)
+
+
+if __name__=="__main__":
+   parser = argparse.ArgumentParser()   
+   parser.add_argument("-l", dest="list", help="list of files to grab [filelist.dat]",
+                       default="filelist.dat")
+   parser.add_argument("-d", dest="dest", help="Directory to download files to. [downloaded]",
+                       default="downloaded")
+   args = parser.parse_args()
+   # First, check for a proxy
+   if not voms.proxy_time():
+       print "Need to generate a grid proxy"
+       sys.exit()
+   # Now, check the downloads
+   files = []
+   sizes = []
+   guids = []
+   fin = open(args.list, "r")
+   for line in fin.readlines():
+       f, s, g = line.split().strip()
+       files.append(f)
+       sizes.append(int(s))
+       guids.append(g)
+   response = raw_input("Will download %.1f GB, OK? [y/N]: " % (sum(sizes)/_GB))
+   if response!="y" and response!="Y":
+       print "OK, quit!"
+       sys.exit()
+   # Now, download files
+   for i, f in enumerate(files):
+       download_file(args.dest, f, giuds[i])
