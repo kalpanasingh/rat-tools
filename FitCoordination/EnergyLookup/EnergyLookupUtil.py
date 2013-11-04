@@ -3,10 +3,32 @@ import ROOT, rat
 # Useful utility functions
 # Author P G Jones - 13/09/2011 <p.jones22@physics.ox.ac.uk>
 
+Material = "labppo_scintillator"
 PosSet = [ 0.0, 2000.0, 4000.0, 5000.0, 5500.0, 5750.0, 5950.0, 6100.0, 6500.0, 7000.0, 7500.0, 8000.0 ]
 EnergySet = [ 1.0, 2.0, 3.0, 3.5, 4.0, 5.0 ]
 ## Energies if using water-filled detector
 #EnergySet = [ 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0 ]
+
+def SetPositions(positions):
+    """Set the positions list."""
+    global PosSet
+    PosSet = positions
+
+def SetEnergies(energies):
+    """Set the energies list."""
+    global EnergySet
+    EnergySet = energies
+
+def SetMaterial(material):
+    """Set the material."""
+    global Material
+    Material = material
+
+def GetFileName(p, e):
+    """Get the ROOT output name for position & energy."""
+    global Material
+    fileName = "%s_P%.0fE%.0f" % (Material, p, (e*10))
+    return fileName
 
 def NhitsHistogram( fileName ):
 
@@ -44,7 +66,7 @@ def NhitPerMeVEnergyPos():
     for energy in EnergySet:
         posList = []
         for pos in PosSet:
-            fileName = "P%.0fE%.0f.root" % (pos, (energy * 10))
+            fileName = "%s.root" % GetFileName(pos, energy)
             print fileName
             posList.append( FitGauss( NhitsHistogram( fileName ) )[0] )
         resultTable.append( posList )
@@ -59,7 +81,7 @@ def SigmaPerMeVEnergyPos():
     for energy in EnergySet:
         posList = []
         for pos in PosSet:
-            fileName = "P%.0fE%.0f.root" % (pos, (energy * 10))
+            fileName = "%s.root" % GetFileName(pos, energy)
             print fileName
             posList.append( FitGauss( NhitsHistogram( fileName ) )[1] )
         resultTable.append( posList )
@@ -74,7 +96,7 @@ def NhitPerMeVPosEnergy():
     for pos in PosSet:
         energyList = []
         for energy in EnergySet:
-            fileName = "P%.0fE%.0f.root" % (pos, (energy * 10))
+            fileName = "%s.root" % GetFileName(pos, energy)
             print fileName
             energyList.append( FitGauss( NhitsHistogram( fileName ) )[0] )
         resultTable.append( energyList )

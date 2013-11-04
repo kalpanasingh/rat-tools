@@ -1,5 +1,5 @@
-/glg4debug/glg4param omit_muon_processes  1.0
-/glg4debug/glg4param omit_hadronic_processes  1.0
+/PhysicsList/OmitMuonicProcesses true
+/PhysicsList/OmitHadronicProcesses true
 
 /rat/db/set MC thin_factor 3.5
 
@@ -29,5 +29,5 @@
 ${Generator}
 /generator/rate/set 1
 
-/rat/run/start 500
+/rat/run/start 1
 exit

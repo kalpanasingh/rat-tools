@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include "TROOT.h"
 #include "TFile.h"
 #include "TNtuple.h"
@@ -11,9 +12,9 @@
 #include <RAT/DS/Root.hh>
 #include <RAT/DS/Run.hh>
 
-void FillScintTimeResiduals( char* pFile, TH1D* hist )
+void FillScintTimeResiduals( string pFile, TH1D* hist )
 {
-  TFile *file = new TFile(pFile);
+  TFile *file = new TFile(pFile.c_str());
   TTree *tree = (TTree*) file->Get("T");
   RAT::DS::Root *rds = new RAT::DS::Root();
   tree->SetBranchAddress("ds", &rds);
@@ -53,7 +54,7 @@ void FillScintTimeResiduals( char* pFile, TH1D* hist )
 
           // Get straight line travel time to PMT
           double distInScint, distInAV, distInWater;
-          pmtds->GetStraightLinePath()->CalcByPosition( mc_pos, pmtPos, distInScint, distInAV, distInWater);
+          pmtds->GetLightPath()->CalcByPosition( mc_pos, pmtPos, distInScint, distInAV, distInWater);
           double straightTime = pmtds->GetEffectiveVelocityTime()->CalcByDistance( distInScint, distInAV, distInWater);
 
           // Finally, get time residual
@@ -65,9 +66,9 @@ void FillScintTimeResiduals( char* pFile, TH1D* hist )
     }
 }
 
-void FillH2OTimeResiduals( char* pFile, TH1D* hist )
+void FillH2OTimeResiduals( string pFile, TH1D* hist )
 {
-  TFile *file = new TFile(pFile);
+  TFile *file = new TFile(pFile.c_str());
   TTree *tree = (TTree*) file->Get("T");
   RAT::DS::Root *rds = new RAT::DS::Root();
   tree->SetBranchAddress("ds", &rds);
@@ -106,7 +107,7 @@ void FillH2OTimeResiduals( char* pFile, TH1D* hist )
           TVector3 pmtPos = pmtProp->GetPos(pCal->GetID());
 
           double distInScint, distInAV, distInWater;
-          pmtds->GetStraightLinePath()->CalcByPosition( mc_pos, pmtPos, distInScint, distInAV, distInWater);
+          pmtds->GetLightPath()->CalcByPosition( mc_pos, pmtPos, distInScint, distInAV, distInWater);
           double straightTime = pmtds->GetGroupVelocityTime()->CalcByDistance(distInScint,distInAV,distInWater);
 
           // Finally, get time residual
@@ -118,12 +119,17 @@ void FillH2OTimeResiduals( char* pFile, TH1D* hist )
     }
 }
 
-void GetScintPDF()
+void GetScintPDF(string material="labppo_scintillator", int nFiles=1)
 {
   // Create and fill time residual histogram
   TH1D* hist = new TH1D("H","",400,-99.5,300.5);
   TH1D* hist2 = new TH1D("H2","",400,-99.5,300.5);
-  FillScintTimeResiduals("data_for_pdf_1.root",hist);
+
+  for(int i=1;i<nFiles+1;i++){
+    stringstream ss;
+    ss << "HitTime_" << material << "_" << i << ".root";
+    FillScintTimeResiduals(ss.str(),hist);
+  }
 
   // Read out data in ratdb format
   cout << "time: [";
@@ -158,12 +164,16 @@ void GetScintPDF()
   hist2->Draw("sames");
 }
 
-void GetH2OPDF()
+void GetH2OPDF(string material="lightwater_sno", int nFiles=1)
 {
   TH1D* hist = new TH1D("H","",800,-99.875,100.125);
   TH1D* hist2 = new TH1D("G","",800,-99.875,100.125);
 
-  FillH2OTimeResiduals("data_for_pdf_1.root",hist);
+  for(int i=1;i<nFiles+1;i++){
+    stringstream ss;
+    ss << "HitTime_" << material << "_" << i << ".root";
+    FillH2OTimeResiduals(ss.str(),hist);
+  }
 
   // Read out data in ratdb format
   cout << "time: [";
