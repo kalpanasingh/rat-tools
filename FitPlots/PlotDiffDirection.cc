@@ -201,31 +201,26 @@ ExtractDiffDirection(
             continue;
 
           RAT::DS::EV *rEV = rDS->GetEV( iEvent );
-          try
-            {
-              if( rEV->GetFitResult( lFit ).GetValid() == false )
-                continue;
-            }
-          catch( std::runtime_error& e )
-            {
-              cout << lFit << " failed for event " << iEvent << ". Continuing..." << endl;
-              continue;
-            }
-
           TVector3 fitDirection;
           try
             {
-              fitDirection = rEV->GetFitResult( lFit ).GetVertex(0).GetDirection();
-            }
-          catch( RAT::DS::FitVertex::NoValueError& e )
-            {
-              cout << lFit << " fitter has not reconstructed a direction." << endl;
-              return;
+              RAT::DS::FitVertex fitVertex = rEV->GetFitResult( lFit ).GetVertex(0);
+              if( fitVertex.ContainsDirection() && fitVertex.ValidDirection() )
+                fitDirection = fitVertex.GetDirection();
+              else if( !fitVertex.ContainsDirection() )
+                cout << lFit << " has not reconstructed direction." << endl;
+              else if( !fitVertex.ValidDirection() )
+                cout << lFit << ": Invalid direction reconstruction." << endl;
             }
           catch( RAT::DS::FitResult::NoVertexError& e )
             {
               cout << lFit << " has not reconstructed a vertex." << endl;
               return;
+            }
+          catch( std::runtime_error& e )
+            {
+              cout << lFit << " failed for event " << iEvent << ". Continuing..." << endl;
+              continue;
             }
 
           //fitDirection is already a unit vector. mcDirection is not a unit vector.

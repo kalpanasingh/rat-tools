@@ -101,7 +101,7 @@ ArrangeStatBox(
 
 vector<string>
 GetFitNames(
-        string lFile )
+            string lFile )
 {
   vector<string> fitNames;
   
