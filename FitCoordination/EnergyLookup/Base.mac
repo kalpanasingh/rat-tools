@@ -29,5 +29,5 @@
 ${Generator}
 /generator/rate/set 1
 
-/rat/run/start 1
+/rat/run/start 500
 exit
