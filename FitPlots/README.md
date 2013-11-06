@@ -5,7 +5,7 @@ These tools are a quick and simple way of plotting the fit results.
 These tools are for usage in root's cint, thus to use load root and type:
 
     .X $RATTOOLS/FitPlots/Load.c
-    DrawFitPosition( filename )
+    PlotPosition( filename )
 
 ### Retriggered Events
 To have the plotting tools ignore retriggered events whilst plotting, set (after the load command):
