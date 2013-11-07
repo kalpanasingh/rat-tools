@@ -1,0 +1,151 @@
+#!/usr/bin/env python
+#####################
+#
+# generate_list
+#
+# Generates lists of production or
+# processed data (full RAT format or
+# ntuples) for download.
+#
+# Author: Matt Mottram
+#         <m.mottram@sussex.ac.uk>
+#
+#####################
+
+import os
+import sys
+import getpass
+try:
+    import argparse
+except:
+    raise ImportError("argparse not available; python version needs to be 2.7+")
+try:
+    import couchdb
+except:
+    raise ImportError("python-couchdb not installed; cannot run")
+
+db = None
+
+
+class WarnedFileType(argparse.FileType):
+    """A writable file type that checks a file exists.
+    """
+    def __init__(self, mode="r", bufsize=-1):
+        super(WarnedFileType, self).__init__(mode, bufsize)
+
+    def __call__(self, string):
+        if "w" in self._mode:
+            if os.path.exists(string):
+                overwrite = raw_input("%s exists, overwrite [y/N]?: " % string)
+                if overwrite!="y" and overwrite!="Y":
+                    print "Specify another filename"
+                    sys.exit()
+        if "r" in self._mode:
+            if not os.path.exists(string):
+                raise IOError("file %s does not exist, cannot read" % string)
+        super(WarnedFileType, self).__call__(string)
+
+
+def connect_db(db_server, db_name):
+    """Open up the database connection.
+    """
+    global db
+    user = raw_input("[%s] Username: " % db_server)
+    pswd = getpass.getpass("[%s] Password: " % db_server)
+    couch = couchdb.Server(db_server)
+    couch.resource.credentials = (user, pswd)
+    db = couch[db_name]
+    
+
+def get_module_list(data_type, rat_version=None):
+    """Get a list of available modules.
+    """
+    global db
+    rows = db.view("_design/proddata/_view/%s_by_mod_pass_sr" % (data_type),
+                   reduce=True, group=True, group_level=2)
+    module_list = []
+    for row in rows:
+        if rat_version and row.key[1]!=unicode(rat_version):
+            continue
+        module_list.append(row.key[0])
+    return module_list
+
+
+def get_list(data_type, module, rat_version):
+    """Get a list of files for the settings given.
+    """
+    global db
+    names = []
+    sizes = []
+    guids = []
+    adlers = []
+    rows = db.view("_design/proddata/_view/%s_by_mod_pass_sr" % (data_type),
+                   startkey=[module, rat_version],
+                   endkey=[module, rat_version+"_"],
+                   reduce=False)
+    for row in rows:
+        if not row.value[2] or row.value[2]=="":
+            print "Cannot get file %s, no GUID" % (row.value[0])
+            continue
+        names.append(row.value[0])
+        sizes.append(row.value[1])
+        guids.append(row.value[2])
+        adlers.append(row.value[5])
+    return names, sizes, guids, adlers
+
+
+if __name__=="__main__":
+   parser = argparse.ArgumentParser()
+   parser.add_argument("-d", dest="db_name", help="Data-flow database name [production]",
+                       default="production")
+   parser.add_argument("-s", dest="db_server",
+                       help="Data-flow database server [http://snoplus.westgrid.ca:5984]",
+                       default="http://snoplus.westgrid.ca:5984")
+   parser.add_argument("-m", dest="module", help="Requested module (can pass multiple, default: all)",
+                       nargs="+")
+   parser.add_argument("-r", dest="run_range", help="Requested run range [(0, 999999)]")
+   parser.add_argument("-l", dest="label", help="Production dataset label (NOT YET USEABLE - PLACEHOLDER!)")
+   parser.add_argument("-v", dest="rat_version", help="Rat version", default="4.4.0")
+   parser.add_argument("-f", dest="full_data", help="[Ntuple] or full datasets (set option for full)",
+                       action="store_true")
+   parser.add_argument("-o", dest="output", help="Filename to write the list to [filelist.dat]",
+                       default="filelist.dat")
+   args = parser.parse_args()
+   # check that the output file is OK
+   if os.path.exists(args.output):
+       overwrite = raw_input("%s exists, overwrite [y/N]?: " % args.output)
+       if overwrite!="y" and overwrite!="Y":
+           print "Specify another filename"
+           sys.exit()
+   # default is to search for ntuple files
+   data_type = "ntuple"
+   if args.full_data:
+       data_type = "files"
+   # connect to the database
+   connect_db(args.db_server, args.db_name)
+   # now loop through each module and get the file lists
+   if not args.module:
+       args.module = get_module_list(data_type, args.rat_version)
+   if len(args.module)==0:
+       print "No modules for rat %s" % args.rat_version
+       sys.exit()
+   names = []
+   sizes = []
+   guids = []
+   adlers = []
+   for i, module in enumerate(args.module):
+       print "Generating file lists, %d of %d" % (i, len(args.module))
+       n, s, g, a= get_list(data_type, module, args.rat_version)
+       names += n
+       sizes += s
+       guids += g
+       adlers += a
+   if len(names)==0:
+       print "No files for rat %s" % args.rat_version
+       sys.exit()
+   # output these to a file
+   list_file = open(args.output, "w")
+   for i, n in enumerate(names):
+       list_file.write("%s\t%s\t%s\t%s\n" % (n, sizes[i], guids[i], adlers[i]))
+   list_file.close()
+   print "Found %d files, listed in %s" % (len(names), args.output)
