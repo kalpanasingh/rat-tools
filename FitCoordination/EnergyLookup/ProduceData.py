@@ -12,8 +12,6 @@ def ProduceRunFiles(options):
     inFile.close()
     
     # Setup arrays for positions and energies
-    positions = []
-    energies = []
     if options.energies:
         EnergyLookupUtil.SetEnergies(options.energies)
     if options.positions:
