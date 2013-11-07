@@ -28,7 +28,7 @@ namespace ratzdab {
             RATDB() {
                 RAT::Log::Init("/dev/null");
 
-                db = RAT::DB::Get();
+                RAT::DB* db = RAT::DB::Get();
                 assert(db);
 
                 char* glg4data = getenv("GLG4DATA");
@@ -47,14 +47,10 @@ namespace ratzdab {
                 pmttype = pmtinfo->GetIArray("type");
             }
 
-            virtual ~RATDB() {
-                delete db;
-            }
+            virtual ~RATDB() {}
 
             RAT::DBLinkPtr pmtinfo;
             std::vector<int> pmttype;
-        protected:
-            RAT::DB* db;
     } ratdb;
 
     /** initialize static maps */
