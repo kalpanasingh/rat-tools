@@ -12,6 +12,7 @@ def AnalyseFiles(options):
         EnergyLookupUtil.SetEnergies(options.energies)
     if options.positions:
         EnergyLookupUtil.SetPositions(options.positions)
+    EnergyLookupUtil.SetMaterial(options.scintMaterial)
 
     nhitPerMeVtable = EnergyLookupUtil.NhitPerMeVPosEnergy()
     print "{\nname: \"FIT_ENERGY_LOOKUP\","
@@ -55,6 +56,7 @@ import argparse
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(usage = "usage: %prog [options] target", version="%prog 1.0")
     parser.add_argument("-i", type=str, dest="index", help="RATDB index to place result.", default="")
+    parser.add_argument("-s", type=str, dest="scintMaterial", help="Scintillator material.", default="labppo_scintillator")
     parser.add_argument("-e", type=float, dest="energies", help="Energies (accepts a list)", default=None, nargs="+")
     parser.add_argument("-x", type=float, dest="positions", help="Positions (accepts a list)", default=None, nargs="+")
     args = parser.parse_args()
