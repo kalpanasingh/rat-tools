@@ -25,6 +25,8 @@
 
 #include <string>
 #include <iostream>
+#include <fstream>
+
 using namespace std;
 
 class User : public G4VUserPrimaryGeneratorAction
@@ -40,6 +42,12 @@ int main( int argc, char *argv[] )
       cout << "Correct usage is geo2gdml input_file.geo output_file.gdml" << endl;
       exit(0);
     }
+  // Check that the .geo file exists
+  ifstream geoFile( argv[1] );
+  if ( !geoFile ){ 
+    cout << "The file " << argv[1] << " does not exist. Check and try again." << endl; 
+    exit(0);
+  }
 
   RAT::Log::Init( "/dev/null", RAT::Log::INFO, RAT::Log::INFO );
  
