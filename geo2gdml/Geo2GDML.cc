@@ -38,6 +38,7 @@ int main( int argc, char *argv[] )
   if( argc != 3 )
     {
       cout << "Correct usage is geo2gdml input_file.geo output_file.gdml" << endl;
+      exit(0);
     }
 
   RAT::Log::Init( "/dev/null", RAT::Log::INFO, RAT::Log::INFO );
