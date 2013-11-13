@@ -48,6 +48,7 @@ int main( int argc, char *argv[] )
     cout << "The file " << argv[1] << " does not exist. Check and try again." << endl; 
     exit(0);
   }
+  geoFile.close();
 
   RAT::Log::Init( "/dev/null", RAT::Log::INFO, RAT::Log::INFO );
  
