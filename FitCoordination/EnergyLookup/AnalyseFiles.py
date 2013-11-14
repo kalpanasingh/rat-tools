@@ -52,13 +52,15 @@ def ToRATDB(inText):
         outText = outText + inText + "d, "
     return outText
     
-import argparse
+import optparse
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(usage = "usage: %prog [options] target", version="%prog 1.0")
-    parser.add_argument("-i", type=str, dest="index", help="RATDB index to place result.", default="")
-    parser.add_argument("-s", type=str, dest="scintMaterial", help="Scintillator material.", default="labppo_scintillator")
-    parser.add_argument("-e", type=float, dest="energies", help="Energies (accepts a list)", default=None, nargs="+")
-    parser.add_argument("-x", type=float, dest="positions", help="Positions (accepts a list)", default=None, nargs="+")
-    args = parser.parse_args()
-    AnalyseFiles(args)
+    parser = optparse.OptionParser(usage = "usage: %prog [options] target", version="%prog 1.0")
+    parser.add_option("-i", type="string", dest="index", help="RATDB index to place result.", default="")
+    parser.add_option("-s", type="string", dest="scintMaterial", help="Scintillator material.", default="labppo_scintillator")
+    parser.add_option("-e", type="string", dest="energies", help="Energies (accepts comma delimited list)",
+                      action="callback", callback=EnergyLookupUtil.parse_list_arg)
+    parser.add_option("-x", type="string", dest="positions", help="Positions (accepts comma delimited list)",
+                      action="callback", callback=EnergyLookupUtil.parse_list_arg)
+    (options, args) = parser.parse_args()
+    AnalyseFiles(options)
                     

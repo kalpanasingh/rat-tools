@@ -40,14 +40,16 @@ def ProduceRunFiles(options):
             os.remove(outFileName + ".mac")
 
 
-import argparse
+import optparse
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(usage = "usage: %prog [options] target", version="%prog 1.0")
-    parser.add_argument("-g", type=str, dest="geoFile", help="Geometry File to use, location must be absolute or relative to target.",
+    parser = optparse.OptionParser(usage = "usage: %prog [options] target", version="%prog 1.0")
+    parser.add_option("-g", type="string", dest="geoFile", help="Geometry File to use, location must be absolute or relative to target.",
                       default="geo/snoplus.geo")
-    parser.add_argument("-s", type=str, dest="scintMaterial", help="Scintillator material.", default="labppo_scintillator")
-    parser.add_argument("-p", type=str, dest="particle", help="Particle type.", default="e-")
-    parser.add_argument("-e", type=float, dest="energies", help="Energies (accepts a list)", default=None, nargs="+")
-    parser.add_argument("-x", type=float, dest="positions", help="Positions (accepts a list)", default=None, nargs="+")
-    args = parser.parse_args()
-    ProduceRunFiles(args)
+    parser.add_option("-s", type="string", dest="scintMaterial", help="Scintillator material.", default="labppo_scintillator")
+    parser.add_option("-p", type="string", dest="particle", help="Particle type.", default="e-")
+    parser.add_option("-e", type="string", dest="energies", help="Energies (accepts a list)",
+                      action="callback", callback=EnergyLookupUtil.parse_list_arg)
+    parser.add_option("-x", type="string", dest="positions", help="Positions (accepts a list)",
+                      action="callback", callback=EnergyLookupUtil.parse_list_arg)
+    (options, args) = parser.parse_args()
+    ProduceRunFiles(options)
