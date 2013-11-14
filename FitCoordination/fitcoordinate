@@ -5,14 +5,15 @@ import os
 import shutil
 
 class FitCoordinate:
-    def __init__( self, target, location ):
+    def __init__( self, target, options ):
         """ If location is set, copy the target folder and run the coordinator there."""
         self._Target = target
         self._TargetLocation = os.path.join( os.getcwd(), target )
-        if location is "":
+        self._run_options = options
+        if options.location is "":
             self._RunLocation = self._TargetLocation
         else:
-            self._RunLocation = os.path.join( location, target )
+            self._RunLocation = os.path.join( options.location, target )
             shutil.copytree( self._TargetLocation, self._RunLocation )
         os.chdir( self._RunLocation )
         
@@ -25,6 +26,9 @@ class FitCoordinate:
     def Produce( self, options ):
         self.RunCommand( "python " + self.production_script + " " + options )
     def Analyse( self, options ):
+        if hasattr(self, 'analysis_script_material') and options._run_options.scintMaterial!="":
+            # Requires the material name
+            options += ' -s %s ' % options._run_options.scintMaterial
         self.RunCommand( "python " + self.analysis_script + " " + options )
     def RunCommand( self, command ):
         print 'Running:', command
@@ -46,7 +50,7 @@ if __name__ == '__main__':
     if len( args ) != 1:
         print "Incorrect usage"
     else:
-        fc = FitCoordinate( args[0], options.location )
+        fc = FitCoordinate( args[0], options )
         fc.Describe()
         # Produce
         prodOptions = "" 
@@ -59,7 +63,7 @@ if __name__ == '__main__':
         fc.Produce( prodOptions )
 
         # Analyse
+        analyse_options = ""
         if( options.index != "" ):
-            fc.Analyse( "-i " + options.index )
-        else:
-            fc.Analyse( "" )
+            analyse_options += " -i " + options.index
+        fc.Analyse( analyse_options )

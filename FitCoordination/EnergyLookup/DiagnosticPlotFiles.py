@@ -59,12 +59,25 @@ ROOT.gStyle.SetCanvasColor(0)
 ROOT.gStyle.SetOptTitle(0)
 ROOT.gStyle.SetOptStat(0)
 
-import optparse
+import argparse
 if __name__ == '__main__':
-    parser = optparse.OptionParser( usage = "usage: %prog [options]", version="%prog 1.0" )
-    parser.add_option( "-e", action="store_true", dest="energy", default=False, help="Plot v energy rather than position?" )
-    (options, args) = parser.parse_args()
-    if options.energy:
+    parser = argparse.ArgumentParser( usage = "usage: %prog [options]", version="%prog 1.0" )
+    parser.add_argument("-E", action="store_true", dest="energy", default=False, help="Plot v energy rather than position?")
+    parser.add_argument("-s", type=str, dest="scintMaterial", help="Scintillator material.", default="labppo_scintillator")
+    parser.add_argument("-e", type=float, dest="energies", help="Energies (accepts a list, needed if custom positions used)", default=None, nargs="+")
+    parser.add_argument("-x", type=float, dest="positions", help="Positions (accepts a list, needed if custom positions used)", default=None, nargs="+")
+    args = parser.parse_args()
+
+    # Setup arrays for positions and energies
+    positions = []
+    energies = []
+    if args.energies:
+        EnergyLookupUtil.SetEnergies(args.energies)
+    if args.positions:
+        EnergyLookupUtil.SetPositions(args.positions)
+    EnergyLookupUtil.SetMaterial(args.scintMaterial)
+
+    if args.energy:
         PlotNHitPerMeV()
     else:
         PlotNHitPerPos()
