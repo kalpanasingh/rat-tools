@@ -118,7 +118,7 @@ if __name__=="__main__":
            print "Specify another filename"
            sys.exit()
    # default is to search for ntuple files
-   data_type = "ntuple"
+   data_type = "ntuples"
    if args.full_data:
        data_type = "files"
    # connect to the database
