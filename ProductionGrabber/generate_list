@@ -15,17 +15,23 @@
 import os
 import sys
 import getpass
+import urllib
+import urlparse
+import httplib
+import base64
 try:
     import argparse
 except:
     raise ImportError("argparse not available; python version needs to be 2.7+")
 try:
-    import couchdb
+    import json
 except:
-    raise ImportError("python-couchdb not installed; cannot run")
+    raise ImportError("json not available; python version needs to be 2.7+")
 
-db = None
-
+host = None # db host
+name = None # db name
+user = None # db user
+pswd = None # db password
 
 class WarnedFileType(argparse.FileType):
     """A writable file type that checks a file exists.
@@ -49,49 +55,112 @@ class WarnedFileType(argparse.FileType):
 def connect_db(db_server, db_name):
     """Open up the database connection.
     """
-    global db
+    global user
+    global pswd
+    global host
+    global name
     user = raw_input("[%s] Username: " % db_server)
     pswd = getpass.getpass("[%s] Password: " % db_server)
-    couch = couchdb.Server(db_server)
-    couch.resource.credentials = (user, pswd)
-    db = couch[db_name]
+    host = "%s" % (db_server)
+    name = "%s" % (db_name)
     
 
 def get_module_list(data_type, rat_version=None):
     """Get a list of available modules.
     """
-    global db
-    rows = db.view("_design/proddata/_view/%s_by_mod_pass_sr" % (data_type),
+    global user
+    global pswd
+    global host
+    global name
+    rows = db_view("%s/_design/proddata/_view/%s_by_mod_pass_sr" % (name, data_type),
                    reduce=True, group=True, group_level=2)
     module_list = []
     for row in rows:
-        if rat_version and row.key[1]!=unicode(rat_version):
+        if rat_version and row["key"][1]!=unicode(rat_version):
             continue
-        module_list.append(row.key[0])
+        module_list.append(row["key"][0])
     return module_list
+
+
+def py_arg(key, arg):
+    """Convert any argument styles.
+    """
+    if type(arg) is list:
+        # Need to ensure that each component is good.
+        for i, a in enumerate(arg):
+            _, arg[i] = py_arg(key, a)
+        # Now ensure that the key is correct
+        key = "%s[]" % key
+    if type(arg) is bool:
+        arg = str(arg).lower()
+    if type(arg) is unicode:
+        arg = str(arg)
+    return key, arg
 
 
 def get_list(data_type, module, rat_version):
     """Get a list of files for the settings given.
     """
-    global db
+    global user
+    global pswd
+    global host
+    global name
     names = []
     sizes = []
     guids = []
     adlers = []
-    rows = db.view("_design/proddata/_view/%s_by_mod_pass_sr" % (data_type),
+    rows = db_view("%s/_design/proddata/_view/%s_by_mod_pass_sr" % (name, data_type),
                    startkey=[module, rat_version],
                    endkey=[module, rat_version+"_"],
                    reduce=False)
     for row in rows:
-        if not row.value[2] or row.value[2]=="":
-            print "Cannot get file %s, no GUID" % (row.value[0])
+        if not row["value"][2] or row["value"][2]=="":
+            print "Cannot get file %s, no GUID" % (row["value"][0])
             continue
-        names.append(row.value[0])
-        sizes.append(row.value[1])
-        guids.append(row.value[2])
-        adlers.append(row.value[5])
+        names.append(row["value"][0])
+        sizes.append(row["value"][1])
+        guids.append(row["value"][2])
+        adlers.append(row["value"][5])
     return names, sizes, guids, adlers
+
+
+def db_view(view_name, **kwargs):
+    global user
+    global pswd
+    global host
+    global name
+    query_opts = {}
+    for key in kwargs:
+        urlkey, arg = py_arg(key, kwargs[key])
+        query_opts[urlkey] = arg
+    query_string = urllib.urlencode(query_opts)
+    if len(query_opts):
+        query_url = "http://%s:5984/%s?%s" % (host, view_name, query_string)
+    else:
+        query_url = "http://%s:5984/%s" % (host, view_name)
+    response = get_response(host, query_url, user, pswd)
+    # Now map these to rows
+    data = json.loads(response)
+    try:
+        return data["rows"]
+    except KeyError, e:
+        sys.stderr.write("DB view error, response: %s\tquery: %s" % (response, query_url))
+        raise
+
+
+def get_response(host, url, username=None, password=None):
+    headers = {}
+    if username is not None and password is not None:
+        auth_string = base64.encodestring('%s:%s' % (username, password))[:-1]
+        headers['Authorization'] = 'Basic %s' % auth_string
+    connection = httplib.HTTPConnection(host, port=5984)
+    try:
+        connection.request('GET', url, headers=headers)
+        response = connection.getresponse()
+    except httplib.HTTPException as e:
+        sys.stderr.write('Error accessing the requested db query: %s' % str(e))
+        sys.exit(20)
+    return response.read()
 
 
 if __name__=="__main__":
