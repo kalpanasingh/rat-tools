@@ -62,7 +62,7 @@ def connect_db(db_server, db_name):
     _db_name = "%s" % (db_name)
     
 
-def get_module_list(data_type, rat_version=None):
+def get_module_list_version(data_type, rat_version=None):
     """Get a list of available modules.
     """
     global _db_user, _db_pswd, _db_host, _db_name
@@ -73,6 +73,20 @@ def get_module_list(data_type, rat_version=None):
         if rat_version and row["key"][1]!=unicode(rat_version):
             continue
         module_list.append(row["key"][0])
+    return module_list
+
+
+def get_module_list_label(data_type, label=None):
+    """Get a list of available modules.                                                                                                            
+    """
+    global _db_user, _db_pswd, _db_host, _db_name
+    rows = db_view("%s/_design/proddata/_view/%s_by_label" % (_db_name, data_type),
+                   reduce=True, group=True, group_level=2)
+    module_list = []
+    for row in rows:
+        if label and row["key"][0]!=unicode(label):
+            continue
+        module_list.append(row["key"][1])
     return module_list
 
 
@@ -204,7 +218,8 @@ def generate_list_by_label(label, data_type, module, run_range):
     guids = []
     adlers = []
     if not module:
-        module = get_labels(data_type)
+        module = get_module_list_label(data_type)
+    print module
     for i, mod in enumerate(module):
         print "Generating file lists, %d of %d" % (i, len(module))
         n, s, g, a = get_list_by_label_module(data_type, label, mod)
@@ -223,7 +238,7 @@ def generate_list_by_version(version, data_type, module, run_range):
     """
     # Now loop through each module and get the file lists
     if not module:
-        module = get_module_list(data_type, version)
+        module = get_module_list_version(data_type, version)
     if len(module)==0:
         print "No modules for rat %s" % version
         sys.exit()
