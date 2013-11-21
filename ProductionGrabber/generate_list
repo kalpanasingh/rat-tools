@@ -205,7 +205,7 @@ def generate_list_by_label(label, data_type, module, run_range):
     adlers = []
     if not module:
         module = get_labels(data_type)
-    for mod in module:
+    for i, mod in enumerate(module):
         print "Generating file lists, %d of %d" % (i, len(module))
         n, s, g, a = get_list_by_label_module(data_type, label, mod)
         names += n
