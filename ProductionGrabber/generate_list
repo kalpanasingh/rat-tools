@@ -139,20 +139,6 @@ def get_labels(data_type):
 def get_versions(data_type):
     """Get a list of all versions available
     """
-    # TODO: update the view (or create new) to get version first!
-    global _db_user, _db_pswd, _db_host, _db_name
-    rows = db_view("%s/_design/proddata/_view/%s_by_mod_pass_sr" % (_db_name, data_type),
-                   reduce=True, group_level=1)
-    versions = set()
-    for row in rows:
-        versions.add(row["key"][0])
-    return versions
-
-
-def get_versions(data_type):
-    """Get a list of all versions available
-    """
-    # TODO: update the view (or create new) to get version first!
     global _db_user, _db_pswd, _db_host, _db_name
     rows = db_view("%s/_design/proddata/_view/%s_by_mod_pass_sr" % (_db_name, data_type),
                    reduce=True, group_level=2)
@@ -160,6 +146,18 @@ def get_versions(data_type):
     for row in rows:
         versions.add(row["key"][1])
     return versions
+
+
+def get_modules(data_type):
+    """Get a list of all modules available
+    """
+    global _db_user, _db_pswd, _db_host, _db_name
+    rows = db_view("%s/_design/proddata/_view/%s_by_mod_pass_sr" % (_db_name, data_type),
+                   reduce=True, group_level=1)
+    modules = set()
+    for row in rows:
+        modules.add(row["key"][0])
+    return modules
 
 
 def db_view(view_name, **kwargs):
@@ -224,7 +222,6 @@ def generate_list_by_version(version, data_type, module, run_range):
     """Generate the file list by rat version
     """
     # Now loop through each module and get the file lists
-    print module, type(module), len(module)
     if not module:
         module = get_module_list(data_type, version)
     if len(module)==0:
