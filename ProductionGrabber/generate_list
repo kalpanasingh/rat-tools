@@ -15,17 +15,23 @@
 import os
 import sys
 import getpass
+import urllib
+import urlparse
+import httplib
+import base64
 try:
     import argparse
 except:
     raise ImportError("argparse not available; python version needs to be 2.7+")
 try:
-    import couchdb
+    import json
 except:
-    raise ImportError("python-couchdb not installed; cannot run")
+    raise ImportError("json not available; python version needs to be 2.7+")
 
-db = None
-
+_db_host = None # db host
+_db_name = None # db name
+_db_user = None # db user
+_db_pswd = None # db password
 
 class WarnedFileType(argparse.FileType):
     """A writable file type that checks a file exists.
@@ -49,103 +55,291 @@ class WarnedFileType(argparse.FileType):
 def connect_db(db_server, db_name):
     """Open up the database connection.
     """
-    global db
-    user = raw_input("[%s] Username: " % db_server)
-    pswd = getpass.getpass("[%s] Password: " % db_server)
-    couch = couchdb.Server(db_server)
-    couch.resource.credentials = (user, pswd)
-    db = couch[db_name]
+    global _db_user, _db_pswd, _db_host, _db_name
+    _db_user = raw_input("[%s] Username: " % db_server)
+    _db_pswd = getpass.getpass("[%s] Password: " % db_server)
+    _db_host = "%s" % (db_server)
+    _db_name = "%s" % (db_name)
     
 
-def get_module_list(data_type, rat_version=None):
+def get_module_list_version(data_type, rat_version=None):
     """Get a list of available modules.
     """
-    global db
-    rows = db.view("_design/proddata/_view/%s_by_mod_pass_sr" % (data_type),
+    global _db_user, _db_pswd, _db_host, _db_name
+    rows = db_view("%s/_design/proddata/_view/%s_by_mod_pass_sr" % (_db_name, data_type),
                    reduce=True, group=True, group_level=2)
     module_list = []
     for row in rows:
-        if rat_version and row.key[1]!=unicode(rat_version):
+        if rat_version and row["key"][1]!=unicode(rat_version):
             continue
-        module_list.append(row.key[0])
+        module_list.append(row["key"][0])
     return module_list
 
 
-def get_list(data_type, module, rat_version):
+def get_module_list_label(data_type, label=None):
+    """Get a list of available modules.                                                                                                            
+    """
+    global _db_user, _db_pswd, _db_host, _db_name
+    rows = db_view("%s/_design/proddata/_view/%s_by_label" % (_db_name, data_type),
+                   reduce=True, group=True, group_level=2)
+    module_list = []
+    for row in rows:
+        if label and row["key"][0]!=unicode(label):
+            continue
+        module_list.append(row["key"][1])
+    return module_list
+
+
+def get_list_by_module_version(data_type, module, rat_version):
     """Get a list of files for the settings given.
     """
-    global db
+    global _db_user, _db_pswd, _db_host, _db_name
     names = []
     sizes = []
     guids = []
     adlers = []
-    rows = db.view("_design/proddata/_view/%s_by_mod_pass_sr" % (data_type),
-                   startkey=[module, rat_version],
-                   endkey=[module, rat_version+"_"],
+    rows = db_view("%s/_design/proddata/_view/%s_by_mod_pass_sr" % (_db_name, data_type),
+                   startkey = [module, rat_version],
+                   endkey = [module, rat_version+"_"],
                    reduce=False)
     for row in rows:
-        if not row.value[2] or row.value[2]=="":
-            print "Cannot get file %s, no GUID" % (row.value[0])
+        if not row["value"][2] or row["value"][2]=="":
+            print "Cannot get file %s, no GUID" % (row["value"][0])
             continue
-        names.append(row.value[0])
-        sizes.append(row.value[1])
-        guids.append(row.value[2])
-        adlers.append(row.value[5])
+        names.append(row["value"][0])
+        sizes.append(row["value"][1])
+        guids.append(row["value"][2])
+        adlers.append(row["value"][5])
     return names, sizes, guids, adlers
 
 
+def get_list_by_label_module(data_type, label, module):
+    """Get a list of files for the settings given
+
+    If no module give, return all modules.
+    """
+    global _db_user, _db_pswd, _db_host, _db_name
+    names = []
+    sizes = []
+    guids = []
+    adlers = []
+    rows = db_view("%s/_design/proddata/_view/%s_by_label" % (_db_name, data_type),
+                   startkey=[label, module],
+                   endkey=[label, module+"_"],
+                   reduce=False)
+    for row in rows:
+        if not row["value"][1] or row["value"][1]=="":
+            print "Cannot get file %s, no GUID" % (row["value"][0])
+            continue
+        names.append(row["value"][0])
+        guids.append(row["value"][1])
+        adlers.append(row["value"][2])
+        sizes.append(row["value"][3])
+    return names, sizes, guids, adlers
+
+
+def get_labels(data_type):
+    """Get a list of all labels available
+    """
+    global _db_user, _db_pswd, _db_host, _db_name
+    rows = db_view("%s/_design/proddata/_view/%s_by_label" % (_db_name, data_type),
+                   reduce=True, group_level=1)
+    labels = set()
+    for row in rows:
+        labels.add(row["key"][0])
+    return labels
+
+
+def get_versions(data_type):
+    """Get a list of all versions available
+    """
+    global _db_user, _db_pswd, _db_host, _db_name
+    rows = db_view("%s/_design/proddata/_view/%s_by_mod_pass_sr" % (_db_name, data_type),
+                   reduce=True, group_level=2)
+    versions = set()
+    for row in rows:
+        versions.add(row["key"][1])
+    return versions
+
+
+def get_modules(data_type):
+    """Get a list of all modules available
+    """
+    global _db_user, _db_pswd, _db_host, _db_name
+    rows = db_view("%s/_design/proddata/_view/%s_by_mod_pass_sr" % (_db_name, data_type),
+                   reduce=True, group_level=1)
+    modules = set()
+    for row in rows:
+        modules.add(row["key"][0])
+    return modules
+
+
+def db_view(view_name, **kwargs):
+    global _db_user, _db_pswd, _db_host, _db_name
+    query_opts = {}    
+    for name, value in kwargs.items():
+        value = json.dumps(value)
+        query_opts[name] = value
+    query_string = urllib.urlencode(query_opts, True)
+    if len(query_opts):
+        query_url = "http://%s:5984/%s?%s" % (_db_host, view_name, query_string)
+    else:
+        query_url = "http://%s:5984/%s" % (_db_host, view_name)    
+    response = get_response(_db_host, query_url, _db_user, _db_pswd)
+    # Now map these to rows
+    data = json.loads(response)
+    try:
+        return data["rows"]
+    except KeyError, e:
+        sys.stderr.write("DB view error, response: %s\tquery: %s" % (response, query_url))
+        raise
+
+
+def get_response(host, url, username=None, password=None):
+    headers = {}
+    if username is not None and password is not None:
+        auth_string = base64.encodestring('%s:%s' % (username, password))[:-1]
+        headers['Authorization'] = 'Basic %s' % auth_string
+    connection = httplib.HTTPConnection(host, port=5984)
+    try:
+        connection.request('GET', url, headers=headers)
+        response = connection.getresponse()
+    except httplib.HTTPException as e:
+        sys.stderr.write('Error accessing the requested db query: %s' % str(e))
+        sys.exit(20)
+    return response.read()
+
+
+def generate_list_by_label(label, data_type, module, run_range):
+    """Generate the file list by production labels
+    """
+    names = []
+    sizes = []
+    guids = []
+    adlers = []
+    if not module:
+        module = get_module_list_label(data_type)
+    print module
+    for i, mod in enumerate(module):
+        print "Generating file lists, %d of %d" % (i, len(module))
+        n, s, g, a = get_list_by_label_module(data_type, label, mod)
+        names += n
+        sizes += s
+        guids += g
+        adlers += a
+    if len(names)==0:
+        print "No files for label %s, modules %s" % (label, module)
+        sys.exit()
+    return names, sizes, guids, adlers
+
+
+def generate_list_by_version(version, data_type, module, run_range):
+    """Generate the file list by rat version
+    """
+    # Now loop through each module and get the file lists
+    if not module:
+        module = get_module_list_version(data_type, version)
+    if len(module)==0:
+        print "No modules for rat %s" % version
+        sys.exit()
+    names = []
+    sizes = []
+    guids = []
+    adlers = []
+    for i, mod in enumerate(module):
+        print "Generating file lists, %d of %d" % (i, len(module))
+        n, s, g, a= get_list_by_module_version(data_type, mod, version)
+        names += n
+        sizes += s
+        guids += g
+        adlers += a
+    if len(names)==0:
+        print "No files for version %s, modules %s" % (version, module)
+        sys.exit()
+    return names, sizes, guids, adlers
+
+
+def write_output(output, names, sizes, guids, adlers):
+    """Write the output file.
+    """
+    if len(names)==0:
+       print "No files found!"
+       sys.exit()
+    list_file = open(output, "w")
+    for i, n in enumerate(names):
+        list_file.write("%s\t%s\t%s\t%s\n" % (n, sizes[i], guids[i], adlers[i]))
+    list_file.close()
+    print "Found %d files, listed in %s" % (len(names), output)
+
+
 if __name__=="__main__":
-   parser = argparse.ArgumentParser()
-   parser.add_argument("-d", dest="db_name", help="Data-flow database name [production]",
-                       default="production")
-   parser.add_argument("-s", dest="db_server",
-                       help="Data-flow database server [http://snoplus.westgrid.ca:5984]",
-                       default="http://snoplus.westgrid.ca:5984")
-   parser.add_argument("-m", dest="module", help="Requested module (can pass multiple, default: all)",
-                       nargs="+")
-   parser.add_argument("-r", dest="run_range", help="Requested run range [(0, 999999)]")
-   parser.add_argument("-l", dest="label", help="Production dataset label (NOT YET USEABLE - PLACEHOLDER!)")
-   parser.add_argument("-v", dest="rat_version", help="Rat version", default="4.4.0")
-   parser.add_argument("-f", dest="full_data", help="[Ntuple] or full datasets (set option for full)",
-                       action="store_true")
-   parser.add_argument("-o", dest="output", help="Filename to write the list to [filelist.dat]",
-                       default="filelist.dat")
-   args = parser.parse_args()
-   # check that the output file is OK
-   if os.path.exists(args.output):
-       overwrite = raw_input("%s exists, overwrite [y/N]?: " % args.output)
-       if overwrite!="y" and overwrite!="Y":
-           print "Specify another filename"
-           sys.exit()
-   # default is to search for ntuple files
-   data_type = "ntuples"
-   if args.full_data:
-       data_type = "files"
-   # connect to the database
-   connect_db(args.db_server, args.db_name)
-   # now loop through each module and get the file lists
-   if not args.module:
-       args.module = get_module_list(data_type, args.rat_version)
-   if len(args.module)==0:
-       print "No modules for rat %s" % args.rat_version
-       sys.exit()
-   names = []
-   sizes = []
-   guids = []
-   adlers = []
-   for i, module in enumerate(args.module):
-       print "Generating file lists, %d of %d" % (i, len(args.module))
-       n, s, g, a= get_list(data_type, module, args.rat_version)
-       names += n
-       sizes += s
-       guids += g
-       adlers += a
-   if len(names)==0:
-       print "No files for rat %s" % args.rat_version
-       sys.exit()
-   # output these to a file
-   list_file = open(args.output, "w")
-   for i, n in enumerate(names):
-       list_file.write("%s\t%s\t%s\t%s\n" % (n, sizes[i], guids[i], adlers[i]))
-   list_file.close()
-   print "Found %d files, listed in %s" % (len(names), args.output)
+    parser = argparse.ArgumentParser(description="File list generator.  Users MUST specify either a label (-l, recommended) or rat version (-v).")
+    parser.add_argument("-d", dest="db_name", help="Data-flow database name [production]",
+                        default="production")
+    parser.add_argument("-s", dest="db_server",
+                        help="Data-flow database server [snoplus.westgrid.ca]",
+                        default="snoplus.westgrid.ca")
+    parser.add_argument("-p", dest="db_port",
+                        help="Data-flow database server port [5984]", default=5984, type=int)
+    parser.add_argument("-f", dest="full_data", help="[Ntuple] or full datasets (set option for full)",
+                        action="store_true")
+    parser.add_argument("-o", dest="output", help="Filename to write the list to [filelist.dat]",
+                        default="filelist.dat")
+    
+    parser.add_argument("-m", dest="module", help="Requested module, format -m mod1 mod2 ... (blank for all)", nargs="+")
+    parser.add_argument("-r", dest="run_range", help="Requested run range, format -r low high (blank for all)", type=int, nargs='+')
+    
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("-l", dest="label", help="Requested production label (recommended)")   
+    group.add_argument("-v", dest="version", help="Requested RAT version")
+    
+    parser.add_argument("--labels", dest="list_labels", help="Show list of possible labels", action="store_true")
+    parser.add_argument("--versions", dest="list_versions", help="Show list of possible versions", action="store_true")
+    parser.add_argument("--modules", dest="list_modules", help="Show list of possible modules", action="store_true")
+    
+    args = parser.parse_args()
+
+    # Default is to search for ntuple files
+    data_type = "ntuples"
+    if args.full_data:
+        data_type = "files"
+    
+    # First, check that no help commands are requested
+    if args.list_labels:
+        connect_db(args.db_server, args.db_name)
+        for l in sorted(get_labels(data_type)):
+            print l
+        sys.exit()
+    if args.list_versions:
+        connect_db(args.db_server, args.db_name)
+        for v in sorted(get_versions(data_type)):
+            print v
+        sys.exit()
+    if args.list_modules:
+        connect_db(args.db_server, args.db_name)
+        for m in sorted(get_modules(data_type)):
+            print m
+        sys.exit()
+
+    # Check that the output file is OK
+    if os.path.exists(args.output):
+        overwrite = raw_input("%s exists, overwrite [y/N]?: " % args.output)
+        if overwrite!="y" and overwrite!="Y":
+            print "Specify another filename"
+            sys.exit()
+
+    # Connect to the database
+    connect_db(args.db_server, args.db_name)
+
+    # Now handle either rat version or labelled data
+    if args.label:
+        names, sizes, guids, adlers = generate_list_by_label(args.label, data_type, args.module, args.run_range)   
+    elif args.version:
+        names, sizes, guids, adlers = generate_list_by_version(args.version, data_type, args.module, args.run_range)   
+    else:
+        parser.print_help()
+        sys.exit()    
+
+    # And write the output file
+    write_output(args.output, names, sizes, guids, adlers)
+    
