@@ -151,10 +151,10 @@ UpdateValidity(
 
 void
 ExtractValidity(
-                   string lFile,
-                   string lFit,
-				   string graphName,
-                   TGraph** gExecTime )
+                string lFile,
+                string lFit,
+                string graphName,
+                TGraph** gExecTime )
 {
   // Now new the graphs
   *gExecTime = new TGraph();
@@ -168,6 +168,8 @@ ExtractValidity(
   LoadRootFile( lFile, &tree, &rDS, &rPMTList );
 
   int graphPoint = 0;
+  double validEvents, totalEvents;
+  validEvents = totalEvents = 0.0;
   for( int iLoop = 0; iLoop < tree->GetEntries(); iLoop++ )
     {
       tree->GetEntry( iLoop );
@@ -180,7 +182,10 @@ ExtractValidity(
 		  RAT::DS::EV *rEV = rDS->GetEV(0);
           try
             {
-              (*gExecTime)->SetPoint( graphPoint, rEV->GetPMTCalCount(), rEV->GetFitResult( lFit ).GetValid() );
+              totalEvents += 1.0;
+              const int valid = rEV->GetFitResult( lFit ).GetValid();
+              (*gExecTime)->SetPoint( graphPoint, rEV->GetPMTCalCount(), valid );
+              validEvents += valid;
               graphPoint++;
             }
           catch( std::runtime_error& e )
@@ -190,9 +195,10 @@ ExtractValidity(
             }
 		}
 	}
+  cout << lFile << " " << lFit << " " << validEvents / totalEvents << endl;
   (*gExecTime)->SetName( graphName.c_str() );
   (*gExecTime)->GetXaxis()->SetTitle( "NHits" );
-  (*gExecTime)->GetYaxis()->SetTitle( "Execution Time [s]" );
+  (*gExecTime)->GetYaxis()->SetTitle( "Validity" );
   (*gExecTime)->SetMarkerStyle( 2 );
 
 }
