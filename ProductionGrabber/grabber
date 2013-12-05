@@ -14,6 +14,8 @@ import os
 import sys
 import zlib
 import argparse
+import time
+import multiprocessing
 
 import grid
 
@@ -40,25 +42,65 @@ def get_adler32(filename):
     return hex(val)[2:10].zfill(8).lower()
 
 
-def download_file(directory, filename, guid, adler32):
+def warn(message):
+    """Pipe to stderr; less typing for me.
+    """
+    sys.stderr.write("WARNING: %s\n" % message)
+
+
+def download_file(directory, filename, guid, adler32, size):
     """Download a file to the given directory.
     """
     if not os.path.exists(directory):
         os.makedirs(directory)
     download_path = os.path.join(directory, filename)
-    #handle any files that have already been downloaded
+    # Handle any files that have already been downloaded
     if os.path.exists(download_path):
-        #compare checksums
+        # Compare checksums
         local_adler32 = get_adler32(download_path)
         if local_adler32!=adler32:
-            print "Checksum mismatch: %s " % filename
-            print "Delete and re-download"
+            warn("Checksum mismatch: %s; delete and re-download" % filename)
             os.unlink(download_path)
         else:
-            print "Already downloaded: %s" % filename
+            warn("Already downloaded: %s" % filename)
             return
     print "Downloading: %s" % filename
-    grid.copy(guid, os.path.join(directory, filename))
+    # Set a timeout based on the file size
+    # For lack of anything better, use 1 second for every MB
+    timeout = 1 + int(size / _MB)
+    try:
+        grid.copy(guid, os.path.join(directory, filename), timeout=timeout)
+    except Exception, e:
+        warn("Download of %s failed: %s" % (filename, e))
+
+
+def download_sequence(destination, files, guids, adlers, sizes):
+    """Download the files in sequence mode; i.e. single threaded.
+    """
+    for i, f in enumerate(files):
+        download_file(destination, f, guids[i], adlers[i], sizes[i])
+
+
+def download_parallel(destination, files, guids, adlers, sizes, streams):
+    """Download the files in parallel mode; i.e. (kinda) multi threaded.
+    """
+    pool = multiprocessing.Pool(processes=streams)
+    for i, f in enumerate(files):
+        result = pool.apply_async(download_file, args=(destination, f, guids[i], adlers[i], sizes[i]))
+    # Add in a hack for keyboard interrupts
+    pool.close()
+    complete = False
+    while result.ready() is False:
+        # Downloads still running, wait for a bit.
+        try:
+            time.sleep(5)            
+        except KeyboardInterrupt:
+            # Kill all the daughters and exit
+            pool.terminate()
+            warn("Keyboard interrupt caught; terminating processes")
+            break
+    if complete is True:
+        pool.join()
 
 
 if __name__=="__main__":
@@ -67,6 +109,9 @@ if __name__=="__main__":
                        default="filelist.dat")
    parser.add_argument("-d", dest="dest", help="Directory to download files to. [downloaded]",
                        default="downloaded")
+   parser.add_argument("-p", dest="parallel", help="Parallel downloads", action="store_true")
+   parser.add_argument("--streams", dest="streams", help="Parallel streams [10]",
+                       type=int, default=10)
    args = parser.parse_args()
    # First, check for a proxy
    if not grid.proxy_time():
@@ -88,7 +133,9 @@ if __name__=="__main__":
    if response!="y" and response!="Y":
        print "OK, quit!"
        sys.exit()
-   # Now, download files
-   for i, f in enumerate(files):
-       download_file(args.dest, f, guids[i], adlers[i])
+   # Now, download files   
+   if args.parallel:
+       download_parallel(args.dest, files, guids, adlers, sizes, args.streams)
+   else:
+       download_sequence(args.dest, files, guids, adlers, sizes)
    print "Downloads complete"
