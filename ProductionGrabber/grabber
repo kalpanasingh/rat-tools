@@ -70,8 +70,8 @@ def download_file(directory, filename, guid, adler32, size):
     timeout = 1 + int(size / _MB)
     try:
         grid.copy(guid, os.path.join(directory, filename), timeout=timeout)
-    except Exception:
-        warn("Download of %s failed" % filename)
+    except Exception, e:
+        warn("Download of %s failed: %s" % (filename, e))
 
 
 def download_sequence(destination, files, guids, adlers, sizes):
@@ -86,24 +86,20 @@ def download_parallel(destination, files, guids, adlers, sizes, streams):
     """
     pool = multiprocessing.Pool(processes=streams)
     for i, f in enumerate(files):
-        pool.apply_async(download_file, args=(destination, f, guids[i], adlers[i], sizes[i]))
+        result = pool.apply_async(download_file, args=(destination, f, guids[i], adlers[i], sizes[i]))
     # Add in a hack for keyboard interrupts
     pool.close()
-    result = False
-    while result is False:
+    complete = False
+    while result.ready() is False:
+        # Downloads still running, wait for a bit.
         try:
-            if pool.is_alive() is False:
-                # Child processes are complete
-                result = True
-            else:
-                # Downloads still running, wait for a bit.
-                time.sleep(5)
+            time.sleep(5)            
         except KeyboardInterrupt:
             # Kill all the daughters and exit
             pool.terminate()
             warn("Keyboard interrupt caught; terminating processes")
             break
-    if result is True:
+    if complete is True:
         pool.join()
 
 

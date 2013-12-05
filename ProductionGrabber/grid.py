@@ -120,7 +120,7 @@ def copy(url, local, timeout=None):
     else:
         rtc, out, err = execute('lcg-cp', '--sendreceive-timeout', str(timeout), url, local)
     if rtc:
-        raise Exception('Unable to copy %s to %s'%(url, local))
+        raise Exception('Unable to copy %s to %s\nError: %s'%(url, local, err))
 
 def list_reps(guid):
     """Get the SURLS of a file.
