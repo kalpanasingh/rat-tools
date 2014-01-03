@@ -113,7 +113,9 @@ def proxy_roles():
 # Data management commands
 
 def copy(url, local, timeout=None):
-    '''Copy a file listed at a LFN/SURL to a local filename/path
+    '''Copy a file listed at a LFN/SURL to a local filename/path.
+
+    URL can also be a guid (requires correct format)
     '''
     if timeout is None:
         rtc, out, err = execute('lcg-cp', url, local)
