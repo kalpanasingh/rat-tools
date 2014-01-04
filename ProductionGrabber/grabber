@@ -68,6 +68,9 @@ def download_file(directory, filename, guid, adler32, size):
     # Set a timeout based on the file size
     # For lack of anything better, use 1 second for every MB
     timeout = 1 + int(size / _MB)
+    # Ensure correct guid format (some are missing prefix)
+    if not guid.startswith("guid:"):
+        guid = "guid:" + guid
     try:
         grid.copy(guid, os.path.join(directory, filename), timeout=timeout)
     except Exception, e:
