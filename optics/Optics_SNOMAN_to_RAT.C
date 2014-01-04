@@ -275,13 +275,13 @@ void AbsScatNonScint(int ninp, double *wave, double *abscoeff, double RSfactor, 
 		double energy = (planks*c)/(wl*MeV_J);
 		rayprob[i] = 0.1 * Confac * isocomp * RSfactor * pow(energy,4.) *
 				  pow((RI2-1.0),2.) * pow((RI2+2.0),2.);
-		mfp_ray[i] = -1/(log(1-rayprob[i]));			
+		mfp_ray[i] = 1/rayprob[i];			
 		// absorption
 		mfp_abs[i] = gabsRAT->Eval(waveOut[i]);			
-		absprob[i] = 1. - exp(-1./mfp_abs[i]);
+		absprob[i] = 1./mfp_abs[i];
 		// combined
 		mfp_tot[i] = 1./((1./mfp_abs[i]) + (1./mfp_ray[i]));
-		totprob[i] = 1. - exp(-1./mfp_tot[i]);
+		totprob[i] = 1./mfp_tot[i];
 		fracray[i] = rayprob[i]/totprob[i];
 		fracabs[i] = absprob[i]/totprob[i];
 		fractot[i] = fracray[i]+fracabs[i];
