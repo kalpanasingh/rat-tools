@@ -116,6 +116,7 @@ def copy(url, local, timeout=None):
     '''Copy a file listed at a LFN/SURL to a local filename/path.
 
     URL can also be a guid (requires correct format)
+    Timeout is the time for the FULL transfer (lcg-cp defaults to 3600)
     '''
     if timeout is None:
         rtc, out, err = execute('lcg-cp', url, local)

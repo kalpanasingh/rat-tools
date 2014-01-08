@@ -66,8 +66,8 @@ def download_file(directory, filename, guid, adler32, size):
             return
     print "Downloading: %s" % filename
     # Set a timeout based on the file size
-    # For lack of anything better, use 1 second for every MB + 10s basic
-    timeout = 10 + int(size / _MB)
+    # For lack of anything better, use 10 second for every MB + 60s basic
+    timeout = 60 + 10 * int(size / _MB)
     # Ensure correct guid format (some are missing prefix)
     if not guid.startswith("guid:"):
         guid = "guid:" + guid
