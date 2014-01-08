@@ -21,7 +21,7 @@ def UpdateData( filename ):
             startPos = mc.GetMCParticle(0).GetPos()
         
             try:
-                fitPos = ev.GetFitResult("simpleLikelihood:powell:et1d-labppo_scintillator:quad").GetVertex(0).GetPosition()
+                fitPos = ev.GetFitResult("positionTimeLikelihood:powell:et1d-labppo_scintillator:quad").GetVertex(0).GetPosition()
                 radial = (fitPos-startPos).Dot(startPos.Unit())
                 if(fitPos.Mag()<fiducialCut):
                     biasPlot.Fill(radial)
