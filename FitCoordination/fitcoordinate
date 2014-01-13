@@ -26,7 +26,7 @@ class FitCoordinate:
     def Produce( self, options ):
         self.RunCommand( "python " + self.production_script + " " + options )
     def Analyse( self, options ):
-        if hasattr(self, 'analysis_script_material') and options._run_options.scintMaterial!="":
+        if hasattr(self, 'analysis_script_material') and self._run_options.scintMaterial!="":
             # Requires the material name
             options += ' -s %s ' % options._run_options.scintMaterial
         self.RunCommand( "python " + self.analysis_script + " " + options )
