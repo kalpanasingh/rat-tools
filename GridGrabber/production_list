@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #####################
 #
-# generate_list
+# production_list
 #
 # Generates lists of production or
 # processed data (full RAT format or
@@ -14,11 +14,7 @@
 
 import os
 import sys
-import getpass
-import urllib
-import urlparse
-import httplib
-import base64
+import database
 try:
     import argparse
 except:
@@ -27,47 +23,13 @@ try:
     import json
 except:
     raise ImportError("json not available; python version needs to be 2.7+")
-
-_db_host = None # db host
-_db_name = None # db name
-_db_user = None # db user
-_db_pswd = None # db password
-
-class WarnedFileType(argparse.FileType):
-    """A writable file type that checks a file exists.
-    """
-    def __init__(self, mode="r", bufsize=-1):
-        super(WarnedFileType, self).__init__(mode, bufsize)
-
-    def __call__(self, string):
-        if "w" in self._mode:
-            if os.path.exists(string):
-                overwrite = raw_input("%s exists, overwrite [y/N]?: " % string)
-                if overwrite!="y" and overwrite!="Y":
-                    print "Specify another filename"
-                    sys.exit()
-        if "r" in self._mode:
-            if not os.path.exists(string):
-                raise IOError("file %s does not exist, cannot read" % string)
-        super(WarnedFileType, self).__call__(string)
-
-
-def connect_db(db_server, db_name):
-    """Open up the database connection.
-    """
-    global _db_user, _db_pswd, _db_host, _db_name
-    _db_user = raw_input("[%s] Username: " % db_server)
-    _db_pswd = getpass.getpass("[%s] Password: " % db_server)
-    _db_host = "%s" % (db_server)
-    _db_name = "%s" % (db_name)
     
 
 def get_module_list_version(data_type, rat_version=None):
     """Get a list of available modules.
     """
-    global _db_user, _db_pswd, _db_host, _db_name
-    rows = db_view("%s/_design/proddata/_view/%s_by_mod_pass_sr" % (_db_name, data_type),
-                   reduce=True, group=True, group_level=2)
+    rows = database.view("_design/proddata/_view/%s_by_mod_pass_sr" % (data_type),
+                    reduce=True, group=True, group_level=2)
     module_list = []
     for row in rows:
         if rat_version and row["key"][1]!=unicode(rat_version):
@@ -79,8 +41,7 @@ def get_module_list_version(data_type, rat_version=None):
 def get_module_list_label(data_type, label=None):
     """Get a list of available modules.                                                                                                            
     """
-    global _db_user, _db_pswd, _db_host, _db_name
-    rows = db_view("%s/_design/proddata/_view/%s_by_label" % (_db_name, data_type),
+    rows = database.view("_design/proddata/_view/%s_by_label" % (data_type),
                    reduce=True, group=True, group_level=2)
     module_list = []
     for row in rows:
@@ -93,12 +54,11 @@ def get_module_list_label(data_type, label=None):
 def get_list_by_module_version(data_type, module, rat_version, run_range):
     """Get a list of files for the settings given.
     """
-    global _db_user, _db_pswd, _db_host, _db_name
     names = []
     sizes = []
     guids = []
     adlers = []
-    rows = db_view("%s/_design/proddata/_view/%s_by_mod_pass_sr" % (_db_name, data_type),
+    rows = database.view("_design/proddata/_view/%s_by_mod_pass_sr" % (data_type),
                    startkey = [module, rat_version],
                    endkey = [module, rat_version+"_"],
                    reduce=False)
@@ -122,7 +82,6 @@ def get_list_by_label_module(data_type, label, module, run_range):
 
     If no module give, return all modules.
     """
-    global _db_user, _db_pswd, _db_host, _db_name
     names = []
     sizes = []
     guids = []
@@ -132,7 +91,7 @@ def get_list_by_label_module(data_type, label, module, run_range):
     if run_range:        
         startkey = [label, module, run_range[0]]
         endkey = [label, module, run_range[1]+1] # range inclusive    
-    rows = db_view("%s/_design/proddata/_view/%s_by_label" % (_db_name, data_type),
+    rows = database.view("_design/proddata/_view/%s_by_label" % (data_type),
                    startkey=startkey, endkey=endkey, reduce=False)
     for row in rows:
         if not row["value"][1] or row["value"][1]=="":
@@ -148,8 +107,7 @@ def get_list_by_label_module(data_type, label, module, run_range):
 def get_labels(data_type):
     """Get a list of all labels available
     """
-    global _db_user, _db_pswd, _db_host, _db_name
-    rows = db_view("%s/_design/proddata/_view/%s_by_label" % (_db_name, data_type),
+    rows = database.view("_design/proddata/_view/%s_by_label" % (data_type),
                    reduce=True, group_level=1)
     labels = set()
     for row in rows:
@@ -160,8 +118,7 @@ def get_labels(data_type):
 def get_versions(data_type):
     """Get a list of all versions available
     """
-    global _db_user, _db_pswd, _db_host, _db_name
-    rows = db_view("%s/_design/proddata/_view/%s_by_mod_pass_sr" % (_db_name, data_type),
+    rows = database.view("_design/proddata/_view/%s_by_mod_pass_sr" % (data_type),
                    reduce=True, group_level=2)
     versions = set()
     for row in rows:
@@ -172,34 +129,12 @@ def get_versions(data_type):
 def get_modules(data_type):
     """Get a list of all modules available
     """
-    global _db_user, _db_pswd, _db_host, _db_name
-    rows = db_view("%s/_design/proddata/_view/%s_by_mod_pass_sr" % (_db_name, data_type),
+    rows = database.view("_design/proddata/_view/%s_by_mod_pass_sr" % (data_type),
                    reduce=True, group_level=1)
     modules = set()
     for row in rows:
         modules.add(row["key"][0])
     return modules
-
-
-def db_view(view_name, **kwargs):
-    global _db_user, _db_pswd, _db_host, _db_name
-    query_opts = {}    
-    for name, value in kwargs.items():
-        value = json.dumps(value)
-        query_opts[name] = value
-    query_string = urllib.urlencode(query_opts, True)
-    if len(query_opts):
-        query_url = "http://%s:5984/%s?%s" % (_db_host, view_name, query_string)
-    else:
-        query_url = "http://%s:5984/%s" % (_db_host, view_name)    
-    response = get_response(_db_host, query_url, _db_user, _db_pswd)
-    # Now map these to rows
-    data = json.loads(response)
-    try:
-        return data["rows"]
-    except KeyError, e:
-        sys.stderr.write("DB view error, response: %s\tquery: %s" % (response, query_url))
-        raise
 
 
 def get_response(host, url, username=None, password=None):
@@ -313,17 +248,17 @@ if __name__=="__main__":
     
     # First, check that no help commands are requested
     if args.list_labels:
-        connect_db(args.db_server, args.db_name)
+        database.connect_db(args.db_server, args.db_port, args.db_name)
         for l in sorted(get_labels(data_type)):
             print l
         sys.exit()
     if args.list_versions:
-        connect_db(args.db_server, args.db_name)
+        database.connect_db(args.db_server, args.db_port, args.db_name)
         for v in sorted(get_versions(data_type)):
             print v
         sys.exit()
     if args.list_modules:
-        connect_db(args.db_server, args.db_name)
+        database.connect_db(args.db_server, args.db_port, args.db_name)
         for m in sorted(get_modules(data_type)):
             print m
         sys.exit()
@@ -336,7 +271,7 @@ if __name__=="__main__":
             sys.exit()
 
     # Connect to the database
-    connect_db(args.db_server, args.db_name)
+    database.connect_db(args.db_server, args.db_port, args.db_name)
 
     # If there is a run range, need exactly two arguments
     if args.run_range:
