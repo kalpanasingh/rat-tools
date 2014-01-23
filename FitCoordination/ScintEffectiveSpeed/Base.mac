@@ -1,7 +1,6 @@
 # Parameters
-/glg4debug/glg4param omit_muon_processes 1.0
-/glg4debug/glg4param omit_hadronic_processes 1.0
-/glg4debug/glg4param omit_neutron_hp 1.0
+/PhysicsList/OmitMuonicProcesses true
+/PhysicsList/OmitHadronicProcesses true
 
 /rat/db/set MC thin_factor 3.5
 
@@ -23,7 +22,7 @@
 /rat/proc fitter
 /rat/procset method "quad"
 /rat/proc fitter
-/rat/procset method "simpleLikelihood"
+/rat/procset method "positionTimeLikelihood"
 /rat/procset optimiser "powell"
 /rat/procset pdf "et1d-labppo_scintillator"
 /rat/procset seed "quad"

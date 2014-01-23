@@ -15,7 +15,7 @@ def ProduceRatioHistogram(filename, t1, t2):
 
 	for ds, run in rat.dsreader(filename):
 		effectiveTime = run.GetEffectiveVelocityTime()
-		straightPath = run.GetStraightLinePath()
+		lightPath = run.GetLightPath()
 		pmtProp = run.GetPMTProp()
 	
 		if ds.GetEVCount() == 0:
@@ -36,7 +36,7 @@ def ProduceRatioHistogram(filename, t1, t2):
 			distInScint = ROOT.Double()
 			distInAV = ROOT.Double()
 			distInWater = ROOT.Double()
-			straightPath.CalcByPosition(vertPos, pmtPos, distInScint, distInAV, distInWater)
+			lightPath.CalcByPosition(vertPos, pmtPos, distInScint, distInAV, distInWater)
 			flightTime = effectiveTime.CalcByDistance(distInScint, distInAV, distInWater)
 			timeresid = pmtTime - flightTime - vertTime
 			

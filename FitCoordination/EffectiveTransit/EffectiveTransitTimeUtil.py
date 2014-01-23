@@ -12,7 +12,7 @@ def UpdateData( filename, fullPlot ):
     
     eventNum = 0
     for ds, run in rat.dsreader( filename ):
-        straightPath = run.GetStraightLinePath()
+        lightPath = run.GetLightPath()
         groupVeloTime = run.GetGroupVelocityTime()
         pmtProp = run.GetPMTProp()
 	
@@ -33,7 +33,7 @@ def UpdateData( filename, fullPlot ):
                 scintDist = ROOT.Double()
                 avDist = ROOT.Double()
                 waterDist = ROOT.Double()
-                straightPath.CalcByPosition( startPos, endPos, scintDist, avDist, waterDist )
+                lightPath.CalcByPosition( startPos, endPos, scintDist, avDist, waterDist )
                 transitTime = groupVeloTime.CalcByDistance( 0.0, avDist, waterDist )
                 fullPlot.Fill( scintDist, mcPhoton.GetHitTime() - startTime - transitTime )
     return
@@ -73,7 +73,7 @@ def UpdateProfile( filename, profile ):
     
     eventNum = 0
     for ds, run in rat.dsreader( filename ):
-        straightPath = run.GetStraightLinePath()
+        lightPath = run.GetLightPath()
         groupVeloTime = run.GetGroupVelocityTime()
         pmtProp = run.GetPMTProp()
 	
@@ -94,7 +94,7 @@ def UpdateProfile( filename, profile ):
                 scintDist = ROOT.Double()
                 avDist = ROOT.Double()
                 waterDist = ROOT.Double()
-                straightPath.CalcByPosition( startPos, endPos, scintDist, avDist, waterDist )
+                lightPath.CalcByPosition( startPos, endPos, scintDist, avDist, waterDist )
                 transitTime = groupVeloTime.CalcByDistance( 0.0, avDist, waterDist )
                 profile.Fill( scintDist, scintDist / ( mcPhoton.GetHitTime() - startTime - transitTime ) )
                 
