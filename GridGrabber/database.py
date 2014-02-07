@@ -28,7 +28,7 @@ _db_url = None # db url
 def connect_db(db_server, db_port, db_name):
     """Open up the database connection.
     """
-    global _db_name, _db_user, _db_pswd, _db_host, _db_url
+    global _db_name, _db_user, _db_pswd, _db_host, _db_url, _db_port
     _db_user = raw_input("[%s] Username: " % db_server)
     _db_pswd = getpass.getpass("[%s] Password: " % db_server)
     _db_name = "%s" % (db_name)
@@ -51,7 +51,7 @@ def view(view_name, **kwargs):
     if len(query_opts):
         query_url = "%s/%s/%s?%s" % (_db_url, _db_name, view_name, query_string)
     else:
-        query_url = "%s/%s/%s" % (_db_host, _db_name, view_name)    
+        query_url = "%s/%s/%s" % (_db_host, _db_name, view_name)
     response = get_response(_db_host, query_url, _db_user, _db_pswd)
     # Now map these to rows
     data = json.loads(response)
