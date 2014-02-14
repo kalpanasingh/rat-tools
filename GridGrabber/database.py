@@ -16,6 +16,7 @@ import urllib
 import httplib
 import base64
 import json
+import sys
 
 _db_name = None # db name
 _db_user = None # db user
