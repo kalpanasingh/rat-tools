@@ -14,8 +14,7 @@ initial_offset_to_x = 18.0 + 0.0#1.55
 separation = 36
 rotational_positions = [initial_offset_to_x + angle for angle in range(0, 360, separation)] 
 print rotational_positions
-rope_radial_pos = 6040.0 # RAT
-#rope_radial_pos = 6030.0 # SNOMAN
+rope_radial_pos = 6030.0
 
 db = { "x" : [], "y" : [], "z" : [], "roll" : [] }
 
