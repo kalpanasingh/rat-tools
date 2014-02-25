@@ -34,7 +34,8 @@ def connect_db(db_server, db_port, db_name):
     _db_pswd = getpass.getpass("[%s] Password: " % db_server)
     _db_name = "%s" % (db_name)
     _db_host = "%s" % (db_server)
-    _db_port = "%s" % (db_port)
+    if db_port:
+        _db_port = "%s" % (db_port)
     db_http = "http" # For now
     if not db_port:
         _db_url = "%s://%s" % (db_http, db_server)
@@ -68,7 +69,10 @@ def get_response(host, url, username=None, password=None):
     if username is not None and password is not None:
         auth_string = base64.encodestring('%s:%s' % (username, password))[:-1]
         headers['Authorization'] = 'Basic %s' % auth_string
-    connection = httplib.HTTPConnection(host, port=_db_port)
+    if _db_port is not None:
+        connection = httplib.HTTPConnection(host, port=_db_port)
+    else:
+        connection = httplib.HTTPConnection(host)
     try:
         connection.request('GET', url, headers=headers)
         response = connection.getresponse()
