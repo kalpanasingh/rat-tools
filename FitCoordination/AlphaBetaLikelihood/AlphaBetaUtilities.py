@@ -1,7 +1,7 @@
 import ROOT, rat, sys
 
 ParticleNames = {"212":["Bi212","Po212","Te130"],"214":["Bi214","Po214","Te130"]}
-PulseDescriptions = ["DefaultPSD","NoPSD","MeasuredPSD"]
+PulseDescriptions = ["wPSD","NoPSD","SeansPSD"]
 ParticlePulseDict= {"Bi212":[""],"Bi214":[""],"Te130":[""],"Po212":PulseDescriptions}
 PulseTimeConstants= {"":"",PulseDescriptions[0]:"",PulseDescriptions[1]:"-4.6d, -18d, -156d,",PulseDescriptions[2]:"-3.2d,-18d,-172d,"}
 PulseTimeRatios= {"":"",PulseDescriptions[0]:"",PulseDescriptions[1]:"0.71d, 0.22d, 0.07d,",PulseDescriptions[2]:"0.61d,0.28d,0.11d,"}
