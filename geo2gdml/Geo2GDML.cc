@@ -50,8 +50,6 @@ int main( int argc, char *argv[] )
   db->LoadDefaults();
   cout << "Loading geo " << argv[1] << endl;
   db->SetS( "DETECTOR", "geo_file", argv[1] );
-  db->Load( data + "/snoman/MATERIALS.ratdb" );
-  db->Load( data + "/snoman/OPTICS.ratdb" );
 
   G4RunManager* runManager = new G4RunManager;
   runManager->SetUserInitialization( new RAT::Detector() );
