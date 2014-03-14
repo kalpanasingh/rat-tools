@@ -1,11 +1,10 @@
-#PDF Histogram list will go [Te130,Bi212,Po212DefaultPSD,Po212NoPSD,Po212MeasuredPSD]
 import AlphaBetaUtilities
 def AnalyseData(options):
     pdfs={}
     particleNames = AlphaBetaUtilities.ParticleNames[options.particle]
     for particleIndex, particle in enumerate(particleNames):
         for pulseIndex, pulseDescription in enumerate(AlphaBetaUtilities.ParticlePulseDict[particle]):
-            fileName = particle+pulseDescription            
+            fileName = particle+pulseDescription 
             pdfs[fileName] = AlphaBetaUtilities.ProduceTimeResidualPDF(fileName+".root")
 
     print "The following are the relevant PDFs for the AlphaBetaClassifier. Replace the relevant portion of ALPHA_BETA_CLASSIFIER.ratdb with the following text"

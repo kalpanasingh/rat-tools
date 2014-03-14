@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import os, sys, string, AlphaBetaUtilities
 
 def ProduceRunMacFiles(options):
@@ -22,7 +21,7 @@ def ProduceRunMacFiles(options):
                
                 generator = "/generator/vtx/set backg " + str(particle)
                 hadrons = ""
-            if ( pulseDescription!="DefaultPSD" and pulseDescription!=""):
+            if ( pulseIndex!=0 and pulseDescription!=""): #If it's Po21X and there is a non-default pulse shape then add that to .mac file.
                     timeConstant = "/rat/db/set OPTICS["+ str(options.scintMaterial) + "] SCINTWAVEFORMalpha_value1 [ " + str(AlphaBetaUtilities.PulseTimeConstants[pulseDescription]) + "]"
                     pulseRatio = "/rat/db/set OPTICS[" + str(options.scintMaterial) + "] SCINTWAVEFORMalpha_value2 [ " + str(AlphaBetaUtilities.PulseTimeRatios[pulseDescription]) + "]"
             else:
@@ -56,7 +55,7 @@ if __name__ == '__main__':
     parser.add_option("-s", type = "string", dest = "scintMaterial", help = "Scintillator material.", default = "labppo_scintillator")
     parser.add_option("-p", type = "string", dest = "particle", help = "Isotope desired, either 212 or 214.", default = "")
     (options, args) = parser.parse_args()
-    if(options.particle == "212" or options.particle == "214"):
+    if(options.particle == "212" or options.particle == "214"): 
         ProduceRunMacFiles(options)
     else:
         print "You must specify if you want PDFs for Bi212 or Bi214. This can be done by adding the option -p IsotopeNumber to your command"

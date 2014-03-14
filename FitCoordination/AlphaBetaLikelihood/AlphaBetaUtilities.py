@@ -6,6 +6,7 @@ ParticlePulseDict= {"Bi212":[""],"Bi214":[""],"Te130":[""],"Po212":PulseDescript
 PulseTimeConstants= {"":"",PulseDescriptions[0]:"",PulseDescriptions[1]:"-4.6d, -18d, -156d,",PulseDescriptions[2]:"-3.2d,-18d,-172d,"}
 PulseTimeRatios= {"":"",PulseDescriptions[0]:"",PulseDescriptions[1]:"0.71d, 0.22d, 0.07d,",PulseDescriptions[2]:"0.61d,0.28d,0.11d,"}
 
+#Creates a normalized time residual PDF for a given root file.
 def ProduceTimeResidualPDF(filename):
     Histogram = ROOT.TH1D(filename,"",1100,-100,1000)
     for ds,run in rat.dsreader(filename):
@@ -30,11 +31,10 @@ def ProduceTimeResidualPDF(filename):
                 Histogram.Fill(timeResidual)
     Histogram.Scale(1.0/Histogram.Integral())
     pdfVector = []
-    #Note to self: Check to make sure the 0th bin means a time residual between -100 and -99 and so on.
-    for i in range(0,Histogram.GetNbinsX()):
+    for i in range(1,Histogram.GetNbinsX()):
         pdfVector.append(Histogram.GetBinContent(i))
     return pdfVector
-
+#Outputs 3 pdfs in the same format as in CLASSIFIER_ALPHA_BETA_LIKELIHOOD.ratdb
 def OutputFileChunk(pdfList, options, description):#pdfList must be in the follwing order [Bi,Po,Te130]
     pdfNames = ["beta_probability","alpha_probability","two_beta_probability"]
     print("{")
@@ -45,12 +45,12 @@ def OutputFileChunk(pdfList, options, description):#pdfList must be in the follw
    
     sys.stdout.write("times: [")
     for time in range(-100,1000):
-       sys.stdout.write(str(time)+", ")
+       sys.stdout.write(str(time)+"d, ")
     print("]")
     for pdfIndex,pdf in enumerate(pdfList):
         sys.stdout.write(str(pdfNames[pdfIndex]) + ": [")
         for pdfIndex,pdfValue in enumerate(pdf):
-            sys.stdout.write(str(pdfValue)+", ")
+            sys.stdout.write(str(pdfValue)+"d, ")
         print("]")
     print("}")
 
