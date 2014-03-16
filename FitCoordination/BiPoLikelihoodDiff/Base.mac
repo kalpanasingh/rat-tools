@@ -1,0 +1,33 @@
+/PhysicsList/OmitMuonicProcesses true
+${Hadrons}
+/rat/db/load scint
+/rat/db/set MC thin_factor 3.5
+/rat/db/set DETECTOR geo_file "${GeoFile}"
+/rat/db/set GEO[scint] material "${ScintMaterial}"
+${AlphaWaveFormLine1}
+${AlphaWaveFormLine2}
+
+/run/initialize
+
+/rat/proc frontend
+/rat/proc trigger
+/rat/proc eventbuilder
+/rat/proc calibratePMT
+/rat/proc count
+/rat/procset update 100
+/rat/proc prune
+/rat/procset prune "mc.track,mc.hit,mc.pmt,ev.pmtuncal,ev.pmttruth"
+
+/rat/proc scintFitter
+
+/rat/proc outroot
+/rat/procset file "${OutFileName}"
+
+${Generator}
+${Vertex}
+/generator/pos/set 0 0 0
+/generator/rate/set 1
+
+/rat/run/start 5000
+exit
+
