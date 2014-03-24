@@ -10,10 +10,10 @@ import math
 import yaml
 
 start_z = 12705.00
-neck_r = 25.5 * 25.4
+neck_r = 25.5 * 25.4 # Inches to mm
 av_r = 6005.0
 boss_z = 5700.0
-gap = 0.0 # Safety margin
+gap = 5.0 # Safety margin
 
 pipe1 = {"name" : "1",
          "theta" : -29.5,
@@ -67,11 +67,13 @@ def output_pipe(pipe):
     else:
         x = [math.sin(math.radians(pipe["theta"])) * neck_r] * 2
         y = [math.cos(math.radians(pipe["theta"])) * neck_r] * 2
-        z = [start_z, boss_z]
+        z = [start_z, boss_z, boss_z]
+        x.append(math.sin(math.radians(pipe["theta"])) * math.sin(math.radians(8.0)) * (av_r - pipe["od"] * 25.4 - gap))
+        y.append(math.cos(math.radians(pipe["theta"])) * math.sin(math.radians(8.0)) * (av_r - pipe["od"] * 25.4 - gap))
         for phi in pipe["phi"]:
-            x.append(math.sin(math.radians(pipe["theta"])) * math.sin(math.radians(phi)) * (av_r - pipe["od"] - gap))
-            y.append(math.cos(math.radians(pipe["theta"])) * math.sin(math.radians(phi)) * (av_r - pipe["od"] - gap))
-            z.append(math.cos(math.radians(phi)) * (av_r - pipe["od"] - gap))
+            x.append(math.sin(math.radians(pipe["theta"])) * math.sin(math.radians(phi)) * (av_r - pipe["od"] * 25.4 - gap))
+            y.append(math.cos(math.radians(pipe["theta"])) * math.sin(math.radians(phi)) * (av_r - pipe["od"] * 25.4 - gap))
+            z.append(math.cos(math.radians(phi)) * (av_r - pipe["od"] * 25.4 - gap))
     db["x"] = x
     db["y"] = y
     db["z"] = z
