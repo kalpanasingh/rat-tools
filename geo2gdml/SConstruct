@@ -1,0 +1,16 @@
+#-*-python-*-
+# Main build script for geo2gdml
+import os
+from packages import addpackages
+
+# Get build environment
+env = Environment(ENV=os.environ)
+
+# Adds all packages used by the viewer
+addpackages(env)
+
+env.Append(CXXFLAGS=['-Wfatal-errors'])
+env.Append(CPPPATH=[os.getcwd()])
+
+# Creates binary file
+env.Program(target="geo2gdml", source=["Geo2GDML.cc", "GDMLWriter.cc"])

@@ -88,19 +88,25 @@ def download_parallel(destination, files, guids, adlers, sizes, streams):
     """Download the files in parallel mode; i.e. (kinda) multi threaded.
     """
     pool = multiprocessing.Pool(processes=streams)
+    result = []
     for i, f in enumerate(files):
-        result = pool.apply_async(download_file, args=(destination, f, guids[i], adlers[i], sizes[i]))
+        result.append(pool.apply_async(download_file, args=(destination, f, guids[i], adlers[i], sizes[i])))
     # Add in a hack for keyboard interrupts
     pool.close()
     complete = False
-    while result.ready() is False:
+    while complete is False:
         # Downloads still running, wait for a bit.
         try:
+            complete = True
+            for i, r in enumerate(result):
+                if r.ready() is False:
+                    complete = False
             time.sleep(5)            
         except KeyboardInterrupt:
             # Kill all the daughters and exit
             pool.terminate()
             warn("Keyboard interrupt caught; terminating processes")
+            complete = False
             break
     if complete is True:
         pool.join()
