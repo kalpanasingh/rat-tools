@@ -104,36 +104,78 @@ def get_list_by_label_module(data_type, label, module, run_range):
     return names, sizes, guids, adlers
 
 
-def get_labels(data_type):
+def get_labels(data_type, module=None):
     """Get a list of all labels available
+
+    Specify a module to see versions associated with that module.
     """
-    rows = database.view("_design/proddata/_view/%s_by_label" % (data_type),
-                   reduce=True, group_level=1)
     labels = set()
-    for row in rows:
-        labels.add(row["key"][0])
+    if module is None:
+        rows = database.view("_design/proddata/_view/%s_by_label" % (data_type),
+                             reduce=True, group_level=1)
+        for row in rows:
+            labels.add(row["key"][0])
+    elif type(module)==list and len(module)==1:
+        rows = database.view("_design/proddata/_view/%s_by_label" % (data_type),
+                             reduce=True, group_level=2)
+        for row in rows:
+            if str(row["key"][1])==module[0]:
+                labels.add(row["key"][0])
+    else:
+        raise Exception("Must only provide one module name.")
     return labels
 
 
-def get_versions(data_type):
-    """Get a list of all versions available
+def get_versions(data_type, module=None):
+    """Get a list of all versions available.
+
+    Specify a module to see versions associated with that module.
     """
-    rows = database.view("_design/proddata/_view/%s_by_mod_pass_sr" % (data_type),
-                   reduce=True, group_level=2)
     versions = set()
-    for row in rows:
-        versions.add(row["key"][1])
+    if module is None:
+        rows = database.view("_design/proddata/_view/%s_by_mod_pass_sr" % (data_type),
+                             reduce=True, group_level=2)
+        for row in rows:
+            versions.add(row["key"][1])
+    elif type(module)==list and len(module)==1:
+        rows = database.view("_design/proddata/_view/%s_by_mod_pass_sr" % (data_type),
+                             reduce=True, group_level=2)
+        for row in rows:
+            if str(row["key"][0])==module[0]:
+                versions.add(row["key"][1])
+    else:
+        raise Exception("Must only provide one module name.")
     return versions
 
 
-def get_modules(data_type):
+def get_modules(data_type, label=None, version=None):
     """Get a list of all modules available
+
+    Only one of label or version can be specified (or neither).
     """
-    rows = database.view("_design/proddata/_view/%s_by_mod_pass_sr" % (data_type),
-                   reduce=True, group_level=1)
+    if label is not None and version is not None:
+        raise Exception("May only specify label OR version")
     modules = set()
-    for row in rows:
-        modules.add(row["key"][0])
+    if label is not None:
+        # Only modules for a given label
+        rows = database.view("_design/proddata/_view/%s_by_label" % (data_type),
+                             reduce=True, group_level=2, startkey=[label],
+                             endkey=[label+"_"])
+        for row in rows:
+            modules.add(row["key"][1])
+    elif version is not None:
+        # Only modules for a given RAT version
+        rows = database.view("_design/proddata/_view/%s_by_mod_pass_sr" % (data_type),
+                             reduce=True, group_level=2)
+        for row in rows:
+            if str(row["key"][1])==version:
+                modules.add(row["key"][0])
+    else:
+        # Any and all modules
+        rows = database.view("_design/proddata/_view/%s_by_mod_pass_sr" % (data_type),
+                             reduce=True, group_level=1)
+        for row in rows:
+            modules.add(row["key"][0])
     return modules
 
 
@@ -249,17 +291,17 @@ if __name__=="__main__":
     # First, check that no help commands are requested
     if args.list_labels:
         database.connect_db(args.db_server, args.db_port, args.db_name)
-        for l in sorted(get_labels(data_type)):
+        for l in sorted(get_labels(data_type, args.module)):
             print l
         sys.exit()
     if args.list_versions:
         database.connect_db(args.db_server, args.db_port, args.db_name)
-        for v in sorted(get_versions(data_type)):
+        for v in sorted(get_versions(data_type, args.module)):
             print v
         sys.exit()
     if args.list_modules:
         database.connect_db(args.db_server, args.db_port, args.db_name)
-        for m in sorted(get_modules(data_type)):
+        for m in sorted(get_modules(data_type, args.label, args.version)):
             print m
         sys.exit()
 
