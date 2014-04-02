@@ -125,7 +125,11 @@ if __name__=="__main__":
    # First, check for a proxy
    if not grid.proxy_time():
        print "Need to generate a grid proxy"
-       sys.exit()
+       if not grid.proxy_create():
+           print "Proxy successfully created"
+       else:
+           print "Unable to create proxy; try 'voms-proxy-init --voms snoplus.snolab.ca' in shell"
+           sys.exit()
    # Now, check the downloads
    files = []
    sizes = []
