@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 import os, sys, string
-# Author K Majumdar - 13/03/2014 <Krishanu.Majumdar@physics.ox.ac.uk>
+# Author K Majumdar - 05/04/2014 <Krishanu.Majumdar@physics.ox.ac.uk>
 
 
 def ProduceRunMacFiles(options):
     # produces and then runs the required RAT macros, and deletes each macro once complete
 
     if (options.isotopeAndTiming == ""):
-        print "An Isotope-and-Timing option (-p) must be specified for this coordinator ... exiting"
+        print "An Isotope-and-Timing option (-p) must be specified for this coordinator, i.e. 212-PSD or 214-noPSD ... exiting"
         sys.exit()
     isotopeAndTimingList = (options.isotopeAndTiming).split('-')
     isotope = isotopeAndTimingList[0]

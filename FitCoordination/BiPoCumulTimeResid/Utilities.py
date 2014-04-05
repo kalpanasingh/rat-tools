@@ -1,7 +1,7 @@
 #!usr/bin/env python
 import ROOT, rat, math
 # Secondary functions and user-defined Values for the BiPoCumulTimeResid Coordinator
-# Author K Majumdar - 10/03/2014 <Krishanu.Majumdar@physics.ox.ac.uk>
+# Author K Majumdar - 05/04/2014 <Krishanu.Majumdar@physics.ox.ac.uk>
 
 
 envronLoc = ""
@@ -28,10 +28,10 @@ def GetEnergyWindow(filename, fidVolLow, fidVolHigh):
 	    vertEnergy = ev.GetFitResult("scintFitter").GetVertex(0).GetEnergy()
 	    Histogram.Fill(vertEnergy)
 
-	GaussFit = ROOT.TF1("GaussFit", "gaus", 0.0, 5.0)
-	Histogram.Fit("GaussFit", "RQ")
-	lowEnergy = GaussFit.GetParameter(1) - GaussFit.GetParameter(2)
-	highEnergy = GaussFit.GetParameter(1) + GaussFit.GetParameter(2)
+	gaussFit = ROOT.TF1("gaus", "gaus", 0.0, 5.0)
+	Histogram.Fit(gaussFit, "RQ")
+	lowEnergy = gaussFit.GetParameter(1) - gaussFit.GetParameter(2)
+	highEnergy = gaussFit.GetParameter(1) + gaussFit.GetParameter(2)
 
 	energyWindow = [lowEnergy, highEnergy]
 	return energyWindow

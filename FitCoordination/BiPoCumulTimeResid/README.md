@@ -15,7 +15,8 @@ There are two methods for running this coordinator:
     -s = Scintillator Material (default = te_0p3_labppo_scintillator_Oct2012)
 	-g = Geometry File, specified with respect to the RAT data folder: geo/[geofile] (default = geo/snoplus.geo)
     -p = Timing Profile, indicating whether Pulse Shape Discrimination is present (= PSD, default) or Not (= noPSD, alternate option)
-    -i = RATDB Index, which must take the form of conecating the explicit -s and -p options (INCLUDING their possible default values), separated by '-' (default = "")
+    -i = RATDB Index, which must take the form of conecating the -s and -p options, separated by '-' (default = "")
+         Even if the default -s and -p options were used, they must be written explicitly for this -i option (e.g. if neither -s nor -p were not explictly set, -i = te_0p3_labppo_scintillator_Oct2012-PSD)
          Because this has an empty string as default, the AnalyseData.py script which uses it will exit with error if this option is NOT assigned
 
 - this will run the Production Script (ProduceData.py) and Analysis Script (AnalyseData.py) one after the other automatically

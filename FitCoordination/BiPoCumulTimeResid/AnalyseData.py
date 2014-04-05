@@ -1,13 +1,13 @@
 #!usr/bin/env python
 import string, Utilities
-# Author K Majumdar - 10/03/2014 <Krishanu.Majumdar@physics.ox.ac.uk>
+# Author K Majumdar - 05/04/2014 <Krishanu.Majumdar@physics.ox.ac.uk>
 
 
 def AnalyseRootFiles(options):
     # returns the cumulative time residuals PDF for 130Te NNBD events in the fiducial volume and energy region of interest
     
     if (options.index == ""):
-        print "An Index option (-i) must be specified for this coordinator ... exiting"
+        print "An Index option (-i) must be specified for this coordinator, i.e. te_0p3_labppo_scintillator_bisMSB_Dec2013-PSD or te_0p3_labppo_scintillator_Oct2012-noPSD ... exiting"
         sys.exit()
     indexList = (options.index).split('-')
     material = indexList[0]
@@ -43,7 +43,7 @@ def AnalyseRootFiles(options):
 import optparse
 if __name__ == '__main__':
     parser = optparse.OptionParser(usage = "usage: %prog [options] target", version = "%prog 1.0")
-    parser.add_option("-i", type = "string", dest = "index", help = "RATDB Index, given by conecating the explicit -s and -p options from the Production Script, separated by '-'", default = "")
+    parser.add_option("-i", type = "string", dest = "index", help = "RATDB Index, given by conecating the EXPLICIT -s and -p options from the Production Script, separated by '-'", default = "")
     (options, args) = parser.parse_args()
     AnalyseRootFiles(options)
 	

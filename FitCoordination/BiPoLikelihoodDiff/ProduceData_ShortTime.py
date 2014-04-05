@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 import os, sys, string, Utilities
-# Author K Majumdar - 14/03/2014 <Krishanu.Majumdar@physics.ox.ac.uk>
+# Author K Majumdar - 05/04/2014 <Krishanu.Majumdar@physics.ox.ac.uk>
 
 
 def ProduceRunMacFiles(options):
     # produces and then runs the required RAT macros by sourcing a .sh file on the cluster
 
     if (options.isotopeAndTiming == ""):
-        print "An Isotope-and-Timing option (-p) must be specified for this coordinator ... exiting"
+        print "An Isotope-and-Timing option (-p) must be specified for this coordinator, i.e. 212-PSD or 214-noPSD ... exiting"
         sys.exit()
     isotopeAndTimingList = (options.isotopeAndTiming).split('-')
     isotope = isotopeAndTimingList[0]
@@ -21,6 +21,13 @@ def ProduceRunMacFiles(options):
         alphaLine2 = ""
     else:
         print "Invalid Timing Option set ... must be either 'PSD' or 'noPSD' ... exiting"
+        sys.exit()
+
+    if Utilities.envronLoc == "":
+        print "Please set your environment file location in the Utilities envronLoc field"
+        sys.exit()
+    if Utilities.currentLoc == "":
+        print "Please set the current location in the Utilities currentLoc field"
         sys.exit()
 
     fileName = options.scintMaterial + "-" + options.isotopeAndTiming

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import os, sys, string, Utilities
-# Author K Majumdar - 12/03/2014 <Krishanu.Majumdar@physics.ox.ac.uk>
+# Author K Majumdar - 05/04/2014 <Krishanu.Majumdar@physics.ox.ac.uk>
 
 
 def ProduceRunMacFiles(options):
@@ -13,6 +13,13 @@ def ProduceRunMacFiles(options):
         alphaLine1 = ""
         alphaLine2 = ""
 
+    if Utilities.envronLoc == "":
+        print "Please set your environment file location in the Utilities envronLoc field"
+        sys.exit()
+    if Utilities.currentLoc == "":
+        print "Please set the current location in the Utilities currentLoc field"
+        sys.exit()
+		
     fileName = options.scintMaterial + "-" + options.timingProfile
     
     inFile = open("Base.mac", "r")

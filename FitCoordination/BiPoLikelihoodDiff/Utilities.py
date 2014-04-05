@@ -1,7 +1,7 @@
 #!usr/bin/env python
 import ROOT, rat, math
 # Secondary functions and user-defined Values for the BiPoLikelihoodDiff Coordinator
-# Author K Majumdar - 13/03/2014 <Krishanu.Majumdar@physics.ox.ac.uk>
+# Author K Majumdar - 05/04/2014 <Krishanu.Majumdar@physics.ox.ac.uk>
 
 
 envronLoc = ""
@@ -82,8 +82,8 @@ def GetMeanNhits(filename, fidVolLow, fidVolHigh):
 		
         nhitsHist.Fill(ev.GetPMTCalCount())
 
-    GaussFit = ROOT.TF1("GaussFit", "gaus", 0.0, 500.0)
-    nhitsHist.Fit("GaussFit", "RQ")
+    gaussFit = ROOT.TF1("gaus", "gaus", 0.0, 500.0)
+    nhitsHist.Fit(gaussFit, "RQ")
 	
-    meanNhits = GaussFit.GetParameter(1)
+    meanNhits = gaussFit.GetParameter(1)
     return meanNhits
