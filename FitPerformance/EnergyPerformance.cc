@@ -9,8 +9,9 @@
 
 #include <FitPerformanceUtil.hh>
 
+#include <RAT/DSReader.hh>
+
 #include <RAT/DS/Root.hh>
-#include <RAT/DS/PMTProperties.hh>
 #include <RAT/DS/EV.hh>
 #include <RAT/DS/FitResult.hh>
 #include <RAT/DS/FitVertex.hh>
@@ -130,30 +131,28 @@ ExtractEnergy(
 
   // Now extract the data
   // Load the first file
-  RAT::DS::Root* rDS;
-  RAT::DS::PMTProperties* rPMTList;
-  TChain* tree;
 
-  LoadRootFile( lFile, &tree, &rDS, &rPMTList );
+  RAT::DSReader dsReader(lFile.c_str());
+  RAT::DU::PMTInfo rPMTList = DS::DU::Utility::Get()->GetPMTInfo();
 
-  for( int iLoop = 0; iLoop < tree->GetEntries(); iLoop++ )
+  for( size_t iEvent = 0; iEvent < dsReader.GetEventCount(); iEvent++ )
     {
-      tree->GetEntry( iLoop );
-	  RAT::DS::MC *rMC = rDS->GetMC();
+      const RAT::DS::Root& rDS = dsReader.GetEvent( iEvent );
+	  const RAT::DS::MC& rMC = rDS.GetMC();
 
-      double mcEnergy = rMC->GetMCParticle(0)->GetKE();
-      for( int iEvent = 0; iEvent < rDS->GetEVCount(); iEvent++ )
+      double mcEnergy = rMC.GetMCParticle(0).GetKineticEnergy();
+      for( int iEV = 0; iEV < rDS->GetEVCount(); iEV++ )
         {
-		  if( iEvent > 0 ) // Only prompt events characterise
+		  if( iEV > 0 ) // Only prompt events characterise
 			continue;
-		  RAT::DS::EV *rEV = rDS->GetEV( iEvent );
-          if( rEV->GetFitResult( lFit ).GetValid() == false )
+		  const RAT::DS::EV& rEV = rDS.GetEV( iEV );
+          if( rEV.GetFitResult( lFit ).GetValid() == false )
             continue;
 
 		  double fitEnergy;
           try
             {
-              fitEnergy = rEV->GetFitResult( lFit ).GetVertex(0).GetEnergy();
+              fitEnergy = rEV.GetFitResult( lFit ).GetVertex(0).GetEnergy();
             }
           catch( RAT::DS::FitVertex::NoValueError& e )
             {

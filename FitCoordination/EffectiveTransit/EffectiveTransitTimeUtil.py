@@ -9,33 +9,36 @@ posSet = [ 0.0, 1000.0, 2000.0, 3000.0, 4000.0, 5000.0, 5500.0, 5600.0, 5700.0, 
 def UpdateData( filename, fullPlot ):
     """ Open one of the data files and extract the transit time difference between forward and backward
     photons. Consider those within 10degrees of the event axis only."""
+
+    dsUtility = RAT.DU.Utility.Get()
+    groupVelocity = dsUtility.GetGroupVelocity()
+    lightPath = dsUtility.GetLightPath()
+    pmtInfo = dsUtility.GetPMTInfo()
     
     eventNum = 0
+
     for ds, run in rat.dsreader( filename ):
-        lightPath = run.GetLightPath()
-        groupVeloTime = run.GetGroupVelocityTime()
-        pmtProp = run.GetPMTProp()
 	
         if( eventNum % 100  == 0 ):
             print eventNum
         eventNum += 1
         mc = ds.GetMC()
         startTime = mc.GetMCParticle(0).GetTime()
-        startPos = mc.GetMCParticle(0).GetPos()
+        startPos = mc.GetMCParticle(0).GetPosition()
         for iPMT in range( 0, mc.GetMCPMTCount() ):
             mcPMT = mc.GetMCPMT( iPMT )
-            endPos = pmtProp.GetPos( mcPMT.GetPMTID() )
+            endPos = pmtInfo.GetPosition( mcPMT.GetPMTID() )
             # 10 degree forward backward limits, unless at centre
             if( startPos.Mag() > 500.0 and startPos.Dot( endPos ) < 0.985 and startPos.Dot( endPos ) > -0.985 ):
                 continue
-            for iPhoton in range( 0, mcPMT.GetMCPhotonCount() ):
-                mcPhoton = mcPMT.GetMCPhoton( iPhoton )
+            for iPE in range( 0, mcPMT.GetMCPhotoelectronCount() ):
+                mcPhotoelectron = mcPMT.GetMCPhotoelectron( iPE )
                 scintDist = ROOT.Double()
                 avDist = ROOT.Double()
                 waterDist = ROOT.Double()
                 lightPath.CalcByPosition( startPos, endPos, scintDist, avDist, waterDist )
-                transitTime = groupVeloTime.CalcByDistance( 0.0, avDist, waterDist )
-                fullPlot.Fill( scintDist, mcPhoton.GetHitTime() - startTime - transitTime )
+                transitTime = groupVelocity.CalcByDistance( 0.0, avDist, waterDist )
+                fullPlot.Fill( scintDist, mcPhotoelectron.GetCreationTime() - startTime - transitTime )
     return
 
 def ProduceAllData():
@@ -71,32 +74,34 @@ def ProduceProfile():
 def UpdateProfile( filename, profile ):
     """ Old, obsolete profile method."""
     
+    dsUtility = RAT.DU.Utility.Get()
+    groupVelocity = dsUtility.GetGroupVelocity()
+    lightPath = dsUtility.GetLightPath()
+    pmtInfo = dsUtility.GetPMTInfo()
+
     eventNum = 0
     for ds, run in rat.dsreader( filename ):
-        lightPath = run.GetLightPath()
-        groupVeloTime = run.GetGroupVelocityTime()
-        pmtProp = run.GetPMTProp()
 	
         if( eventNum % 100  == 0 ):
             print eventNum
         eventNum += 1
         mc = ds.GetMC()
         startTime = mc.GetMCParticle(0).GetTime()
-        startPos = mc.GetMCParticle(0).GetPos()
+        startPos = mc.GetMCParticle(0).GetPosition()
         for iPMT in range( 0, mc.GetMCPMTCount() ):
             mcPMT = mc.GetMCPMT( iPMT )
-            endPos = pmtProp.GetPos( mcPMT.GetPMTID() )
+            endPos = pmtInfo.GetPosition( mcPMT.GetPMTID() )
             # 10 degree forward backward limits, no centre pos condieration
             if( startPos.Mag() > 500.0 and startPos.Dot( endPos ) < 0.985 and startPos.Dot( endPos ) > -0.985 ):
                 continue
-            for iPhoton in range( 0, mcPMT.GetMCPhotonCount() ):
-                mcPhoton = mcPMT.GetMCPhoton( iPhoton )
+            for iPE in range( 0, mcPMT.GetMCPhotoelectronCount() ):
+                mcPhotoelectron = mcPMT.GetMCPhotoelectron( iPE )
                 scintDist = ROOT.Double()
                 avDist = ROOT.Double()
                 waterDist = ROOT.Double()
                 lightPath.CalcByPosition( startPos, endPos, scintDist, avDist, waterDist )
-                transitTime = groupVeloTime.CalcByDistance( 0.0, avDist, waterDist )
-                profile.Fill( scintDist, scintDist / ( mcPhoton.GetHitTime() - startTime - transitTime ) )
+                transitTime = groupVelocity.CalcByDistance( 0.0, avDist, waterDist )
+                profile.Fill( scintDist, scintDist / ( mcPhotoelectron.GetCreationTime() - startTime - transitTime ) )
                 
     return
         
