@@ -44,7 +44,7 @@ for ncd in ncd_file:
         print "z differs", ncd[0], z, z_old[index]
     index += 1
     pos = numpy.array([x, y, z])
-    pos = 6005.0 * pos / numpy.linalg.norm(pos)
+    pos = 6004.0 * pos / numpy.linalg.norm(pos)
     print numpy.linalg.norm(pos)
     dir = -pos / numpy.linalg.norm(pos) # Want to point inwards
     pos += 28.6 * dir # Measured position is the centre of the top face, rat uses centre of the object
