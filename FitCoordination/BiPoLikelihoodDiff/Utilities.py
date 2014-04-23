@@ -21,9 +21,9 @@ def GetTimeResidsVector(filename, fidVolLow, fidVolHigh, minTimeResid, maxTimeRe
     timeResidsHist = ROOT.TH1D("timeResidsHist", "timeResidsHist", numbOfBins, minTimeResid, maxTimeResid)
 	
     for ds, run in rat.dsreader(filename):
-        effectiveTime = run.GetEffectiveVelocityTime()
-        lightPath = run.GetLightPath()
-        pmtProp = run.GetPMTProp()
+	    groupVelocity = rat.utility().GetGroupVelocity()
+	    lightPath = rat.utility().GetLightPath()
+	    pmtInfo = rat.utility().GetPMTInfo()
 	
         if ds.GetEVCount() == 0:
             continue
@@ -36,17 +36,19 @@ def GetTimeResidsVector(filename, fidVolLow, fidVolHigh, minTimeResid, maxTimeRe
                 continue
             vertTime = ev.GetFitResult("scintFitter").GetVertex(0).GetTime()
 		
+            calibratedPMTs = ev.GetCalibratedPMTs()
+
             timeResidsList = []
-            for k in range(0, ev.GetPMTCalCount()):
-                pmt = ev.GetPMTCal(k)
-                pmtPos = pmtProp.GetPos(pmt.GetID())
+            for k in range(0, calibratedPMTs.GetCount()):
+                pmt = calibratedPMTs.GetPMT(k)
+                pmtPos = pmtInfo.GetPosition(pmt.GetID())
                 pmtTime = pmt.GetTime()
 
                 distInScint = ROOT.Double()
                 distInAV = ROOT.Double()
                 distInWater = ROOT.Double()
                 lightPath.CalcByPosition(vertPos, pmtPos, distInScint, distInAV, distInWater)
-                flightTime = effectiveTime.CalcByDistance(distInScint, distInAV, distInWater)
+                flightTime = groupVelocity.CalcByDistance(distInScint, distInAV, distInWater)
                 timeResid = pmtTime - flightTime - vertTime
                 timeResidsList.append(timeResid)
 
@@ -80,7 +82,7 @@ def GetMeanNhits(filename, fidVolLow, fidVolHigh):
         if (vertPos.Mag() < fidVolLow) or (vertPos.Mag() >= fidVolHigh):
             continue
 		
-        nhitsHist.Fill(ev.GetPMTCalCount())
+        nhitsHist.Fill(ev.GetCalibratedPMTs().GetCount())
 
     gaussFit = ROOT.TF1("gaus", "gaus", 0.0, 500.0)
     nhitsHist.Fit(gaussFit, "RQ")

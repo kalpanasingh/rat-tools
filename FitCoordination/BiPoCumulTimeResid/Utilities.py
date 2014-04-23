@@ -1,7 +1,7 @@
 #!usr/bin/env python
 import ROOT, rat, math
 # Secondary functions and user-defined Values for the BiPoCumulTimeResid Coordinator
-# Author K Majumdar - 05/04/2014 <Krishanu.Majumdar@physics.ox.ac.uk>
+# Author K Majumdar - 23/04/2014 <Krishanu.Majumdar@physics.ox.ac.uk>
 
 
 envronLoc = ""
@@ -45,9 +45,9 @@ def GetCDFVector(filename, fidVolLow, fidVolHigh, energyLow, energyHigh, minTime
 	cumuHist = ROOT.TH1D("cumuHist", "cumuHist", numbOfBins, minTimeResid, maxTimeResid)
 	
 	for ds, run in rat.dsreader(filename):
-	    effectiveTime = run.GetEffectiveVelocityTime()
-	    lightPath = run.GetLightPath()
-	    pmtProp = run.GetPMTProp()
+	    groupVelocity = rat.utility().GetGroupVelocity()
+	    lightPath = rat.utility().GetLightPath()
+	    pmtInfo = rat.utility().GetPMTInfo()
 	
 	    if ds.GetEVCount() == 0:
 	        continue
@@ -60,18 +60,20 @@ def GetCDFVector(filename, fidVolLow, fidVolHigh, energyLow, energyHigh, minTime
 	    if (vertEnergy < energyLow) or (vertEnergy >= energyHigh):
 	        continue
 	    vertTime = ev.GetFitResult("scintFitter").GetVertex(0).GetTime()
+
+        calibratedPMTs = ev.GetCalibratedPMTs()
 		
 	    timeResidsHist = ROOT.TH1D("timeResidsHist", "timeResidsHist", numbOfBins, minTimeResid, maxTimeResid)
-	    for j in range(0, ev.GetPMTCalCount()):
-	        pmt = ev.GetPMTCal(j)
-	        pmtPos = pmtProp.GetPos(pmt.GetID())
+	    for j in range(0, calibratedPMTs.GetCount()):
+	        pmt = calibratedPMTs.GetPMT(j)
+	        pmtPos = pmtInfo.GetPosition(pmt.GetID())
 	        pmtTime = pmt.GetTime()
 
 	        distInScint = ROOT.Double()
 	        distInAV = ROOT.Double()
 	        distInWater = ROOT.Double()
 	        lightPath.CalcByPosition(vertPos, pmtPos, distInScint, distInAV, distInWater)
-	        flightTime = effectiveTime.CalcByDistance(distInScint, distInAV, distInWater)
+	        flightTime = groupVelocity.CalcByDistance(distInScint, distInAV, distInWater)
 	        timeResid = pmtTime - flightTime - vertTime
 	        timeResidsHist.Fill(timeResid)
 
@@ -79,7 +81,7 @@ def GetCDFVector(filename, fidVolLow, fidVolHigh, energyLow, energyHigh, minTime
 	    for k in range(1, timeResidsHist.GetNbinsX() + 1):
 	        numPMTs = timeResidsHist.Integral(0, k)
 	        timeVal = timeResidsHist.GetBinLowEdge(k)
-	        tempHist.Fill(timeVal, (numPMTs / ev.GetPMTCalCount()))
+	        tempHist.Fill(timeVal, (numPMTs / calibratedPMTs.GetCount()))
 
 	    cumuHist.Add(cumuHist, tempHist, 1, 1)
 	    numEvents += 1.0
