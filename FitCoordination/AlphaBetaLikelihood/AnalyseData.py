@@ -6,11 +6,13 @@ def AnalyseData(options):
         for pulseIndex, pulseDescription in enumerate(AlphaBetaUtilities.ParticlePulseDict[particle]):
             fileName = particle+pulseDescription 
             pdfs[fileName] = AlphaBetaUtilities.ProduceTimeResidualPDF(fileName+".root")
-
-    print "The following are the relevant PDFs for the AlphaBetaClassifier. Replace the relevant portion of ALPHA_BETA_CLASSIFIER.ratdb with the following text"
+    filename = "AlphaBetaOutput"+options.particle+".txt"
+    print "The relevant PDFs for the AlphaBetaClassifier have been output to "+str(filename) 
+    print "Replace the appropriate portion of ALPHA_BETA_CLASSIFIER.ratdb with the text found there"
+    f = open(filename,'w')
     for pulseIndex, pulseDescription in enumerate(AlphaBetaUtilities.ParticlePulseDict[particleNames[1]]):
-        AlphaBetaUtilities.OutputFileChunk([pdfs[particleNames[0]],pdfs[particleNames[1]+pulseDescription],pdfs[particleNames[2]]],options, pulseDescription )
-
+        AlphaBetaUtilities.OutputFileChunk([pdfs[particleNames[0]],pdfs[particleNames[1]+pulseDescription],pdfs[particleNames[2]]],options, pulseDescription, f )
+    f.close()
 import optparse
 if __name__ == '__main__':
     parser = optparse.OptionParser(usage = "usage: %prog [options] target", version = "%prog 1.0")
