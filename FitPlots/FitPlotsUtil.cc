@@ -16,8 +16,11 @@
 #include <TVirtualPad.h>
 using namespace ROOT;
 
+#include <RAT/DSReader.hh>
+
+#include <RAT/DU/PMTInfo.hh>
+
 #include <RAT/DS/Root.hh>
-#include <RAT/DS/PMTProperties.hh>
 #include <RAT/DS/EV.hh>
 #include <RAT/DS/FitResult.hh>
 
@@ -27,47 +30,6 @@ using namespace ROOT;
 using namespace std;
 
 bool gIgnoreRetriggers = false; // Global variable used to ignore retriggered (low nhit tail) events
-
-////////////////////////////////////////////////////////
-/// Load a chain of ROOTs file with RAT information in
-/// and fill the information pointers
-////////////////////////////////////////////////////////
-void
-LoadRootFile(
-             string lFile,
-             TChain** tree,
-             RAT::DS::Root** rDS,
-             RAT::DS::PMTProperties** rPMTList )
-{
-  (*tree) = new TChain( "T" );
-  // Strip the .root part
-
-  int numFiles = (*tree)->Add( lFile.c_str() );
-  cout << "Loaded " << numFiles << " files." << endl;
-
-  *rDS = new RAT::DS::Root();
-
-  (*tree)->SetBranchAddress( "ds", &(*rDS) );
-
-  // Now the runT, only in the LAST file
-  stringstream lastFile;
-  if( numFiles > 1 )
-    {
-      const int fileLen = lFile.length();
-      lastFile << lFile.substr( 0, fileLen - 5 ) << "_" << numFiles - 1 << ".root";
-    }
-  else
-    lastFile << lFile;
-  TFile *file = new TFile( lastFile.str().c_str() );
-  TTree *rRunTree = (TTree*)file->Get( "runT" );
-
-  RAT::DS::Run *rRun = new RAT::DS::Run();
-
-  rRunTree->SetBranchAddress( "run", &rRun );
-
-  rRunTree->GetEntry();
-  *rPMTList = rRun->GetPMTProp();
-}
 
 ////////////////////////////////////////////////////////
 /// Correctly arrange and tile stat boxes
