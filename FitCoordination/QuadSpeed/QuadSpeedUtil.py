@@ -7,6 +7,27 @@ import rat
 transitTime = [ 170.0, 175.0, 180.0, 185.0, 190.0, 195.0, 200.0,]
 fiducialCut = 5500
 
+def parse_list_arg(option, opt, value, parser):
+    """Parse a comma delimited list, return list of floats
+    """
+    value_list = []
+    # Strip any brackets
+    value_str = value.strip("]})").strip("[{(")
+    value_list = value_str.split(",")
+    for i, v in enumerate(value_list):
+        try:
+            value_list[i] = float(value_list[i])
+        except ValueError:
+            print "Parser issue: %s must be set as a comma delimited string"
+            print "You used: %s" % value
+            raise
+    setattr(parser.values, option.dest, value_list)
+
+def SetTransitTimes( times ):
+    """Set the positions list."""
+    global transitTime
+    transitTime = times
+
 def UpdateData( filename ):
     biasPlot = ROOT.TH1D( "RadialBias", "RadialBias", 200, -1000.0, 1000.0, )
     biasFit = ROOT.TF1("fitr","gaus",-1000.0,1000.0)

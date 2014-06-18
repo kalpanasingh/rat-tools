@@ -6,10 +6,7 @@
 
 /rat/db/set DETECTOR geo_file "${GeoFile}"
 /rat/db/set GEO[scint] material "${ScintMaterial}"
-/rat/db/set QUAD_FIT[${ScintMaterial}] transit_time ${Speed}d
-
-## for pure labppo or unknown material
-#/rat/db/set QUAD_FIT transit_time ${Speed}d
+${TransitTime}
 
 /run/initialize
 
@@ -21,8 +18,6 @@
 /rat/proc calibratePMT
 /rat/proc fitter
 /rat/procset method "quad"
-/rat/proc prune 
-/rat/procset prune "mc.hit,mc.pmt.photon"
 /rat/proc outroot
 /rat/procset file "quad_${Speed}.root"
 
