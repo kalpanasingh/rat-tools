@@ -56,7 +56,15 @@ def view(view_name, **kwargs):
         query_url = "%s/%s/%s" % (_db_host, _db_name, view_name)
     response = get_response(_db_host, query_url, _db_user, _db_pswd)
     # Now map these to rows
-    data = json.loads(response)
+    try:
+        data = json.loads(response)
+    except ValueError, e:
+        # Don't bother parsing whole html response, just look for the response code
+        if "401 Authorization Required" in response:
+            print "Failed to contact database, incorrect credentials supplied?"
+            sys.exit()
+        else:
+            raise Exception("Unknown respose from database:\n%s" % response)
     try:
         return data["rows"]
     except KeyError, e:

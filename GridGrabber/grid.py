@@ -19,7 +19,18 @@
 import os
 import sys
 import re
+import getpass
 import subprocess
+
+
+def check_environment():
+    '''Ensure grid environment variables are set
+    '''
+    global _env
+    for check in _checks:
+        if check not in os.environ:
+            print "WARNING: %s not set in shell environment (to: %s)" % (check, _checks[check])
+            _env[check] = _checks[check]
 
 
 def execute(command, *args):
@@ -35,12 +46,10 @@ def execute(command, *args):
     return rtc, out, err
 
 
-def execute_command(command, args, env=None, cwd=None, verbose=False, debug=False):
+def execute_command(command, args, inputs=[], env=None, cwd=None):
     '''Command execution
     '''
     shellCommand = [command] + args
-    if verbose:
-        print shellCommand
     useEnv = os.environ # Default to current environment
     if env is not None:
         for key in env:
@@ -50,22 +59,12 @@ def execute_command(command, args, env=None, cwd=None, verbose=False, debug=Fals
     for i, arg in enumerate(args):
         if type(arg) is unicode:
             args[i] = ucToStr(arg)
-    if debug:
-        print 'cmd', shellCommand
-        print 'cwd', cwd
-        print 'ls', os.listdir(cwd)
-        print 'env', useEnv
-    process = subprocess.Popen(args = shellCommand, env = useEnv, cwd = cwd, stdout = subprocess.PIPE, stderr = subprocess.PIPE, shell = False)
-    output = ""
-    error = ""
-    if verbose:
-        for line in iter(process.stdout.readline, ""):
-            sys.stdout.write('\n' + line[:-1])
-            sys.stdout.flush()
-            output += '\n' + line[:-1]
-        process.wait()
-    else:
-        output, error = process.communicate()
+    process = subprocess.Popen(args = shellCommand, env = useEnv, cwd = cwd,
+                               stdout = subprocess.PIPE, stderr = subprocess.PIPE,
+                               stdin = subprocess.PIPE, shell = False)
+    for i in inputs:
+        process.stdin.write(i)
+    output, error = process.communicate()
     output = output.split('\n')#want lists
     error = error.split('\n')#will always have a '' as last element, unless :
     if output[len(output)-1] == '':
@@ -109,6 +108,18 @@ def proxy_roles():
             roles += [search.group('role')]
     return roles
 
+
+def proxy_create():
+    '''Create a snoplus proxy
+    '''
+    command = 'voms-proxy-init'
+    args = ['--voms', 'snoplus.snolab.ca']
+    pswd = getpass.getpass("Grid password: ")
+    inputs = [pswd + "\n"] # Need return char?
+    rtc, out, err = execute_command(command, args, inputs)
+    return rtc
+
+
 ##############################################################
 # Data management commands
 
@@ -132,3 +143,10 @@ def list_reps(guid):
     if rtc:
         raise Exception('Cannot find replicas for %s' % (guid))
     return out
+
+
+# Check environment variables
+_env = {}
+_checks = {"LFC_HOST": "lfc.gridpp.rl.ac.uk",
+           "LCG_GFAL_INFOSYS": "lcgbdii.gridpp.rl.ac.uk:2170"}
+check_environment()

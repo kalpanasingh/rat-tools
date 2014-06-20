@@ -67,6 +67,9 @@ def download_file(directory, filename, guid, adler32, size):
     print "Downloading: %s" % filename
     # Set a timeout based on the file size
     # For lack of anything better, use 10 second for every MB + 60s basic
+    if size==0:
+        print "Warning: filesize 0 is probably not true..."
+        size = _GB # This is usually the max
     timeout = 60 + 10 * int(size / _MB)
     # Ensure correct guid format (some are missing prefix)
     if not guid.startswith("guid:"):
@@ -125,7 +128,11 @@ if __name__=="__main__":
    # First, check for a proxy
    if not grid.proxy_time():
        print "Need to generate a grid proxy"
-       sys.exit()
+       if not grid.proxy_create():
+           print "Proxy successfully created"
+       else:
+           print "Unable to create proxy; try 'voms-proxy-init --voms snoplus.snolab.ca' in shell"
+           sys.exit()
    # Now, check the downloads
    files = []
    sizes = []
