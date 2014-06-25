@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import os, sys, string, Utilities
-# Author K Majumdar - 02/04/2014 <Krishanu.Majumdar@physics.ox.ac.uk>
+# Author K Majumdar - 25/06/2014 <Krishanu.Majumdar@physics.ox.ac.uk>
 
 
 def ProduceRunMacros(options):
@@ -15,7 +15,7 @@ def ProduceRunMacros(options):
     infile2.close()
 
     # create a new file for submitting all macros simultaneously
-    outFile3 = open("SubmitAll.sh", "w")
+    outFile3 = open("ProduceData_ShortTime_SubmitScript.sh", "w")
 
 	# Need 5000 events per Parameter per Energy ... go quicker by doing 5 files of 1000 events each
     for energy in Utilities.energies:
@@ -43,21 +43,20 @@ def ProduceRunMacros(options):
                 outFile2.write(outText2)
                 outFile2.close()
                 
-                outFile3.write("qsub -l cput=11:59:00 " + outfileName + ".sh\n")
+                outFile3.write("qsub -l cput=01:59:00 " + outfileName + ".sh\n")
 
     outFile3.close()
 
     # send all batch commands at once, and ends the production script
-    submitCommand = "source " + Utilities.currentLoc + "/SubmitAll.sh"
+    submitCommand = "source " + Utilities.currentLoc + "/ProduceData_ShortTime_SubmitScript.sh"
     os.system(submitCommand)
 		
 
 import optparse
 if __name__ == '__main__':
     parser = optparse.OptionParser(usage = "usage: %prog [options] target", version="%prog 1.0")
-    parser.add_option("-g", type = "string", dest = "geoFile", help = "Geometry File to use, location must be absolute or relative to target.", default = "geo/snoplus.geo")
-    parser.add_option("-s", type = "string", dest = "scintMaterial", help = "Scintillator material.", default = "labppo_scintillator")
-    parser.add_option("-p", type = "string", dest = "particle", help = "Particle type - this is not relevant for this coordinator.", default = "")
+    parser.add_option("-g", type = "string", dest = "geoFile", help = "Geometry File to use - location relative to rat/data/, default = geo/snoplus.geo", default = "geo/snoplus.geo")
+    parser.add_option("-s", type = "string", dest = "scintMaterial", help = "Scintillator Material to use, default = labppo_scintillator", default = "labppo_scintillator")
     (options, args) = parser.parse_args()
     ProduceRunMacros(options)
 

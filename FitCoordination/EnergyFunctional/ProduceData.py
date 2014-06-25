@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import os, sys, string, Utilities
-# Author K Majumdar - 02/04/2014 <Krishanu.Majumdar@physics.ox.ac.uk>
+# Author K Majumdar - 25/06/2014 <Krishanu.Majumdar@physics.ox.ac.uk>
 
 
 def ProduceRunMacros(options):
@@ -38,9 +38,8 @@ def ProduceRunMacros(options):
 import optparse
 if __name__ == '__main__':
     parser = optparse.OptionParser(usage = "usage: %prog [options] target", version="%prog 1.0")
-    parser.add_option("-g", type = "string", dest = "geoFile", help = "Geometry File to use, location must be absolute or relative to target.", default = "geo/snoplus.geo")
-    parser.add_option("-s", type = "string", dest = "scintMaterial", help = "Scintillator material.", default = "labppo_scintillator")
-    parser.add_option("-p", type = "string", dest = "particle", help = "Particle type - this is not relevant for this coordinator.", default = "")
+    parser.add_option("-g", type = "string", dest = "geoFile", help = "Geometry File to use - location relative to rat/data/, default = geo/snoplus.geo", default = "geo/snoplus.geo")
+    parser.add_option("-s", type = "string", dest = "scintMaterial", help = "Scintillator Material to use, default = labppo_scintillator", default = "labppo_scintillator")
     (options, args) = parser.parse_args()
     ProduceRunMacros(options)
 

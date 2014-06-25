@@ -1,6 +1,7 @@
 
 /PhysicsList/OmitMuonicProcesses true
 /PhysicsList/OmitHadronicProcesses true
+/rat/db/load scint
 /rat/db/set MC thin_factor 3.5
 /rat/db/set DETECTOR geo_file "${GeoFile}"
 /rat/db/set GEO[scint] material "${ScintMaterial}"
@@ -13,9 +14,6 @@
 /rat/proc calibratePMT
 /rat/proc count
 /rat/procset update 50
-
-# Need to have a reconstructed position ... use the scintFitter since it gives the best reconstruction
-/rat/proc scintFitter
 
 /rat/proc outroot
 /rat/procset file "${FileName}"
