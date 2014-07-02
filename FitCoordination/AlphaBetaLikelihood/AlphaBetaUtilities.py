@@ -10,23 +10,30 @@ PulseTimeRatios= {"":"",PulseDescriptions[0]:"",PulseDescriptions[1]:"0.71d, 0.2
 def ProduceTimeResidualPDF(filename):
     Histogram = ROOT.TH1D(filename,"",1400,-300,1000)
     for ds,run in rat.dsreader(filename):
-        effectiveTime = run.GetEffectiveVelocityTime()
-        lightPath = run.GetLightPath()
-        pmtProp = run.GetPMTProp()
+        groupVelocity = rat.utility().GetGroupVelocity()
+        lightPath = rat.utility().GetLightPathCalculator()
+        pmtInfo = rat.utility().GetPMTInfo()
         if ds.GetEVCount() > 0:
             ev = ds.GetEV(0)
+            rmc = ds.GetMC()
+            mcParticle = rmc.GetMCParticle(0);
+            mcPos = mcParticle.GetPosition();
+            fitTime = mcParticle.GetTime()
             fitVertex = ev.GetFitResult("scintFitter").GetVertex(0)
-            fitPos = fitVertex.GetPosition()
             fitTime = fitVertex.GetTime()
-            for iPMT in range(0,ev.GetPMTCalCount()):
-                pmt = ev.GetPMTCal(iPMT)
-                pmtPos = pmtProp.GetPos(pmt.GetID())
+            calibratedPMTs = ev.GetCalibratedPMTs()
+            for iPMT in range(0,calibratedPMTs.GetCount()):
+                pmt = calibratedPMTs.GetPMT(iPMT)
+                pmtPos = pmtInfo.GetPosition(pmt.GetID())
                 pmtTime = pmt.GetTime()
                 distInScint = ROOT.Double()
                 distInAV = ROOT.Double()
                 distInWater = ROOT.Double()
-                lightPath.CalcByPosition(fitPos,pmtPos,distInScint,distInAV,distInWater)
-                flightTime = effectiveTime.CalcByDistance(distInScint,distInAV,distInWater)
+                lightPath.CalcByPosition(mcPos,pmtPos)
+                distInScint = lightPath.GetDistInScint()
+                distInAv = lightPath.GetDistInAV()
+                distInWater = lightPath.GetDistInWater()
+                flightTime = groupVelocity.CalcByDistance(distInScint,distInAV,distInWater)
                 timeResidual = pmtTime - flightTime - fitTime
                 Histogram.Fill(timeResidual)
     Histogram.Scale(1.0/Histogram.Integral())
