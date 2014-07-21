@@ -66,4 +66,6 @@ if __name__ == '__main__':
         analyse_options = ""
         if( options.index != "" ):
             analyse_options += " -i " + options.index
+        if (options.particle != ""):
+            analyse_options += "-p " + options.particle
         fc.Analyse( analyse_options )
