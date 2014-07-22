@@ -47,6 +47,7 @@ def compare(info1, info2):
 
 #compare(snoman, rat_original)
 #compare(rat_original, rat_snoman)
+print "Comparison between rat_snoman and airfill2"
 compare(rat_snoman, airfill2)
-print "AA"
+print "Comparison between airfill2 and airfill3"
 compare(airfill2, airfill3)
