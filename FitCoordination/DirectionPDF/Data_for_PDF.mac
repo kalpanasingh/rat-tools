@@ -2,6 +2,7 @@
 /PhysicsList/OmitMuonicProcesses true
 /PhysicsList/OmitHadronicProcesses true
 
+${ExtraDB}
 /rat/db/set MC thin_factor 3.5
 /rat/db/set DETECTOR geo_file "${GeoFile}"
 /rat/db/set GEO[scint] material "${ScintMaterial}"

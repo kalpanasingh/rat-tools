@@ -7,9 +7,11 @@
 #include <RAT/DS/MC.hh>
 #include <RAT/DS/MCParticle.hh>
 #include <RAT/DS/EV.hh>
-#include <RAT/DS/PMTCal.hh>
+#include <RAT/DS/PMT.hh>
 #include <RAT/DS/Root.hh>
 #include <RAT/DS/Run.hh>
+
+#include <math.h>
 
 void FillDirection(char* pFile, TH1D* hist)
 {
