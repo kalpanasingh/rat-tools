@@ -8,11 +8,12 @@
 #include <RAT/DS/MC.hh>
 #include <RAT/DS/MCParticle.hh>
 #include <RAT/DS/EV.hh>
-#include <RAT/DS/PMTCal.hh>
+#include <RAT/DS/PMT.hh>
 #include <RAT/DS/Root.hh>
 #include <RAT/DS/Run.hh>
+#include <RAT/DB.hh>
 
-void FillScintTimeResiduals( string pFile, TH1D* hist )
+void FillScintTimeResiduals( string pFile, TH1D* hist, double velocity=-999 )
 {
   TFile *file = new TFile(pFile.c_str());
   TTree *tree = (TTree*) file->Get("T");
@@ -25,6 +26,15 @@ void FillScintTimeResiduals( string pFile, TH1D* hist )
   runtree->SetBranchAddress("run", &pmtds);
   runtree->GetEntry();
   RAT::DS::PMTProperties *pmtProp = pmtds->GetPMTProp();
+
+  if( velocity > 0 )
+    {
+      cout << "Attempting to update VG from " << pmtds->GetEffectiveVelocityTime()->GetVg() << " to " << velocity << newline;
+      pmtds->GetEffectiveVelocityTime()->UpdateVg( velocity );
+      cout << "Using effective velocity: " << pmtds->GetEffectiveVelocityTime()->GetVg() << endl;
+    }
+  else
+    cout << "Running with default velocity: " << pmtds->GetEffectiveVelocityTime()->GetVg() << newline;
 
   // loop over each event
   for(int j=0; j<tree->GetEntries(); j++)
@@ -49,7 +59,7 @@ void FillScintTimeResiduals( string pFile, TH1D* hist )
       for( Int_t loop=0; loop < PMThits; loop++)
         {
           RAT::DS::PMTCal *pCal = pev->GetPMTCal(loop);
-          double pmtTime = pCal->GetsPMTt();
+          double pmtTime = pCal->GetTime();
           TVector3 pmtPos = pmtProp->GetPos(pCal->GetID());
 
           // Get straight line travel time to PMT
@@ -103,7 +113,7 @@ void FillH2OTimeResiduals( string pFile, TH1D* hist )
       for( Int_t loop=0; loop < PMThits; loop++)
         {
           RAT::DS::PMTCal *pCal = pev->GetPMTCal(loop);
-          double pmtTime = pCal->GetsPMTt();
+          double pmtTime = pCal->GetTime();
           TVector3 pmtPos = pmtProp->GetPos(pCal->GetID());
 
           double distInScint, distInAV, distInWater;
@@ -119,7 +129,7 @@ void FillH2OTimeResiduals( string pFile, TH1D* hist )
     }
 }
 
-void GetScintPDF(string material="labppo_scintillator", int nFiles=1)
+void GetScintPDF(string material="labppo_scintillator", int nFiles=1, double velocity=-999)
 {
   // Create and fill time residual histogram
   TH1D* hist = new TH1D("H","",400,-99.5,300.5);
@@ -128,7 +138,7 @@ void GetScintPDF(string material="labppo_scintillator", int nFiles=1)
   for(int i=1;i<nFiles+1;i++){
     stringstream ss;
     ss << "HitTime_" << material << "_" << i << ".root";
-    FillScintTimeResiduals(ss.str(),hist);
+    FillScintTimeResiduals(ss.str(),hist,velocity);
   }
 
   // Read out data in ratdb format
