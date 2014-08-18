@@ -7,7 +7,14 @@ ${ExtraDB}
 
 /rat/db/set DETECTOR geo_file "${GeoFile}"
 /rat/db/set GEO[scint] material "${ScintMaterial}"
-${TransitTime}
+
+## TODO: update following lines such that fitcoordinator
+##       decides whether to use default or specified material
+##       Requires access to RATDB from python
+/rat/db/set QUAD_FIT[${ScintMaterial}] transit_time ${Speed}
+
+## for pure labppo or unknown material
+#/rat/db/set QUAD_FIT transit_time ${Speed}
 
 /run/initialize
 

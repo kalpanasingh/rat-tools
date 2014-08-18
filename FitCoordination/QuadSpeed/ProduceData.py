@@ -34,10 +34,6 @@ def ProduceRunMacFile( options ):
         # Load the database and check whether a QUAD_FIT table exists for this material
         # If not, use the default material
         # Currently cannot do this: can't load DB in python
-        quad_db = rat.db.get
-        transitTimeText = "/rat/db/set QUAD_FIT light_speed %s" % speed
-        if not options.default:
-            transitTimeText = "/rat/db/set QUAD_FIT[%s] light_speed %s" % ( options.scintMaterial, speed )
         outText = rawText.substitute( Speed = str( "%.0f" % speed ),
                                       GeoFile = options.geoFile,
                                       ScintMaterial = options.scintMaterial,
@@ -46,8 +42,6 @@ def ProduceRunMacFile( options ):
                                       ExtraDB = extraDB)
         outFileName = "quad_%.0f.mac" % speed
         outFile = open( outFileName, "w" )
-        print "MACRO:"
-        print outText
         outFile.write( outText )
         outFile.close()
 
