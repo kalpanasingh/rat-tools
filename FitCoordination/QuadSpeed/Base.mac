@@ -1,7 +1,8 @@
 # Parameters
-/PhysicsList/OmitMuonicProcesses true
-/PhysicsList/OmitHadronicProcesses true
+/rat/physics_list/OmitMuonicProcesses true
+/rat/physics_list/OmitHadronicProcesses true
 
+${ExtraDB}
 /rat/db/set MC thin_factor 3.5
 
 /rat/db/set DETECTOR geo_file "${GeoFile}"

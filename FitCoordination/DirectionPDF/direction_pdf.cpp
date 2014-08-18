@@ -15,10 +15,13 @@
 #include <RAT/DS/MC.hh>
 #include <RAT/DS/MCParticle.hh>
 #include <RAT/DS/EV.hh>
+#include <RAT/DS/PMT.hh>
 #include <RAT/DS/Root.hh>
 #include <RAT/DS/Run.hh>
 #include <RAT/DS/PMTSet.hh>
 #include <RAT/DS/PMT.hh>
+
+#include <math.h>
 
 void FillDirection(char* pFile, TH1D* hist)
 {
@@ -30,22 +33,23 @@ void FillDirection(char* pFile, TH1D* hist)
 
   // loop over each event
 
-  for( size_t iEvent = 0; iEvent < dsReader.GetEventCount(); iEvent++ ) 
-
-      tree->GetEntry( iLoop );
-      const RAT::DS::MC& pmc = rds->GetMC();
+  for( size_t iEntry = 0; iEntry < dsReader.GetEntryCount(); iEntry++ ) 
+    {
+      
+      const RAT::DS::Entry& rds = dsReader.GetEntry( iEntry );
+      const RAT::DS::MC& pmc = rds.GetMC();
       TVector3 mcPos = pmc.GetMCParticle(0).GetPosition();
       TVector3 mcDir = pmc.GetMCParticle(0).GetMomentum().Unit();
 
       int evc = rds.GetEVCount();
       if( evc == 0 ) continue;
       const RAT::DS::EV& pev= rds.GetEV(0);
-      const RAT::DS::CalibratedPMTs& calPMTs = pev.GetCalibratedPMTs();
-      size_t PMThits = pev.GetCalibratedPMTs.GetCount();
+      const RAT::DS::CalPMTs& calPMTs = pev.GetCalPMTs();
+      size_t PMThits = pev.GetCalPMTs.GetCount();
 
       for(size_t jLoop=0; jLoop<PMThits; jLoop++)
         {
-          const RAT::DS::PMTCal& pCal = pev.GetCalibratedPMTs.GetPMT(jLoop);
+          const RAT::DS::PMTCal& pCal = pev.GetCalPMTs.GetPMT(jLoop);
           TVector3 pmtPos = pmtInfo.GetPos(pCal.GetID());
           TVector3 photonDir = (pmtPos-mcPos);
           double ctheta = (photonDir.Unit()).Dot(mcDir);

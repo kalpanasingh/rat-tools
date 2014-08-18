@@ -215,28 +215,28 @@ TH1D* Hist5000(char* infile, double lowNhits, TH1D* histo)
 	
   const RAT::DU::PMTInfo& pmtInfo = RAT::DU::Utility::Get()->GetPMTInfo();
 
-  for( size_t iEvent = 0; iEvent < dsReader.GetEventCount(); iEvent++ ) 
+  for( size_t iEntry = 0; iEntry < dsReader.GetEntryCount(); iEntry++ ) 
 	{
       
-      const RAT::DS::Root& rDS = dsReader.GetEvent( iEvent );
+      const RAT::DS::Root& rDS = dsReader.GetEntry( iEntry );
       if ( rds.GetEVCount() == 0 ) continue;
       const RAT::DS::EV& eventev = rds->GetEV( 0 );
-      const RAT::DS::CalibratedPMTs& calibratedPMTs = eventev.GetCalibratedPMTs();
-      if ( calibratedPMTs.GetCount() < lowNhitsCut ) continue;    // Ignore events with too few Nhits
-      if ( (calibratedPMTs.GetCount() < lowNhits) || (calibratedPMTs.GetCount() >= (lowNhits + windowWidth)) ) continue;
+      const RAT::DS::CalPMTs& calPMTs = eventev.GetCalPMTs();
+      if ( calPMTs.GetCount() < lowNhitsCut ) continue;    // Ignore events with too few Nhits
+      if ( (calPMTs.GetCount() < lowNhits) || (calPMTs.GetCount() >= (lowNhits + windowWidth)) ) continue;
 		
       TVector3 eventvector;
-      for ( size_t iPMT = 0; iPMT < calibratedPMTs.GetCount(); iPMT++ )
+      for ( size_t iPMT = 0; iPMT < calPMTs.GetCount(); iPMT++ )
 		{
-          const RAT::DS::PMTCal& pmt = calibratedPMTs.GetPMT( iPMT );
+          const RAT::DS::PMTCal& pmt = calPMTs.GetPMT( iPMT );
           TVector3 pmtvector = pmtInfo.GetPosition( pmt.GetID() );
           eventvector += pmtvector;
 		}
 		
       double pmtcount = 0.0, total = 0.0;
-      for ( size_t iPMT = 0; iPMT < calibratedPMTs.GetCount(); iPMT++ )
+      for ( size_t iPMT = 0; iPMT < calPMTs.GetCount(); iPMT++ )
 		{
-          const RAT::DS::PMTCal& pmt = calibratedPMTs.GetPMT( iPMT );
+          const RAT::DS::PMTCal& pmt = calPMTs.GetPMT( iPMT );
           TVector3 pmtvector = pmtInfo.GetPosition( pmt.GetID() );
 
           double angle = acos((eventvector.Dot(pmtvector)) / (eventvector.Mag() * pmtvector.Mag())) * (180 / pi);
@@ -265,28 +265,28 @@ double MeanRatio(char *infile, double lowNhits)
 	
   const RAT::DU::PMTInfo& pmtInfo = RAT::DU::Utility::Get()->GetPMTInfo();
 
-  for( size_t iEvent = 0; iEvent < dsReader.GetEventCount(); iEvent++ ) 
+  for( size_t iEntry = 0; iEntry < dsReader.GetEntryCount(); iEntry++ ) 
 	{
       
-      const RAT::DS::Root& rDS = dsReader.GetEvent( iEvent );
+      const RAT::DS::Root& rDS = dsReader.GetEntry( iEntry );
       if ( rds.GetEVCount() == 0 ) continue;
       const RAT::DS::EV& eventev = rds.GetEV( 0 );
-      const RAT::DS::CalibratedPMTs& calibratedPMTs = eventev.GetCalibratedPMTs();
-      if ( calibratedPMTs.GetCount() < lowNhitsCut) continue;    // Ignore events with too few Nhits
-      if ( (calibratedPMTs.GetCount() < lowNhits) || (calibratedPMTs.GetCount() >= (lowNhits + windowWidth)) ) continue;
+      const RAT::DS::CalPMTs& calPMTs = eventev.GetCalPMTs();
+      if ( calPMTs.GetCount() < lowNhitsCut) continue;    // Ignore events with too few Nhits
+      if ( (calPMTs.GetCount() < lowNhits) || (calPMTs.GetCount() >= (lowNhits + windowWidth)) ) continue;
 		
       TVector3 eventvector;
-      for ( size_t iPMT = 0; iPMT < calibratedPMTs.GetCount(); iPMT++ )
+      for ( size_t iPMT = 0; iPMT < calPMTs.GetCount(); iPMT++ )
 		{
-          const RAT::DS::PMTCal& pmt = calibratedPMTs.GetPMT( iPMT );
+          const RAT::DS::PMTCal& pmt = calPMTs.GetPMT( iPMT );
           TVector3 pmtvector = pmtInfo.GetPosition( pmt.GetID() );
           eventvector += pmtvector;
 		}
 		
       double pmtcount = 0.0, total = 0.0;
-      for ( size_t iPMT = 0; iPMT < calibratedPMTs.GetCount(); iPMT++ )
+      for ( size_t iPMT = 0; iPMT < calPMTs.GetCount(); iPMT++ )
 		{
-          const RAT::DS::PMTCal& pmt = calibratedPMTs.GetPMT( iPMT );
+          const RAT::DS::PMTCal& pmt = calPMTs.GetPMT( iPMT );
           TVector3 pmtvector = pmtInfo.GetPosition( pmt.GetID() );
 
           double angle = acos((eventvector.Dot(pmtvector)) / (eventvector.Mag() * pmtvector.Mag())) * (180 / pi);
@@ -327,27 +327,27 @@ TH1D* ErrorHist(char* infile, double lowNhits, double lowRatio, TH1D* histo)
 	
   const RAT::DU::PMTInfo& pmtInfo = RAT::DU::Utility::Get()->GetPMTInfo();
 
-  for( size_t iEvent = 0; iEvent < dsReader.GetEventCount(); iEvent++ ) 
+  for( size_t iEntry = 0; iEntry < dsReader.GetEntryCount(); iEntry++ ) 
 	{
-      const RAT::DS::Root& rDS = dsReader.GetEvent( iEvent );
+      const RAT::DS::Root& rDS = dsReader.GetEntry( iEntry );
       if ( rds.GetEVCount() == 0 ) continue;
       const RAT::DS::EV& eventev = rds.GetEV( 0 );
-      const RAT::DS::CalibratedPMTs& calibratedPMTs = eventev.GetCalibratedPMTs();
-      if ( calibratedPMTs.GetCount() < lowNhitsCut) continue;    // Ignore events with too few Nhits
-      if ( (calibratedPMTs.GetCount() < lowNhits) || (calibratedPMTs.GetCount() >= (lowNhits + windowWidth)) ) continue;
+      const RAT::DS::CalPMTs& calPMTs = eventev.GetCalPMTs();
+      if ( calPMTs.GetCount() < lowNhitsCut) continue;    // Ignore events with too few Nhits
+      if ( (calPMTs.GetCount() < lowNhits) || (calPMTs.GetCount() >= (lowNhits + windowWidth)) ) continue;
       
       TVector3 eventvector;
-      for ( size_t iPMT = 0; iPMT < calibratedPMTs.GetCount(); iPMT++ )
+      for ( size_t iPMT = 0; iPMT < calPMTs.GetCount(); iPMT++ )
 		{
-          const RAT::DS::PMTCal& pmt = calibratedPMTs.GetPMT( iPMT );
+          const RAT::DS::PMTCal& pmt = calPMTs.GetPMT( iPMT );
           TVector3 pmtvector = pmtInfo.GetPosition( pmt.GetID() );
           eventvector += pmtvector;
 		}
 		
       double pmtcount = 0.0, total = 0.0;
-      for ( size_t iPMT = 0; iPMT < calibratedPMTs.GetCount(); iPMT++ )
+      for ( size_t iPMT = 0; iPMT < calPMTs.GetCount(); iPMT++ )
 		{
-          const RAT::DS::PMTCal& pmt = calibratedPMTs.GetPMT( iPMT );
+          const RAT::DS::PMTCal& pmt = calPMTs.GetPMT( iPMT );
           TVector3 pmtvector = pmtInfo.GetPosition( pmt.GetID() );
 
           double angle = acos((eventvector.Dot(pmtvector)) / (eventvector.Mag() * pmtvector.Mag())) * (180 / pi);

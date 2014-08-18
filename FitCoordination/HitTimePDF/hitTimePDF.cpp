@@ -21,8 +21,9 @@
 #include <RAT/DS/PMTSet.hh>
 #include <RAT/DS/Root.hh>
 #include <RAT/DS/Run.hh>
+#include <RAT/DB.hh>
 
-void FillScintTimeResiduals( string pFile, TH1D* hist )
+void FillScintTimeResiduals( string pFile, TH1D* hist, double velocity=-999 )
 {
 
   RAT::DSReader dsReader(pFile);
@@ -31,12 +32,21 @@ void FillScintTimeResiduals( string pFile, TH1D* hist )
   const RAT::DU::EffectiveVelocity& effectiveVelocity = RAT::DU::Utility::Get()->GetEffectiveVelocity();
   const RAT::DU::PMTInfo& pmtInfo = RAT::DU::Utility::Get()->GetPMTInfo();
 
+  if( velocity > 0 )
+    {
+      cout << "Attempting to update VG from " << pmtds->GetEffectiveVelocityTime()->GetVg() << " to " << velocity << newline;
+      pmtds->GetEffectiveVelocityTime()->UpdateVg( velocity );
+      cout << "Using effective velocity: " << pmtds->GetEffectiveVelocityTime()->GetVg() << endl;
+    }
+  else
+    cout << "Running with default velocity: " << pmtds->GetEffectiveVelocityTime()->GetVg() << newline;
+
   // loop over each event
 
-  for( size_t iEvent = 0; iEvent < dsReader.GetEventCount(); iEvent++ ) 
+  for( size_t iEntry = 0; iEntry < dsReader.GetEntryCount(); iEntry++ ) 
     {
 
-      const RAT::DS::Root& rDS = dsReader.GetEvent( iEvent );
+      const RAT::DS::Root& rDS = dsReader.GetEntry( iEntry );
 
       int evc = rds.GetEVCount();
       if(evc==0) continue;
@@ -48,14 +58,15 @@ void FillScintTimeResiduals( string pFile, TH1D* hist )
 
       // Get Number of PMT hits
       const RAT::DS::EV& pev = rds.GetEV(0);
-      const RAT::DS::CalibratedPMTs& calPMTs = pev.GetCalibratedPMTs();
+      const RAT::DS::CalPMTs& calPMTs = pev.GetCalPMTs();
 
       // Get event time
-      double eventTime = 390 - pmc.GetMCEV(0).GetGlobalTriggerTime();
+      double eventTime = 390 - pmc.GetMCEV(0).GetGTTime();
 
       // Loop over each PMT hit and get time
       for( size_t loop=0; loop < calPMTs.GetCount(); loop++)
         {
+
           const RAT::DS::PMTCal& pCal = calPMTs.GetPMT(loop);
           double pmtTime = pCal.GetTime();
           TVector3 pmtPos = pmtInfo.GetPos(pCal.GetID());
@@ -66,8 +77,7 @@ void FillScintTimeResiduals( string pFile, TH1D* hist )
           const double straightTime = effectiveVelocity.CalcByDistance( distInScint, distInAV, distInWater);
                     
           // Finally, get time residual
-          //          double tres= pmtTime - straightTime - eventTime;
-          double tres = pmtTime - straightTime;
+          double tres= pmtTime - straightTime - eventTime;
 
           // Fill histogram with those within a fiducial volume of 5.5m
           if(mcPos.Mag() < 5500)  hist->Fill(tres);
@@ -86,10 +96,10 @@ void FillH2OTimeResiduals( string pFile, TH1D* hist )
 
   // loop over each event
 
-  for( size_t iEvent = 0; iEvent < dsReader.GetEventCount(); iEvent++ ) 
+  for( size_t iEntry = 0; iEntry < dsReader.GetEntryCount(); iEntry++ ) 
     {
 
-      const RAT::DS::Root& rDS = dsReader.GetEvent( iEvent );
+      const RAT::DS::Root& rDS = dsReader.GetEntry( iEntry );
 
       int evc = rds.GetEVCount();
       if(evc==0) continue;
@@ -101,14 +111,15 @@ void FillH2OTimeResiduals( string pFile, TH1D* hist )
 
       // Get Number of PMT hits
       const RAT::DS::EV& pev = rds.GetEV(0);
-      const RAT::DS::CalibratedPMTs& calPMTs = pev.GetCalibratedPMTs();
+      const RAT::DS::CalPMTs& calPMTs = pev.GetCalPMTs();
 
       // Get event time
-      //      double eventTime = 390 - pev->GetGTrigTime();
+      double eventTime = 390 - pmc.GetMCEV(0).GetGTTime();
 
       // Loop over each PMT hit and get time
       for( size_t loop=0; loop < calPMTs.GetCount(); loop++)
         {
+
           const RAT::DS::PMTCal& pCal = calPMTs.GetPMT(loop);
           double pmtTime = pCal.GetTime();
           TVector3 pmtPos = pmtInfo.GetPos(pCal.GetID());
@@ -119,8 +130,7 @@ void FillH2OTimeResiduals( string pFile, TH1D* hist )
           const double straightTime = groupVelocity.CalcByDistance( distInScint, distInAV, distInWater);
                     
           // Finally, get time residual
-          //          double tres= pmtTime - straightTime - eventTime;
-          double tres = pmtTime - straightTime;
+          double tres= pmtTime - straightTime - eventTime;
 
           // Fill histogram with those within a fiducial volume of 5.5m
           if(mcPos.Mag() < 5500)  hist->Fill(tres);
@@ -129,7 +139,7 @@ void FillH2OTimeResiduals( string pFile, TH1D* hist )
 
 }
 
-void GetScintPDF(string material="labppo_scintillator", int nFiles=1)
+void GetScintPDF(string material="labppo_scintillator", int nFiles=1, double velocity=-999)
 {
   // Create and fill time residual histogram
   TH1D* hist = new TH1D("H","",400,-99.5,300.5);
@@ -138,7 +148,7 @@ void GetScintPDF(string material="labppo_scintillator", int nFiles=1)
   for(int i=1;i<nFiles+1;i++){
     stringstream ss;
     ss << "HitTime_" << material << "_" << i << ".root";
-    FillScintTimeResiduals(ss.str(),hist);
+    FillScintTimeResiduals(ss.str(),hist,velocity);
   }
 
   // Read out data in ratdb format

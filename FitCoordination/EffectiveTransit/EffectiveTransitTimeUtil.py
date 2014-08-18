@@ -31,14 +31,14 @@ def UpdateData( filename, fullPlot ):
             # 10 degree forward backward limits, unless at centre
             if( startPos.Mag() > 500.0 and startPos.Dot( endPos ) < 0.985 and startPos.Dot( endPos ) > -0.985 ):
                 continue
-            for iPE in range( 0, mcPMT.GetMCPhotoelectronCount() ):
-                mcPhotoelectron = mcPMT.GetMCPhotoelectron( iPE )
+            for iPE in range( 0, mcPMT.GetMCPECount() ):
+                mcPE = mcPMT.GetMCPE( iPE )
                 scintDist = ROOT.Double()
                 avDist = ROOT.Double()
                 waterDist = ROOT.Double()
                 lightPath.CalcByPosition( startPos, endPos, scintDist, avDist, waterDist )
                 transitTime = groupVelocity.CalcByDistance( 0.0, avDist, waterDist )
-                fullPlot.Fill( scintDist, mcPhotoelectron.GetCreationTime() - startTime - transitTime )
+                fullPlot.Fill( scintDist, mcPE.GetCreationTime() - startTime - transitTime )
     return
 
 def ProduceAllData():
@@ -94,14 +94,14 @@ def UpdateProfile( filename, profile ):
             # 10 degree forward backward limits, no centre pos condieration
             if( startPos.Mag() > 500.0 and startPos.Dot( endPos ) < 0.985 and startPos.Dot( endPos ) > -0.985 ):
                 continue
-            for iPE in range( 0, mcPMT.GetMCPhotoelectronCount() ):
-                mcPhotoelectron = mcPMT.GetMCPhotoelectron( iPE )
+            for iPE in range( 0, mcPMT.GetMCPECount() ):
+                mcPE = mcPMT.GetMCPE( iPE )
                 scintDist = ROOT.Double()
                 avDist = ROOT.Double()
                 waterDist = ROOT.Double()
                 lightPath.CalcByPosition( startPos, endPos, scintDist, avDist, waterDist )
                 transitTime = groupVelocity.CalcByDistance( 0.0, avDist, waterDist )
-                profile.Fill( scintDist, scintDist / ( mcPhotoelectron.GetCreationTime() - startTime - transitTime ) )
+                profile.Fill( scintDist, scintDist / ( mcPE.GetCreationTime() - startTime - transitTime ) )
                 
     return
         

@@ -2,6 +2,7 @@
 # Author P G Jones - 13/03/2011 <p.jones22@physics.ox.ac.uk>
 #        P G Jones - 23/03/2012 <p.g.jones@qmul.ac.uk> New location option
 import os
+import sys
 import shutil
 
 class FitCoordinate:
@@ -14,7 +15,9 @@ class FitCoordinate:
             self._RunLocation = self._TargetLocation
         else:
             self._RunLocation = os.path.join( options.location, target )
-            shutil.copytree( self._TargetLocation, self._RunLocation )
+            # No need to copy if the analysis only is being run
+            if not options.analyse:
+                shutil.copytree( self._TargetLocation, self._RunLocation )
         os.chdir( self._RunLocation )
         
         # Load the settings from the config file
@@ -45,6 +48,9 @@ if __name__ == '__main__':
     parser.add_option( "-i", type="string", dest="index", help="RATDB index to place result.", default="" )
     parser.add_option( "-d", type="string", dest="location", help="Set to run the scripts in a particular location, e.g. on a data disc.", default="" )
     parser.add_option( "-p", type="string", dest="particle", help="Particle type.", default="" )
+    parser.add_option( "-b", type="string", dest="batch", help="Batch system config file" )
+    parser.add_option( "-a", action="store_true", dest="analyse", help="Run analysis only" )
+    parser.add_option( "-l", type="string", dest="loaddb", help="Additional database directory to load (FULL PATH)" )
     (options, args) = parser.parse_args()
 
     if len( args ) != 1:
@@ -56,14 +62,26 @@ if __name__ == '__main__':
         prodOptions = "" 
         if options.particle != "":
             prodOptions = "-p " + options.particle 
-        if( options.geoFile != "" ):
+        if options.geoFile != "":
             prodOptions = prodOptions + " -g " + options.geoFile
-        if( options.scintMaterial != "" ):
+        if options.scintMaterial != "":
             prodOptions = prodOptions + " -s " + options.scintMaterial
-        fc.Produce( prodOptions )
+        if options.loaddb:
+            prodOptions = prodOptions + " -l " + options.loaddb
+        if options.batch :
+            prodOptions = prodOptions + " -b " + os.path.join(os.environ['PWD'], options.batch )
+
+        if not options.analyse:
+            fc.Produce( prodOptions )
+
+            if options.batch:
+                print "Running in batch mode; run analysis separately"
+                sys.exit()
 
         # Analyse
         analyse_options = ""
         if( options.index != "" ):
             analyse_options += " -i " + options.index
+        if (options.particle != ""):
+            analyse_options += "-p " + options.particle
         fc.Analyse( analyse_options )

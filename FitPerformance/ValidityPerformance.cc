@@ -84,9 +84,9 @@ ExtractValidity(
   RAT::DSReader dsReader(lFile.c_str());
   RAT::DU::PMTInfo rPMTList = DS::DU::Utility::Get()->GetPMTInfo();
 
-  for( size_t iEvent = 0; iEvent < dsReader.GetEventCount(); iEvent++ )
+  for( size_t iEntry = 0; iEntry < dsReader.GetEntryCount(); iEntry++ )
     {
-      const RAT::DS::Root& rDS = dsReader.GetEvent( iEvent );
+      const RAT::DS::Root& rDS = dsReader.GetEntry( iEntry );
       for( size_t iEV = 0; iEV < rDS.GetEVCount(); iEV++ )
         {
 		  if( iEV > 0 ) // Only prompt events characterise

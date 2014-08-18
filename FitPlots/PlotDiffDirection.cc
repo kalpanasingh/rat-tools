@@ -184,18 +184,18 @@ ExtractDiffDirection(
   // Load the first file
 
   RAT::DSReader dsReader(lFile.c_str());
-  RAT::DU::PMTInfo rPMTList = DS::DU::Utility::Get()->GetPMTInfo();
+  RAT::DU::PMTInfo pmtInfo = DS::DU::Utility::Get()->GetPMTInfo();
 
   int graphPoint = 0;
   graphPoint++;
 
-  for( size_t iEvent = 0; iEvent < dsReader.GetEventCount(); iEvent++ )
+  for( size_t iEntry = 0; iEntry < dsReader.GetEntryCount(); iEntry++ )
     {
-      const RAT::DS::Root& rDS = dsReader.GetEvent( iEvent );
+      const RAT::DS::Root& rDS = dsReader.GetEntry( iEntry );
       const RAT::DS::MC& rMC = rDS.GetMC();
 
-      TVector3 mcPos = rMC->GetMCParticle(0)->GetPosition();
-      TVector3 mcDirection = rMC->GetMCParticle(0)->GetMomentum();
+      TVector3 mcPos = rMC.GetMCParticle(0).GetPosition();
+      TVector3 mcDirection = rMC.GetMCParticle(0).GetMomentum();
       
       for( size_t iEV = 0; iEV < rDS.GetEVCount(); iEV++ )
         {
@@ -206,7 +206,7 @@ ExtractDiffDirection(
           TVector3 fitDirection;
           try
             {
-              RAT::DS::FitVertex fitVertex = rEV->GetFitResult( lFit ).GetVertex(0);
+              RAT::DS::FitVertex fitVertex = rEV.GetFitResult( lFit ).GetVertex(0);
               if( fitVertex.ContainsDirection() && fitVertex.ValidDirection() )
                 fitDirection = fitVertex.GetDirection();
               else if( !fitVertex.ContainsDirection() )
