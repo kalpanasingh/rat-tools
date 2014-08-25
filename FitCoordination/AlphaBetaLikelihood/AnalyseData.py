@@ -1,17 +1,27 @@
-import AlphaBetaUtilities
+import AlphaBetaUtilities as ABU
 def AnalyseData(options):
     pdfs={}
-    particleNames = AlphaBetaUtilities.ParticleNames[options.particle]
+    energies={}
+    energyRatio={}
+    betaEnergies=[]
+    particleNames = ABU.ParticleNames[options.particle]
     for particleIndex, particle in enumerate(particleNames):
-        for pulseIndex, pulseDescription in enumerate(AlphaBetaUtilities.ParticlePulseDict[particle]):
+        for pulseIndex, pulseDescription in enumerate(ABU.ParticlePulseDict[particle]):
             fileName = particle+pulseDescription 
-            pdfs[fileName] = AlphaBetaUtilities.ProduceTimeResidualPDF(fileName+".root")
-    filename = "AlphaBetaOutput"+options.particle+".txt"
-    print "The relevant PDFs for the AlphaBetaClassifier have been output to "+str(filename) 
+            fileInfo = ABU.GetFileInfo(fileName+".root")
+            pdfs[fileName] = fileInfo[0]
+            energies[fileName] = fileInfo[1]
+            if (fileName.find("Bi")!=-1): #The Bi212 file has beta energies
+                 betaEnergies = energies[fileName]
+    for fileName in energies:
+        if fileName.find("Po") != -1 :
+            energyRatio[fileName] = ABU.GetEnergyRatio(betaEnergies,energies[fileName])
+    outfile = "AlphaBetaOutput"+options.particle+".txt"
+    print "The relevant PDFs for the AlphaBetaClassifier have been output to "+str(outfile) 
     print "Replace the appropriate portion of ALPHA_BETA_CLASSIFIER.ratdb with the text found there"
-    f = open(filename,'w')
-    for pulseIndex, pulseDescription in enumerate(AlphaBetaUtilities.ParticlePulseDict[particleNames[1]]):
-        AlphaBetaUtilities.OutputFileChunk([pdfs[particleNames[0]],pdfs[particleNames[1]+pulseDescription],pdfs[particleNames[2]]],options, pulseDescription, f )
+    f = open(outfile,'w')
+    for pulseIndex, pulseDescription in enumerate(ABU.ParticlePulseDict[particleNames[1]]):
+        ABU.OutputFileChunk([pdfs[particleNames[0]],pdfs[particleNames[1]+pulseDescription],pdfs[particleNames[2]]],energyRatio[particleNames[1]+pulseDescription],options, pulseDescription, f )
     f.close()
 import optparse
 if __name__ == '__main__':
