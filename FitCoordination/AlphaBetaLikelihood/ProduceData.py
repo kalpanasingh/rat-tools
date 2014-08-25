@@ -31,7 +31,7 @@ def ProduceRunMacFiles(options):
 
             if str(particle) == "Te130":
                 generator = "/generator/vtx/set 2beta " + str(particle) + " 0 1"
-                hadrons= "/PhysicsList/OmitHadronicProcesses true" 
+                hadrons= "/rat/physics_list/OmitHadronicProcesses true" 
             else:
                
                 generator = "/generator/vtx/set backg " + str(particle)
