@@ -79,7 +79,7 @@ EventData::NewSignal(
 		     const int pmtID,
 		     const double numPE )
 {
-  //cout << "SIG " << trackID << " " << pmtID << " pe " << numPE << " R ";
+  //cout << "SIG " << trackID << " " << pmtID << " pe " << numPE << endl;
   int iLoop;
   for( iLoop = fpHits.size() - 1; iLoop >= 0; iLoop-- )
     {
