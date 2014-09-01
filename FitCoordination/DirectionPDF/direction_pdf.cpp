@@ -6,17 +6,15 @@
 #include <TH1D.h>
 #include <TTree.h>
 
-#include <RAT/DSReader.hh>
-
-#include <RAT/DU/LightPath.hh>
-#include <RAT/DU/GroupVelocity.hh>
-#include <RAT/DU/EffectiveVelocity.hh>
+#include <RAT/DU/DSReader.hh>
+#include <RAT/DU/Utility.hh>
+#include <RAT/DU/PMTInfo.hh>
 
 #include <RAT/DS/MC.hh>
 #include <RAT/DS/MCParticle.hh>
 #include <RAT/DS/EV.hh>
 #include <RAT/DS/PMT.hh>
-#include <RAT/DS/Root.hh>
+#include <RAT/DS/Entry.hh>
 #include <RAT/DS/Run.hh>
 #include <RAT/DS/PMTSet.hh>
 #include <RAT/DS/PMT.hh>
@@ -25,10 +23,8 @@
 
 void FillDirection(char* pFile, TH1D* hist)
 {
-  RAT::DSReader dsReader(pFile);
+  RAT::DU::DSReader dsReader(pFile);
 
-  RAT::DU::LightPath lightPath = RAT::DU::Utility::Get()->GetLightPath();
-  const RAT::DU::EffectiveVelocity& effectiveVelocity = RAT::DU::Utility::Get()->GetEffectiveVelocity();
   const RAT::DU::PMTInfo& pmtInfo = RAT::DU::Utility::Get()->GetPMTInfo();
 
   // loop over each event

@@ -13,8 +13,9 @@
 #include <TAxis.h>
 #include <TF1.h>
 
-#include <RAT/DSReader.hh>
+#include <RAT/DU/DSReader.hh>
 
+#include <RAT/DU/Utility.hh>
 #include <RAT/DU/PMTInfo.hh>
 
 #include <RAT/DS/MC.hh>
@@ -22,7 +23,7 @@
 #include <RAT/DS/EV.hh>
 #include <RAT/DS/PMT.hh>
 #include <RAT/DS/PMTSet.hh>
-#include <RAT/DS/Root.hh>
+#include <RAT/DS/Entry.hh>
 #include <RAT/DS/Run.hh>
 
 const double lowNhitsCut = 50;
@@ -211,14 +212,14 @@ void Coordination(char* infile5000, char* infile5300, char* infile5400, char* in
 TH1D* Hist5000(char* infile, double lowNhits, TH1D* histo)
 {
 
-  RAT::DSReader dsReader(pFile);
+  RAT::DU::DSReader dsReader(pFile);
 	
   const RAT::DU::PMTInfo& pmtInfo = RAT::DU::Utility::Get()->GetPMTInfo();
 
   for( size_t iEntry = 0; iEntry < dsReader.GetEntryCount(); iEntry++ ) 
 	{
       
-      const RAT::DS::Root& rDS = dsReader.GetEntry( iEntry );
+      const RAT::DS::Entry& rDS = dsReader.GetEntry( iEntry );
       if ( rds.GetEVCount() == 0 ) continue;
       const RAT::DS::EV& eventev = rds->GetEV( 0 );
       const RAT::DS::CalPMTs& calPMTs = eventev.GetCalPMTs();
@@ -261,14 +262,14 @@ double MeanRatio(char *infile, double lowNhits)
 {
   vector<double> ratios;
 
-  RAT::DSReader dsReader(pFile);
+  RAT::DU::DSReader dsReader(pFile);
 	
   const RAT::DU::PMTInfo& pmtInfo = RAT::DU::Utility::Get()->GetPMTInfo();
 
   for( size_t iEntry = 0; iEntry < dsReader.GetEntryCount(); iEntry++ ) 
 	{
       
-      const RAT::DS::Root& rDS = dsReader.GetEntry( iEntry );
+      const RAT::DS::Entry& rDS = dsReader.GetEntry( iEntry );
       if ( rds.GetEVCount() == 0 ) continue;
       const RAT::DS::EV& eventev = rds.GetEV( 0 );
       const RAT::DS::CalPMTs& calPMTs = eventev.GetCalPMTs();
@@ -323,13 +324,13 @@ double MeanRatio(char *infile, double lowNhits)
 TH1D* ErrorHist(char* infile, double lowNhits, double lowRatio, TH1D* histo)
 {
 
-  RAT::DSReader dsReader(pFile);
+  RAT::DU::DSReader dsReader(pFile);
 	
   const RAT::DU::PMTInfo& pmtInfo = RAT::DU::Utility::Get()->GetPMTInfo();
 
   for( size_t iEntry = 0; iEntry < dsReader.GetEntryCount(); iEntry++ ) 
 	{
-      const RAT::DS::Root& rDS = dsReader.GetEntry( iEntry );
+      const RAT::DS::Entry& rDS = dsReader.GetEntry( iEntry );
       if ( rds.GetEVCount() == 0 ) continue;
       const RAT::DS::EV& eventev = rds.GetEV( 0 );
       const RAT::DS::CalPMTs& calPMTs = eventev.GetCalPMTs();

@@ -10,11 +10,9 @@
 
 #include <FitPlotsUtil.hh>
 
-#include <RAT/DSReader.hh>
+#include <RAT/DU/DSReader.hh>
 
-#include <RAT/DU/PMTInfo.hh>
-
-#include <RAT/DS/Root.hh>
+#include <RAT/DS/Entry.hh>
 #include <RAT/DS/EV.hh>
 #include <RAT/DS/FitResult.hh>
 #include <RAT/DS/FitVertex.hh>
@@ -196,17 +194,16 @@ ExtractDiffEnergy(
   // Now extract the data
   // Load the first file
 
-  RAT::DSReader dsReader(lFile.c_str());
-  RAT::DU::PMTInfo rPMTList = DS::DU::Utility::Get()->GetPMTInfo();
+  RAT::DU::DSReader dsReader(lFile.c_str());
 
   int graphPoint = 0;
   (*gResVE)->SetPoint( graphPoint, 0.0, 0.0 );
   graphPoint++;
 
-  for( size_t iEvent = 0; iEvent < dsReader.GetEventCount(); iEvent++ )
+  for( size_t iEntry = 0; iEntry < dsReader.GetEntryCount(); iEntry++ )
     {
       
-      const RAT::DS::Root& rDS = dsReader.GetEvent( iEvent );
+      const RAT::DS::Entry& rDS = dsReader.GetEntry( iEntry );
       const RAT::DS::MC& rMC = rDS.GetMC();
 	  int npart = rMC.GetMCParticleCount();
 
