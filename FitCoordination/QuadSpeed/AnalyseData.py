@@ -15,10 +15,12 @@ def AnalyseData( options ):
     # Print the results
     print "{\nname: \"QUAD_FIT\","
     print "index: \"%s\"," % options.index
-    print "valid_begin : [0, 0],\nvalid_end : [0, 0],"
-    print "transit_time: %.2fd," % linearFit.GetParameter( 0 )
-    print "num_points: 4000,"
-    print "nhit_cutoff: 50,"
+    print "valid_begin : [0, 0],\nvalid_end : [0, 0],\n"
+    print "light_speed: %.2fd,  // Effective overall speed of light" % linearFit.GetParameter( 0 )
+    print "num_points: 4000,      // Max points generated in quadcloud"
+    print "limit_points: 20000,   // Number of attempts to generate points"
+    print "calc_time: 1,       // Whether to calcuate the reconstructed time"
+    print "calc_errors: 1,     // Whether to compute errors on time & position"
     print "}"
 
 import optparse

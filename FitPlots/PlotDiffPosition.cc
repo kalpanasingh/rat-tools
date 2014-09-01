@@ -11,8 +11,11 @@
 #include <FitPlotsUtil.hh>
 #include <PlotDiffPosition.hh>
 
+#include <RAT/DSReader.hh>
+
+#include <RAT/DU/PMTInfo.hh>
+
 #include <RAT/DS/Root.hh>
-#include <RAT/DS/PMTProperties.hh>
 #include <RAT/DS/EV.hh>
 #include <RAT/DS/FitResult.hh>
 #include <RAT/DS/FitVertex.hh>
@@ -250,35 +253,35 @@ ExtractDiffPosition(
 
   // Now extract the data
   // Load the first file
-  RAT::DS::Root* rDS;
-  RAT::DS::PMTProperties* rPMTList;
-  TChain* tree;
 
-  LoadRootFile( lFile, &tree, &rDS, &rPMTList );
+  RAT::DSReader dsReader(lFile.c_str());
+  RAT::DU::PMTInfo rPMTList = DS::DU::Utility::Get()->GetPMTInfo();
 
   int graphPoint = 0;
-  for( int iLoop = 0; iLoop < tree->GetEntries(); iLoop++ )
-    {
-      tree->GetEntry( iLoop );
-      RAT::DS::MC *rMC = rDS->GetMC();
 
-      TVector3 mcPos = rMC->GetMCParticle(0)->GetPos();
+  for( size_t iEvent = 0; iEvent < dsReader.GetEventCount(); iEvent++ )
+    {
+
+      const RAT::DS::Root& rDS = dsReader.GetEvent( iEvent );
+      const RAT::DS::MC& rMC = rDS.GetMC();
+
+      TVector3 mcPos = rMC->GetMCParticle(0)->GetPosition();
         
       /*Produce a average position (unweighted ?? )
-      for( int iLoop2 = 1; iLoop2 < numMCParticles; iLoop2++ )
+      for( int iEvent2 = 1; iEvent2 < numMCParticles; iEvent2++ )
         {
           cout << "Warn, pileup: averaging position" << endl;
-          RAT::DS::MCParticle *rMCParticle =  rMC->GetMCParticle( iLoop2 );
+          RAT::DS::MCParticle *rMCParticle =  rMC->GetMCParticle( iEvent2 );
           mcPos = mcPos + rMCParticle->GetPos();
         }
       mcPos = mcPos * ( 1.0 / numMCParticles );
       */
-      for( int iEvent = 0; iEvent < rDS->GetEVCount(); iEvent++ )
+      for( size_t iEV = 0; iEV < rDS.GetEVCount(); iEV++ )
         {
-          if( gIgnoreRetriggers && iEvent > 0 )
+          if( gIgnoreRetriggers && iEV > 0 )
             continue;
 
-          RAT::DS::EV *rEV = rDS->GetEV( iEvent );
+          const RAT::DS::EV& rEV = rDS.GetEV( iEV );
           TVector3 fitPos;
           try
             {
@@ -297,7 +300,7 @@ ExtractDiffPosition(
             }
           catch( std::runtime_error& e )
             {
-              cout << lFit << " failed for event " << iEvent << ". Continuing..." << endl;
+              cout << lFit << " failed for event " << iEV << ". Continuing..." << endl;
               continue;
             }
           TVector3 deltaR = fitPos - mcPos;

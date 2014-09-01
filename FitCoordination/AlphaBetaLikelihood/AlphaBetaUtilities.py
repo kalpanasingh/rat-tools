@@ -21,9 +21,9 @@ def ProduceTimeResidualPDF(filename):
             fitTime = mcParticle.GetTime()
             fitVertex = ev.GetFitResult("scintFitter").GetVertex(0)
             fitTime = fitVertex.GetTime()
-            calibratedPMTs = ev.GetCalibratedPMTs()
-            for iPMT in range(0,calibratedPMTs.GetCount()):
-                pmt = calibratedPMTs.GetPMT(iPMT)
+            calPMTs = ev.GetCalPMTs()
+            for iPMT in range(0,calPMTs.GetCount()):
+                pmt = calPMTs.GetPMT(iPMT)
                 pmtPos = pmtInfo.GetPosition(pmt.GetID())
                 pmtTime = pmt.GetTime()
                 distInScint = ROOT.Double()

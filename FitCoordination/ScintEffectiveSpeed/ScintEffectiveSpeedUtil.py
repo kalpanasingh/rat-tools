@@ -18,7 +18,7 @@ def UpdateData( filename ):
             mc = ds.GetMC()
             ev = ds.GetEV(0)
             startTime = mc.GetMCParticle(0).GetTime()
-            startPos = mc.GetMCParticle(0).GetPos()
+            startPos = mc.GetMCParticle(0).GetPosition()
         
             try:
                 fitPos = ev.GetFitResult("positionTimeLikelihood").GetVertex(0).GetPosition()

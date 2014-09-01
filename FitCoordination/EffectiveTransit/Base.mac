@@ -1,8 +1,8 @@
 # In this file the source is at 0.0 ${SourcePos} 0.0
 
 # Parameters
-/PhysicsList/OmitMuonicProcesses true
-/PhysicsList/OmitHadronicProcesses true
+/rat/physics_list/OmitMuonicProcesses true
+/rat/physics_list/OmitHadronicProcesses true
 
 ${ExtraDB}
 /rat/db/set DETECTOR geo_file "${GeoFile}"

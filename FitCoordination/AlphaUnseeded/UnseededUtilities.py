@@ -23,8 +23,8 @@ def ProduceRatioHistogram(filename, tailfrac):
 		lowlimit, highlimit = 1000.0, 0.0
 		temp = []
 
-		for j in range(0, ev.GetPMTCalCount()):
-			pmtTime = ev.GetPMTCal(j).GetTime()
+		for j in range(0, ev.GetCalPMTs.GetCount()):
+			pmtTime = ev.GetCalPMTs.GetPMT(j).GetTime()
 			temp.append(pmtTime)
 
 			if pmtTime < lowlimit and pmtTime > 250:

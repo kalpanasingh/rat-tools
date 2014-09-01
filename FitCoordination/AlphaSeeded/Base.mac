@@ -1,4 +1,4 @@
-/PhysicsList/OmitMuonicProcesses true
+/rat/physics_list/OmitMuonicProcesses true
 ${OmitHadrons}
 
 ${ExtraDB}
