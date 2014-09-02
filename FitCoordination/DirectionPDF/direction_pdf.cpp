@@ -21,7 +21,7 @@
 
 #include <math.h>
 
-void FillDirection(char* pFile, TH1D* hist)
+void FillDirection(std::string pFile, TH1D* hist)
 {
   RAT::DU::DSReader dsReader(pFile);
 
@@ -41,12 +41,12 @@ void FillDirection(char* pFile, TH1D* hist)
       if( evc == 0 ) continue;
       const RAT::DS::EV& pev= rds.GetEV(0);
       const RAT::DS::CalPMTs& calPMTs = pev.GetCalPMTs();
-      size_t PMThits = pev.GetCalPMTs.GetCount();
+      size_t PMThits = pev.GetCalPMTs().GetCount();
 
       for(size_t jLoop=0; jLoop<PMThits; jLoop++)
         {
-          const RAT::DS::PMTCal& pCal = pev.GetCalPMTs.GetPMT(jLoop);
-          TVector3 pmtPos = pmtInfo.GetPos(pCal.GetID());
+          const RAT::DS::PMTCal& pCal = pev.GetCalPMTs().GetPMT(jLoop);
+          TVector3 pmtPos = pmtInfo.GetPosition(pCal.GetID());
           TVector3 photonDir = (pmtPos-mcPos);
           double ctheta = (photonDir.Unit()).Dot(mcDir);
           double theta = acos(ctheta);

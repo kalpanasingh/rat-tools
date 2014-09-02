@@ -269,7 +269,7 @@ ExtractDiffPosition(
         {
           cout << "Warn, pileup: averaging position" << endl;
           RAT::DS::MCParticle& rMCParticle =  rMC.GetMCParticle( iEvent2 );
-          mcPos = mcPos + rMCParticle->GetPos();
+          mcPos = mcPos + rMCParticle.GetPosition();
         }
       mcPos = mcPos * ( 1.0 / numMCParticles );
       */

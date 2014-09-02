@@ -31,7 +31,7 @@ ${ExtraDB}
 /rat/procset selector "null"
 /rat/procset name "positionTimeLikelihood"
 /rat/proc prune 
-/rat/procset prune "mc.hit,mc.pmt.photon"
+/rat/procset prune "mc.hits,mc.pmts.photons"
 /rat/proc outroot
 /rat/procset file "scintFit_${Speed}.root"
 

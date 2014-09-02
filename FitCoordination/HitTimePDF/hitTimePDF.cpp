@@ -69,7 +69,7 @@ void FillScintTimeResiduals( string pFile, TH1D* hist, double velocity=-999 )
 
           const RAT::DS::PMTCal& pCal = calPMTs.GetPMT(loop);
           double pmtTime = pCal.GetTime();
-          TVector3 pmtPos = pmtInfo.GetPos(pCal.GetID());
+          TVector3 pmtPos = pmtInfo.GetPosition(pCal.GetID());
 
           // Get straight line travel time to PMT
           lightPath.CalcByPosition( mcPosition, pmtPos, distInScint, distInAV, distInWater);
@@ -124,7 +124,7 @@ void FillH2OTimeResiduals( string pFile, TH1D* hist )
 
           const RAT::DS::PMTCal& pCal = calPMTs.GetPMT(loop);
           double pmtTime = pCal.GetTime();
-          TVector3 pmtPos = pmtInfo.GetPos(pCal.GetID());
+          TVector3 pmtPos = pmtInfo.GetPosition(pCal.GetID());
 
           // Get straight line travel time to PMT
           double distInScint, distInAV, distInWater;

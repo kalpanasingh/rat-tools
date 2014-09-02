@@ -30,8 +30,8 @@ def ProduceRatioHistogram(filename, t1, t2):
 		vertTime = ev.GetFitResult("scintFitter").GetVertex(0).GetTime()
 		peak = total = 0.0
 		
-		for j in range(0, ev.GetCalPMTs.GetCount()):
-			pmt = ev.GetCalPMTs.GetPMT(j)
+		for j in range(0, ev.GetCalPMTs().GetCount()):
+			pmt = ev.GetCalPMTs().GetPMT(j)
 			pmtPos = pmtInfo.GetPosition(pmt.GetID())
 			pmtTime = pmt.GetTime()
 
