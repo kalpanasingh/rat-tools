@@ -1,0 +1,12 @@
+#/rat/db/set DETECTOR geo_file "ncd_anchors.geo"
+#/rat/db/set DETECTOR geo_file "snovessel.geo"
+#/rat/db/set DETECTOR geo_file "basic.geo"
+#/rat/db/set DETECTOR geo_file "calib_sources.geo"
+/rat/db/set DETECTOR geo_file "pmt.geo"
+/rat/db/set DETECTOR pmt_info_file "singlepmt.ratdb"
+
+/run/initialize
+
+/geometry/test/recursive_test
+
+exit

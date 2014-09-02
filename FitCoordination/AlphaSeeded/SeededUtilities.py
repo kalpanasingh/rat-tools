@@ -13,11 +13,13 @@ def ProduceRatioHistogram(filename, t1, t2):
 	# produces the overall histogram of the ratio of PMTs in the Prompt Region to total PMTs in the event, for the specified rootfile
 	Histogram = ROOT.TH1D(filename, filename + ": Prompt PMTs/Total PMTs in Event", 100, 0.0, 1.0)
 
+        dsUtility = RAT.DU.Utility.Get()
+        effectiveVelocity = dsUtility.GetEffectiveVelocity()
+        lightPath = dsUtility.GetLightPath()
+        pmtInfo = dsUtility.GetPMTInfo()
+
 	for ds, run in rat.dsreader(filename):
-		effectiveTime = run.GetEffectiveVelocityTime()
-		lightPath = run.GetLightPath()
-		pmtProp = run.GetPMTProp()
-	
+
 		if ds.GetEVCount() == 0:
 			continue
 		ev = ds.GetEV(0)
@@ -28,16 +30,16 @@ def ProduceRatioHistogram(filename, t1, t2):
 		vertTime = ev.GetFitResult("scintFitter").GetVertex(0).GetTime()
 		peak = total = 0.0
 		
-		for j in range(0, ev.GetPMTCalCount()):
-			pmt = ev.GetPMTCal(j)
-			pmtPos = pmtProp.GetPos(pmt.GetID())
+		for j in range(0, ev.GetCalPMTs.GetCount()):
+			pmt = ev.GetCalPMTs.GetPMT(j)
+			pmtPos = pmtInfo.GetPosition(pmt.GetID())
 			pmtTime = pmt.GetTime()
 
 			distInScint = ROOT.Double()
 			distInAV = ROOT.Double()
 			distInWater = ROOT.Double()
 			lightPath.CalcByPosition(vertPos, pmtPos, distInScint, distInAV, distInWater)
-			flightTime = effectiveTime.CalcByDistance(distInScint, distInAV, distInWater)
+			flightTime = effectiveVelocity.CalcByDistance(distInScint, distInAV, distInWater)
 			timeresid = pmtTime - flightTime - vertTime
 			
 			if timeresid > t1 and timeresid < t2:

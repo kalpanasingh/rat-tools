@@ -24,18 +24,16 @@ namespace DS
 
 void
 ExtractTrackData(
-		 RAT::DS::MC* rMC,
-		 RAT::DS::PMTProperties* rPMTList,
-		 int eventID,
-		 FullDataManager& fileData );
+                 const RAT::DS::MC& rMC,
+                 const int eventID,
+                 FullDataManager& fileData );
 void
 ExtractSignalData(
-		  RAT::DS::Root* rDS,
-		  RAT::DS::PMTProperties* rPMTList,
-		  RAT::DS::MC* rMC,
-		  int eventID,
-		  FullDataManager& fileData,
-		  int mode );
+                  const RAT::DS::Entry& rDS,
+                  const RAT::DS::MC& rMC,
+                  const int eventID,
+                  FullDataManager& fileData,
+                  int mode );
 double
 GetFrontFaceHitPos(
 		   const TVector3 trackDir,

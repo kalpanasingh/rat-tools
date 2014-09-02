@@ -1,46 +1,56 @@
 #include <iostream>
 #include <fstream>
-#include "TROOT.h"
-#include "TFile.h"
-#include "TH1D.h"
-#include "TTree.h"
+
+#include <TROOT.h>
+#include <TFile.h>
+#include <TH1D.h>
+#include <TTree.h>
+
+#include <RAT/DSReader.hh>
+
+#include <RAT/DU/LightPath.hh>
+#include <RAT/DU/GroupVelocity.hh>
+#include <RAT/DU/EffectiveVelocity.hh>
+
 #include <RAT/DS/MC.hh>
 #include <RAT/DS/MCParticle.hh>
 #include <RAT/DS/EV.hh>
-#include <RAT/DS/PMTCal.hh>
+#include <RAT/DS/PMT.hh>
 #include <RAT/DS/Root.hh>
 #include <RAT/DS/Run.hh>
+#include <RAT/DS/PMTSet.hh>
+#include <RAT/DS/PMT.hh>
+
+#include <math.h>
 
 void FillDirection(char* pFile, TH1D* hist)
 {
-  TFile *file = new TFile(pFile);
-  TTree *tree = (TTree*) file->Get("T");
-  RAT::DS::Root *rds = new RAT::DS::Root();
-  tree->SetBranchAddress("ds", &rds);
+  RAT::DSReader dsReader(pFile);
 
-  // PMT Properties are contained in different tree
-  TTree *runtree = (TTree*) file->Get( "runT");
-  RAT::DS::Run *pmtds = new RAT::DS::Run();
-  runtree->SetBranchAddress("run", &pmtds);
-  runtree->GetEntry();
-  RAT::DS::PMTProperties *pmtProp = pmtds->GetPMTProp();
+  RAT::DU::LightPath lightPath = RAT::DU::Utility::Get()->GetLightPath();
+  const RAT::DU::EffectiveVelocity& effectiveVelocity = RAT::DU::Utility::Get()->GetEffectiveVelocity();
+  const RAT::DU::PMTInfo& pmtInfo = RAT::DU::Utility::Get()->GetPMTInfo();
 
-  for(int iLoop =0; iLoop < tree->GetEntries(); iLoop++ )
+  // loop over each event
+
+  for( size_t iEntry = 0; iEntry < dsReader.GetEntryCount(); iEntry++ ) 
     {
-      tree->GetEntry( iLoop );
-      RAT::DS::MC *pmc = rds->GetMC();
-      TVector3 mcPos = pmc->GetMCParticle(0)->GetPos();
-      TVector3 mcDir = pmc->GetMCParticle(0)->GetMom().Unit();
+      
+      const RAT::DS::Entry& rds = dsReader.GetEntry( iEntry );
+      const RAT::DS::MC& pmc = rds.GetMC();
+      TVector3 mcPos = pmc.GetMCParticle(0).GetPosition();
+      TVector3 mcDir = pmc.GetMCParticle(0).GetMomentum().Unit();
 
-      int evc = rds->GetEVCount();
+      int evc = rds.GetEVCount();
       if( evc == 0 ) continue;
-      RAT::DS::EV *pev= rds->GetEV(0);
-      int PMThits = pev->GetPMTCalCount();
+      const RAT::DS::EV& pev= rds.GetEV(0);
+      const RAT::DS::CalPMTs& calPMTs = pev.GetCalPMTs();
+      size_t PMThits = pev.GetCalPMTs.GetCount();
 
-      for(int jLoop=0; jLoop<PMThits; jLoop++)
+      for(size_t jLoop=0; jLoop<PMThits; jLoop++)
         {
-          RAT::DS::PMTCal *pCal = pev->GetPMTCal(jLoop);
-          TVector3 pmtPos = pmtProp->GetPos(pCal->GetID());
+          const RAT::DS::PMTCal& pCal = pev.GetCalPMTs.GetPMT(jLoop);
+          TVector3 pmtPos = pmtInfo.GetPos(pCal.GetID());
           TVector3 photonDir = (pmtPos-mcPos);
           double ctheta = (photonDir.Unit()).Dot(mcDir);
           double theta = acos(ctheta);

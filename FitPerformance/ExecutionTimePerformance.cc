@@ -113,29 +113,26 @@ ExtractExecutionTime(
 					 bool pos )
 {
   // Now extract the data
-  // Load the first file
-  RAT::DS::Root* rDS;
-  RAT::DS::PMTProperties* rPMTList;
-  TChain* tree;
 
-  LoadRootFile( lFile, &tree, &rDS, &rPMTList );
+  RAT::DU::DSReader dsReader( lFile );
+  const RAT::DU::PMTInfo rPMTList = DS::DU::Utility::Get()->GetPMTInfo();
 
-  for( int iLoop = 0; iLoop < tree->GetEntries(); iLoop++ )
+  for( int iEntry = 0; iEntry < dsReader.GetEntryCount(); iEntry++ )
     {
-      tree->GetEntry( iLoop );
+      const RAT::DS::Entry& rDS = dsReader.GetEntry( iEntry );
 
-      for( int iEvent = 0; iEvent < rDS->GetEVCount(); iEvent++ )
+      for( int iEvent = 0; iEvent < rDS.GetEVCount(); iEvent++ )
         {
 		  if( iEvent > 0 ) // Only prompt events characterise
 			continue;
-		  RAT::DS::EV *rEV = rDS->GetEV( iEvent );
+		  const RAT::DS::EV& rEV = rDS.GetEV( iEvent );
           if( rEV->GetFitResult( lFit ).GetValid() == false )
             continue;
 
 		  if( pos )
-			gPlot->SetPoint( plotPoint, rDS->GetMC()->GetMCParticle(0)->GetPos().Mag(), rEV->GetFitResult( lFit ).GetExecutionTime() );
+			gPlot->SetPoint( plotPoint, rDS.GetMC().GetMCParticle(0).GetPosition().Mag(), GetFitResult( lFit ).GetExecutionTime() );
 		  else
-			gPlot->SetPoint( plotPoint, rEV->GetPMTCalCount(), rEV->GetFitResult( lFit ).GetExecutionTime() );
+			gPlot->SetPoint( plotPoint, rEV.GetCalPMTs().GetCount(), rEV.GetFitResult( lFit ).GetExecutionTime() );
 		  plotPoint++;
         }
     }

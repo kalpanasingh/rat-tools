@@ -28,7 +28,7 @@ for rotation in rotational_positions:
     db["x"].append(float("%.2f" % x))
     db["y"].append(float("%.2f" % y))
     db["z"].append(float("%.2f" % z))
-    db["roll"].append(float("%.2f" % (roll)))
+    db["roll"].append(float("%.2f" % (-roll)))
 
 print "Ropes:"
 print  yaml.dump(db).replace("]", "],")

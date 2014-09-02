@@ -55,7 +55,7 @@ def NhitsHistogram( fileName ):
     for ds, run in rat.dsreader( fileName ):
         if( ds.GetEVCount() == 0 ):
             continue
-        nhitHist.Fill( ds.GetEV(0).GetPMTCalCount() )
+        nhitHist.Fill( ds.GetEV(0).GetCalbratedPMTs.GetCount() )
 
     return nhitHist
 

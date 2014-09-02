@@ -1,7 +1,8 @@
 # Parameters
-/PhysicsList/OmitMuonicProcesses true
-/PhysicsList/OmitHadronicProcesses true
+/rat/physics_list/OmitMuonicProcesses true
+/rat/physics_list/OmitHadronicProcesses true
 
+${ExtraDB}
 /rat/db/set MC thin_factor 3.5
 
 /rat/db/set DETECTOR geo_file "${GeoFile}"
@@ -17,15 +18,18 @@
 /rat/proc trigger
 /rat/proc eventbuilder
 /rat/proc count
-/rat/procset update 100
+/rat/procset update 10
 /rat/proc calibratePMT
 /rat/proc fitter
 /rat/procset method "quad"
 /rat/proc fitter
 /rat/procset method "positionTimeLikelihood"
 /rat/procset optimiser "powell"
-/rat/procset pdf "et1d-labppo_scintillator"
+#/rat/procset pdf "et1d-labppo_scintillator"
+/rat/procset pdf "et1d"
 /rat/procset seed "quad"
+/rat/procset selector "null"
+/rat/procset name "positionTimeLikelihood"
 /rat/proc prune 
 /rat/procset prune "mc.hit,mc.pmt.photon"
 /rat/proc outroot

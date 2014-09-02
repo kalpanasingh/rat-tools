@@ -8,8 +8,11 @@
 
 #include <FitPlotsUtil.hh>
 
+#include <RAT/DSReader.hh>
+
+#include <RAT/DU/PMTInfo.hh>
+
 #include <RAT/DS/Root.hh>
-#include <RAT/DS/PMTProperties.hh>
 #include <RAT/DS/EV.hh>
 #include <RAT/DS/FitResult.hh>
 #include <RAT/DS/FitVertex.hh>
@@ -161,36 +164,35 @@ ExtractValidity(
 
   // Now extract the data
   // Load the first file
-  RAT::DS::Root* rDS;
-  RAT::DS::PMTProperties* rPMTList;
-  TChain* tree;
 
-  LoadRootFile( lFile, &tree, &rDS, &rPMTList );
+  RAT::DSReader dsReader(lFile.c_str());
+  RAT::DU::PMTInfo rPMTList = DS::DU::Utility::Get()->GetPMTInfo();
 
   int graphPoint = 0;
   double validEvents, totalEvents;
   validEvents = totalEvents = 0.0;
-  for( int iLoop = 0; iLoop < tree->GetEntries(); iLoop++ )
-    {
-      tree->GetEntry( iLoop );
 
-      for( int iEvent = 0; iEvent < rDS->GetEVCount(); iEvent++ )
+  for( size_t iEvent = 0; iEvent < dsReader.GetEventCount(); iEvent++ )
+    {
+      const RAT::DS::Root& rDS = dsReader.GetEvent( iEvent );
+
+      for( size_t iEV = 0; iEV < rDS.GetEVCount(); iEV++ )
 		{
-          if( gIgnoreRetriggers && iEvent > 0 )
+          if( gIgnoreRetriggers && iEV > 0 )
             continue;
 
-		  RAT::DS::EV *rEV = rDS->GetEV(0);
+		  const RAT::DS::EV& rEV = rDS.GetEV( iEV );
           try
             {
               totalEvents += 1.0;
-              const int valid = rEV->GetFitResult( lFit ).GetValid();
-              (*gExecTime)->SetPoint( graphPoint, rEV->GetPMTCalCount(), valid );
+              const int valid = rEV.GetFitResult( lFit ).GetValid();
+              (*gExecTime)->SetPoint( graphPoint, rEV.GetCalibratedPMTs().GetCount(), valid );
               validEvents += valid;
               graphPoint++;
             }
           catch( std::runtime_error& e )
             {
-              cout << lFit << " failed for event " << iEvent << ". Continuing..." << endl;
+              cout << lFit << " failed for event " << iEV << ". Continuing..." << endl;
               continue;
             }
 		}
