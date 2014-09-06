@@ -1,37 +1,33 @@
 #!usr/bin/env python
-import string, Utilities
-# Author K Majumdar - 05/04/2014 <Krishanu.Majumdar@physics.ox.ac.uk>
+import ROOT, rat, string, math, ProduceData
+# Author K Majumdar - 05/09/2014 <Krishanu.Majumdar@physics.ox.ac.uk>
+
+infileName = ProduceData.outfileName + ".root"
+minTimeResid = -10.0
+maxTimeResid = 400.0
+fidVolLow = 0.0
+fidVolHigh = 3500.0
 
 
+# returns the parameters for the BiPo (Cumulative Time Residuals Method) Classifier in the form of a complete RATDB entry
 def AnalyseRootFiles(options):
-    # returns the cumulative time residuals PDF for 130Te NNBD events in the fiducial volume and energy region of interest
     
-    if (options.index == ""):
-        print "An Index option (-i) must be specified for this coordinator, i.e. te_0p3_labppo_scintillator_bisMSB_Dec2013-PSD or te_0p3_labppo_scintillator_Oct2012-noPSD ... exiting"
-        sys.exit()
-    indexList = (options.index).split('-')
-    material = indexList[0]
-    timingProfile = indexList[1]
-
-    if (timingProfile == "noPSD"):
-        indexString = material + "_" + timingProfile
-    else:
-        indexString = material
-
-    energyWindow = Utilities.GetEnergyWindow(options.index + ".root", Utilities.fidVolLow, Utilities.fidVolHigh)
-    cumulTimeResids = Utilities.GetCDFVector(options.index + ".root", Utilities.fidVolLow, Utilities.fidVolHigh, energyWindow[0], energyWindow[1], Utilities.minTimeResid, Utilities.maxTimeResid)
+    energyWindow = GetEnergyWindow()
+    cumulTimeResids = GetCDFVector(energyWindow[0], energyWindow[1])
+	
+    ##############################
 	
     print "\n"
     print "Please place the text below into the database file: CLASSIFIER_BIPO_CUMULTIMERESID.ratdb located in rat/data, replacing any existing entry with the same index."
     print "\n"
     print "{"
     print "name: \"CLASSIFIER_BIPO_CUMULTIMERESID\","
-    print "index: \"" + indexString + "\","
+    print "index: \"" + options.index + "\","
     print "valid_begin: [0, 0],"
     print "valid_end: [0, 0],"
     print "\n",
-    print "min_time_residual: " + str(Utilities.minTimeResid) + "d,"
-    print "max_time_residual: " + str(Utilities.maxTimeResid) + "d,"
+    print "min_time_residual: " + str(minTimeResid) + "d,"
+    print "max_time_residual: " + str(maxTimeResid) + "d,"
     print "cumulative_fractions: [",
     for probability in cumulTimeResids:
         print str(probability) + "d, ",
@@ -40,10 +36,99 @@ def AnalyseRootFiles(options):
     print "\n"
 
 
+# returns a vector containing the lower and upper bounds of the energy region of interest (mean reco.energy +/- 1 sigma)
+def GetEnergyWindow():
+    Histogram = ROOT.TH1D("recoEnergy", "recoEnergy", 100, 0.0, 5.0)
+
+    for ds, run in rat.dsreader(infileName):
+        if ds.GetEVCount() == 0:
+            continue
+        ev = ds.GetEV(0)
+
+        vertPos = ev.GetFitResult("scintFitter").GetVertex(0).GetPosition()
+        if (vertPos.Mag() < fidVolLow) or (vertPos.Mag() >= fidVolHigh):
+            continue
+        vertEnergy = ev.GetFitResult("scintFitter").GetVertex(0).GetEnergy()
+        Histogram.Fill(vertEnergy)
+
+    gaussFit = ROOT.TF1("gaus", "gaus", 0.0, 5.0)
+    Histogram.Fit(gaussFit, "RQ")
+    lowEnergy = gaussFit.GetParameter(1) - gaussFit.GetParameter(2)
+    highEnergy = gaussFit.GetParameter(1) + gaussFit.GetParameter(2)
+
+    energyWindow = [lowEnergy, highEnergy]
+	
+    print "\n"
+    print "Energy Window (mean reco.energy +/- 1 sigma): " + str(lowEnergy) + "MeV to " + str(highEnergy) + "MeV"
+    print "\n"
+    
+    return energyWindow
+
+# returns a vector containing the normalised cumulative time residuals over many events
+def GetCDFVector(energyLow, energyHigh):
+
+    numberOfBins = int(math.fabs(minTimeResid) + math.fabs(maxTimeResid))
+    numberOfEvents = 0.0
+    cumuHist = ROOT.TH1D("cumuHist", "cumuHist", numberOfBins, minTimeResid, maxTimeResid)
+	
+    effectiveVelocity = rat.utility().GetEffectiveVelocity()
+    lightPath = rat.utility().GetLightPathCalculator()
+    pmtInfo = rat.utility().GetPMTInfo()
+		
+    for ds, run in rat.dsreader(infileName):
+        if ds.GetEVCount() == 0:
+            continue
+        ev = ds.GetEV(0)
+
+        vertPos = ev.GetFitResult("scintFitter").GetVertex(0).GetPosition()
+        if (vertPos.Mag() < fidVolLow) or (vertPos.Mag() >= fidVolHigh):
+            continue
+        vertEnergy = ev.GetFitResult("scintFitter").GetVertex(0).GetEnergy()
+        if (vertEnergy < energyLow) or (vertEnergy >= energyHigh):
+            continue
+        vertTime = ev.GetFitResult("scintFitter").GetVertex(0).GetTime()
+
+        calibratedPMTs = ev.GetCalPMTs()
+		
+        timeResidsHist = ROOT.TH1D("timeResidsHist", "timeResidsHist", numberOfBins, minTimeResid, maxTimeResid)
+        for j in range(0, calibratedPMTs.GetCount()):
+            pmtPos = pmtInfo.GetPosition(calibratedPMTs.GetPMT(j).GetID())
+            pmtTime = calibratedPMTs.GetPMT(j).GetTime()
+
+            lightPath.CalcByPosition(vertPos, pmtPos)
+            distInScint = lightPath.GetDistInScint()
+            distInAV = lightPath.GetDistInAV()
+            distInWater = lightPath.GetDistInWater()
+            flightTime = effectiveVelocity.CalcByDistance(distInScint, distInAV, distInWater)
+            timeResid = pmtTime - flightTime - vertTime
+            timeResidsHist.Fill(timeResid)
+
+        tempHist = ROOT.TH1D("tempHist", "tempHist", numberOfBins, minTimeResid, maxTimeResid)
+        for k in range(1, timeResidsHist.GetNbinsX() + 1):
+            numberOfPMTs = timeResidsHist.Integral(0, k)
+            timeValue = timeResidsHist.GetBinLowEdge(k)
+            tempHist.Fill(timeValue, (numberOfPMTs / calibratedPMTs.GetCount()))
+
+        cumuHist.Add(cumuHist, tempHist, 1, 1)
+        numberOfEvents += 1.0
+		
+        del timeResidsHist
+        del tempHist
+
+    cumuHist.Scale(1.0 / numberOfEvents)
+
+    cumuVector = []
+    for l in range(1, cumuHist.GetNbinsX() + 1):
+        cumuVector.append(cumuHist.GetBinContent(l))
+
+    return cumuVector
+
+
+	
 import optparse
 if __name__ == '__main__':
     parser = optparse.OptionParser(usage = "usage: %prog [options] target", version = "%prog 1.0")
-    parser.add_option("-i", type = "string", dest = "index", help = "RATDB Index, given by conecating the EXPLICIT -s and -p options from the Production Script, separated by '-'", default = "")
+    parser.add_option("-i", type = "string", dest = "index", help = "RATDB index to place result.", default = "")
     (options, args) = parser.parse_args()
     AnalyseRootFiles(options)
 	

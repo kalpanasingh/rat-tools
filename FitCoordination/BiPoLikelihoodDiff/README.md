@@ -7,54 +7,52 @@ To do this, edit the Decay0Backg.ratdb file as follows:
 - in the "ProbDecay" field
 - set the first number in the square brackets to 0.0
 
-
+This folder contains the files needed to coordinate the BiPo (Log-Likelihood Difference Method) classifier. 
 There are two methods for running this coordinator:
 
+-------------------------
+
+
+1) standard method, which is the same as other coordinators:
+- navigate to one directory up from this, and then do:
+
+    python fitcoordinate [options] BiPoLikelihoodDiff
+
+The following fit coordination options apply:
+- [-d]: A location in which to run the scripts, e.g. on a data disk (default = [empty])
+- [-g]: Geometry File to use ... location relative to rat/data/ (default = geo/snoplus.geo)
+- [-i]: RATDB index to place result (default = [empty])
+- [-l]: Load an extra .ratdb directory
+- [-p]: REQUIRED Isotope, either '212' or '214' (default = [empty]).  Note that the coordinator will exit automatically if this options is not specified at all.
+- [-s]: Scintillator Material to use (default = te_0p3_labppo_scintillator_bisMSB_Dec2013)
+
+This method first runs the ProduceData.py script, which generates 3 rootfiles of 5000 events: electrons at 2.527MeV, Bi-Beta decays, and Po-Alpha decays, all filling the detector.  
+Once this is done, the AnalyseData.py script automatically begins.  
+The coordination results are written to screen - there will be a complete RATDB entry that should be placed in the CLASSIFIER_BIPO_LIKELIHOODDIFF.ratdb located in rat/data, replacing any existing entry with the same index.  
 
 ------------------------------
 
 
-1) standard method (same as other coordinators)
-- navigate to one directory up from this one
-- run the command:
-
-    python fitcoordinate BiPoLikelihoodDiff
-
-  with the following possible options:
-
-    -s = Scintillator Material (default = te_0p3_labppo_scintillator_Oct2012)
-	-g = Geometry File, specified with respect to the RAT data folder: geo/[geofile] (default = geo/snoplus.geo)
-    -p = Combined Isotope-Timing, indicating which Isotope ('212' or '214') and if Pulse Shape Discrimination is present ('PSD') or Not ('noPSD') (default = "")
-	     Both parts of this option must be explicitly assigned, and separated by a '-' (e.g. 212-PSD or 214-noPSD)
-         Because this has an empty string as default, the ProduceData.py script which uses it will exit with error if this option is NOT assigned
-    -i = RATDB Index, which must take the form of conecating the -s and -p options, separated by '-' (default = "")
-         Even if the default -s option was used, it must be written explicitly for this -i option (e.g. if -s was not explictly set and -p = 212-PSD, -i = te_0p3_labppo_scintillator_Oct2012-212-PSD)
-         Because this has an empty string as default, the AnalyseData.py script which uses it will exit with error if this option is NOT assigned
-
-- this will run the Production Script (ProduceData.py) and Analysis Script (AnalyseData.py) one after the other automatically
-- NOTE: the production script runs 3 macros which generates 5000 electrons at 2.527MeV, 5000 Bi-Beta decays and 5000 Po-Alpha decays all filling the detector
-      : this takes a long time when running interactively, so it is advised to use the second method described below
-
-------------------------------
-
-
-2) short-timing method, running the Production script on a cluster system
-- write the ABSOLUTE location of this folder (as a string) in the "currentLoc" field in Utilities.py
-- write the ABSOLUTE location of the user's environment setup file (as a string) into the "envronLoc" field in Utilities.py
+2) batch method, which needs to be invoked differently from the standard method:
 - in this folder, run the command:
 
-    python ProduceData_ShortTime.py
+    python ProduceData.py [options]
 
-  with the -s, -g and -p options as described above (but not the -i)
+The options for this script are: [-g], [-l], [-p] and [-s] as specified above, as well as:
+- [-b]: Batch configuration file ... absolute location
 
-- once this has completed (~3 hours), run the command:
+There already exists a basic "batch.config" file in the "FitCoordination" folder.  However, users may specify their own configuration using that file as a template, and then provide the filename of their new configuration file here.
 
-   python AnalyseData.py
+This production script generates the same 3 rootfiles as the standard method, but runs them in parallel, cutting the required time for the whole production script.  
+The command above must be run in an interactive session, not through a batch script, since the production script itself creates and runs a batch script.
 
-  with only the -i option as described above
+- once the production script is complete, the analysis script will NOT begin automatically - it must be run by the user.  To do this, while still in this folder, run the command:
 
-------------------------------
+    python AnalyseData_Batch.py [options]
 
+The only applicable options for this script are [-b], [-i] and [-p] as described above.  
+Note that the analysis script also requires an explicit [-p] to be set - it will exit if this is not done.    
+The coordination results are written to the Batch logfile - there will be a complete RATDB entry that should be placed in the CLASSIFIER_BIPO_LIKELIHOODDIFF.ratdb located in rat/data, replacing any existing entry with the same index.  
 
-Both of these methods will output to screen a full RATDB entry that should be placed in the CLASSIFIER_BIPO_LIKELIHOODDIFF.ratdb located in rat/data, replacing any existing entry with the same index.
+-------------------------
 

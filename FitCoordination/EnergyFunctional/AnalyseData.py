@@ -1,11 +1,22 @@
 #!usr/bin/env python
 import string, Utilities
-# Author K Majumdar - 25/06/2014 <Krishanu.Majumdar@physics.ox.ac.uk>
+# Author K Majumdar - 04/09/2014 <Krishanu.Majumdar@physics.ox.ac.uk>
 
 
 # returns the parameters for the Functional Form of Energy Reconstruction in the form of a complete RATDB entry
 def AnalyseRootFiles(options):
     
+    Utilities.PlotsForEnergyCoeffs()
+    energyCoefficients = Utilities.ExtractEnergyCoeffs()
+
+    Utilities.PlotsForRadiusCoeffs(energyCoefficients)
+    radiusCoefficients = Utilities.ExtractRadiusCoeffs()
+	
+    Utilities.PlotsForZCoeffs(energyCoefficients, radiusCoefficients)
+    zCoefficients = Utilities.ExtractZCoeffs()
+	
+	##############################
+	
     diagFileName = Utilities.baseFileName + "Output.txt"
     diagFile = open(diagFileName, "w")
 
@@ -19,77 +30,52 @@ def AnalyseRootFiles(options):
     diagFile.write("valid_end: [0, 0], \n")
     diagFile.write("\n")
 
-	##############################
-
-    Utilities.PlotsForAlphas()
-    alphaParameters = Utilities.ExtractAlphaParameters()
-
-    alphaStringList = []
-    for alpha in alphaParameters:
-        alphaString = str(alpha)
-        if (alphaString.find("e") == -1):
-            alphaString += "d, "
+    diagFile.write("energyCoeffs: ["),
+    energyCoeffStrings = []
+    for coeff in energyCoefficients:
+        coeffString = str(coeff)
+        if (coeffString.find("e") == -1):
+            coeffString += "d, "
         else:
-            alphaString = alphaString.replace("e", "d") + ", "
-        alphaStringList.append(alphaString)
-
-    diagFile.write("alpha: ["),
-    for alpha in alphaStringList:
-        diagFile.write(alpha)
+            coeffString = coeffString.replace("e", "d") + ", "
+        diagFile.write(coeffString)
     diagFile.write("], \n")
 
-	##############################
+    radiusCoeffStrings = []
+    for coeff in radiusCoefficients:
+        coeffString = str(coeff)
+        if (coeffString.find("e") == -1):
+            coeffString += "d, "
+        else:
+            coeffString = coeffString.replace("e", "d") + ", "
+        radiusCoeffStrings.append(coeffString)
 
-    Utilities.PlotsForBetas(alphaParameters)
-    betaParameters = Utilities.ExtractBetaParameters()
+    diagFile.write("radiusCoeffsLow: ["),
+    for index in range(0, Utilities.numberOfRadiusCoeffs_Low):
+        diagFile.write(radiusCoeffStrings[index])
+    diagFile.write("], \n")
+    diagFile.write("midRadiusCut: " + str(Utilities.radiusFitRange_Mid[0]) + "d, \n")
+    diagFile.write("radiusCoeffsMid: ["),
+    for index in range(Utilities.numberOfRadiusCoeffs_Low, (Utilities.numberOfRadiusCoeffs_Low + Utilities.numberOfRadiusCoeffs_Mid)):
+        diagFile.write(radiusCoeffStrings[index])
+    diagFile.write("], \n")	
+    diagFile.write("highRadiusCut: " + str(Utilities.radiusFitRange_High[0]) + "d, \n")
+    diagFile.write("radiusCoeffsHigh: ["),
+    for index in range((Utilities.numberOfRadiusCoeffs_Low + Utilities.numberOfRadiusCoeffs_Mid), len(radiusCoeffStrings)):
+        diagFile.write(radiusCoeffStrings[index])
+    diagFile.write("], \n")	
+
+    diagFile.write("zCoeffs: ["),
+    zCoeffStrings = []
+    for coeff in zCoefficients:
+        coeffString = str(coeff)
+        if (coeffString.find("e") == -1):
+            coeffString += "d, "
+        else:
+            coeffString = coeffString.replace("e", "d") + ", "
+        diagFile.write(coeffString)
+    diagFile.write("], \n")
 	
-    betaStringList = []
-    for beta in betaParameters:
-        betaString = str(beta)
-        if (betaString.find("e") == -1):
-            betaString += "d, "
-        else:
-            betaString = betaString.replace("e", "d") + ", "
-        betaStringList.append(betaString)
-
-    diagFile.write("betaLowRadius: ["),
-    for index in range(0, Utilities.numberOfParameters[1]):
-         diagFile.write(betaStringList[index])
-    diagFile.write("], \n")
-
-    diagFile.write("betaMidRadiusCut: " + str(Utilities.fitRangeHigh[1]) + "d, \n")
-    diagFile.write("betaMidRadius: ["),
-    for index in range(Utilities.numberOfParameters[1], (Utilities.numberOfParameters[1] + Utilities.numberOfParameters[2])):
-         diagFile.write(betaStringList[index])
-    diagFile.write("], \n")
-    
-    diagFile.write("betaHighRadiusCut: " + str(Utilities.fitRangeHigh[2]) + "d, \n")
-    diagFile.write("betaHighRadius: ["),
-    for index in range((Utilities.numberOfParameters[1] + Utilities.numberOfParameters[2]), len(betaStringList)):
-         diagFile.write(betaStringList[index])
-    diagFile.write("], \n")
-
-	##############################
-
-    Utilities.PlotsForGammas(alphaParameters, betaParameters)
-    gammaParameters = Utilities.ExtractGammaParameters()
-
-    gammaStringList = []
-    for gamma in gammaParameters:
-        gammaString = str(gamma)
-        if (gammaString.find("e") == -1):
-            gammaString += "d, "
-        else:
-            gammaString = gammaString.replace("e", "d") + ", "
-        gammaStringList.append(gammaString)
-
-    diagFile.write("gamma: ["),
-    for index in range(0, Utilities.numberOfParameters[4]):
-         diagFile.write(gammaStringList[index])
-    diagFile.write("], \n")
-
-	##############################
-
     diagFile.write("} \n")
     diagFile.write("\n")
 

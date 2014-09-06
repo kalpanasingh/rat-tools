@@ -9,7 +9,14 @@ There are two methods for running the coordinator:
 
     python fitcoordinate [options] EnergyFunctional
 
-Normal fit coordination options apply (-g, -s, -i, -d), but do not specify a particle type using "-p" - this coordinator does not take that option.
+The following fit coordination options apply:
+- [-d]: A location in which to run the scripts, e.g. on a data disk (default = [empty])
+- [-g]: Geometry File to use ... location relative to rat/data/ (default = geo/snoplus.geo)
+- [-i]: RATDB index to place result (default = [empty])
+- [-l]: Load an extra .ratdb directory
+- [-s]: Scintillator Material to use (default = labppo_scintillator)
+
+Note that this coordinator does not take a "-p" option.
 
 This method first runs the ProduceData.py script, which generates 90 rootfiles (3 parameters to coordinate, each of which has 6 energies, each of which has 5 parts) of 1000 events each.  Each one takes roughly 1 to 1.5 hours to complete, depending mainly on the scintillator material being used in the simulation.  
 Once this is done, the AnalyseData.py script automatically begins - this takes between 1-2 hours to complete.  
@@ -19,32 +26,33 @@ The coordination results are written in the "AnalyseData_Results_Output.txt" fil
 
 -------------------------
 
-2) time-saving method, which needs to be invoked differently from the standard method:
-- copy this entire folder to a location with around 10GB of free disk-space, and write the ABSOLUTE value of this new location (as a string) to the "currentLoc" field in Utilities.py
-- write the ABSOLUTE location (as a string) of the user's environment setup file into the "envronLoc" field in Utilities.py
-- navigate into the folder copy, and run the command:
+2) batch method, which needs to be invoked differently from the standard method:
+- copy this entire folder to a location with around 5GB of free disk-space
+- navigate into this new folder, and run the command:
 
-    python ProduceData_ShortTime.py [options]
+    python ProduceData.py [options]
 
-Normal options for ONLY the production script apply (-g, -s), but do not specify a particle type using "-p" - this coordinator does not take that option.  
-This production script generates the same 90 rootfiles as the standard method, but runs them in parallel, cutting the required time for the whole production script. 
+The options for this script are: [-g], [-l] and [-s] as specified above, as well as:
+- [-b]: Batch configuration file ... absolute location
+
+There already exists a basic "batch.config" file in the "FitCoordination" folder.  However, users may specify their own configuration using that file as a template, and then provide the filename of their new configuration file here.
+
+This production script generates the same 90 rootfiles as the standard method, but runs them in parallel, cutting the required time for the whole production script.  
 The command above must be run in an interactive session, not through a batch script, since the production script itself creates and runs a set of batch scripts.
 
-** NOTE: Batch commands in "ProduceData_ShortTime.py" are currently given as "qsub ... " - this may not work on all systems.  If this is the case, please replace "qsub" with the equivalent batch command.
+- once the production script is complete (i.e. there are 90 complete rootfiles), the analysis script will NOT begin automatically - it must be run by the user.  To do this, while still in this folder, run the command:
 
-- once the production script is complete (i.e. there are 90 complete rootfiles), the analysis script will NOT begin automatically - it must be run by the user.  To do this, while still in the copied folder, run the command:
+    python AnalyseData_Batch.py [options]
 
-    python AnalyseData_ShortTime.py [options]
-
-Normal options for the analysis script ONLY apply (-i), and it takes roughly 30 minutes to complete.  
+The only applicable options for this script are [-b] and [-i] as described above, and it takes roughly 30 minutes to complete.  
 The coordination results are written in the "AnalyseData_Results_Output.txt" file - there will be a complete RATDB entry that should be placed in the FIT_ENERGY_FUNCTIONAL.ratdb located in rat/data, replacing any existing entry with the same index.  
-
-** NOTE: Batch commands in "AnalyseData_ShortTime.py" are currently given as "qsub ... " - this may not work on all systems.  If this is the case, please replace "qsub" with the equivalent batch command.
 
 -------------------------
 
 Note about Multiple Coordinations with the Same Data:  
-- The analysis is made up of two separate sections: 1) generating plots of H-Parameter vs. various quantities ("AnalyseData_Results_PlotsForXXX.root"), and 2) fitting functions to these plots ("AnalyseData_Results_ExtractXXX.root")    
-- Once the plots in 1) have been generated, they do not change unless the data itself also changes - therefore step 2) can be performed extremely quickly multiple times without needing to run over the data each time  
-- Regeneration of the plots is enabled by default, but can be disabled by commenting out lines 24, 43 and 70 of the "AnalyseData.py" script  
+- The analysis is made up of two separate sections:
+1) generating plots of H-Parameter vs. various quantities (plots are stored in the "AnalyseData_Results_PlotsForXXX.root" files)
+2) fitting functions to these plots (plots are stored in the "AnalyseData_Results_ExtractXXX.root" files)    
+- Once the plots in step 1) have been generated, they do not change unless the data itself also changes - therefore step 2) can be performed extremely quickly multiple times without needing to run over the data each time  
+- Generation of the plots is enabled by default, but can be disabled by commenting out lines 9, 12 and 15 of the "AnalyseData.py" script  
 

@@ -1,7 +1,6 @@
-#!/bin/bash
-source ${envrnLoc}
+${Preamble}
 
-cd ${currentLoc}
-${runCommand}
+source ${Ratenv}
+cd ${Cwd}
 
-echo done
+${RunCommand}
