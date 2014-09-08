@@ -42,7 +42,7 @@ The command above must be run in an interactive session, not through a batch scr
 
 - once the production script is complete (i.e. there are 90 complete rootfiles), the analysis script will NOT begin automatically - it must be run by the user.  To do this, while still in this folder, run the command:
 
-    python AnalyseData_Batch.py [options]
+    python AnalyseData.py [options]
 
 The only applicable options for this script are [-b] and [-i] as described above, and it takes roughly 30 minutes to complete.  
 The coordination results are written in the "AnalyseData_Results_Output.txt" file - there will be a complete RATDB entry that should be placed in the FIT_ENERGY_FUNCTIONAL.ratdb located in rat/data, replacing any existing entry with the same index.  

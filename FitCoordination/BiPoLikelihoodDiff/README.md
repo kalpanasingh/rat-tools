@@ -7,7 +7,7 @@ To do this, edit the Decay0Backg.ratdb file as follows:
 - in the "ProbDecay" field
 - set the first number in the square brackets to 0.0
 
-This folder contains the files needed to coordinate the BiPo (Log-Likelihood Difference Method) classifier. 
+This folder contains the files needed to coordinate the BiPo (Log-Likelihood Difference Method) classifier.  
 There are two methods for running this coordinator:
 
 -------------------------
@@ -48,7 +48,7 @@ The command above must be run in an interactive session, not through a batch scr
 
 - once the production script is complete, the analysis script will NOT begin automatically - it must be run by the user.  To do this, while still in this folder, run the command:
 
-    python AnalyseData_Batch.py [options]
+    python AnalyseData.py [options]
 
 The only applicable options for this script are [-b], [-i] and [-p] as described above.  
 Note that the analysis script also requires an explicit [-p] to be set - it will exit if this is not done.    

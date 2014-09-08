@@ -1,6 +1,6 @@
 #!usr/bin/env python
-import ROOT, rat, string, math, ProduceData
-# Author K Majumdar - 05/09/2014 <Krishanu.Majumdar@physics.ox.ac.uk>
+import ROOT, rat, string, math, ProduceData, os
+# Author K Majumdar - 08/09/2014 <Krishanu.Majumdar@physics.ox.ac.uk>
 
 infileName = ProduceData.outfileName + ".root"
 minTimeResid = -10.0
@@ -9,8 +9,38 @@ fidVolLow = 0.0
 fidVolHigh = 3500.0
 
 
-# returns the parameters for the BiPo (Cumulative Time Residuals Method) Classifier in the form of a complete RATDB entry
 def AnalyseRootFiles(options):
+
+    # Load any parameters for running the macros on a Batch system
+    batch_params = None
+    if options.batch:
+        batch_params = {}
+    execfile(options.batch, {}, batch_params)
+	
+	# Load the batch submission script template
+    inFile = open("Template_Batch.sh", "r")
+    rawText = string.Template(inFile.read())
+    inFile.close()
+		
+    # Run the analysis on a Batch system
+    if options.batch:
+        outText = rawText.substitute(Preamble = "\n".join(s for s in batch_params['preamble']),
+                                     Ratenv = batch_params['ratenv'],
+                                     Cwd = os.environ['PWD'].replace("/.", "/"),
+                                     RunCommand = "python -c 'import AnalyseData; AnalyseData.AnalysisFunction(\"" + options.index + "\")'")
+        outFile = open("AnalyseData.sh", "w")
+        outFile.write(outText)
+        outFile.close()
+		
+        os.system(batch_params["submit"] + " AnalyseData.sh")
+		
+    # Else run the macro locally on an interactive machine				
+    else:
+        os.system("python -c 'import AnalyseData; AnalyseData.AnalysisFunction(\"" + options.index + "\")'")
+		
+
+# returns the parameters for the BiPo (Cumulative Time Residuals Method) Classifier in the form of a complete RATDB entry
+def AnalysisFunction(index):
     
     energyWindow = GetEnergyWindow()
     cumulTimeResids = GetCDFVector(energyWindow[0], energyWindow[1])
@@ -22,7 +52,7 @@ def AnalyseRootFiles(options):
     print "\n"
     print "{"
     print "name: \"CLASSIFIER_BIPO_CUMULTIMERESID\","
-    print "index: \"" + options.index + "\","
+    print "index: \"" + index + "\","
     print "valid_begin: [0, 0],"
     print "valid_end: [0, 0],"
     print "\n",
@@ -128,6 +158,7 @@ def GetCDFVector(energyLow, energyHigh):
 import optparse
 if __name__ == '__main__':
     parser = optparse.OptionParser(usage = "usage: %prog [options] target", version = "%prog 1.0")
+    parser.add_option("-b", type = "string", dest = "batch", help = "Run the macros in Batch mode")
     parser.add_option("-i", type = "string", dest = "index", help = "RATDB index to place result.", default = "")
     (options, args) = parser.parse_args()
     AnalyseRootFiles(options)

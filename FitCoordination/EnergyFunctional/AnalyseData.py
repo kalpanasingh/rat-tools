@@ -1,10 +1,40 @@
 #!usr/bin/env python
-import string, Utilities
-# Author K Majumdar - 04/09/2014 <Krishanu.Majumdar@physics.ox.ac.uk>
+import string, Utilities, os
+# Author K Majumdar - 08/09/2014 <Krishanu.Majumdar@physics.ox.ac.uk>
 
+
+def AnalyseRootFiles(options):
+
+    # Load any parameters for running the macros on a Batch system
+    batch_params = None
+    if options.batch:
+        batch_params = {}
+    execfile(options.batch, {}, batch_params)
+	
+	# Load the batch submission script template
+    inFile = open("Template_Submit.sh", "r")
+    rawText = string.Template(inFile.read())
+    inFile.close()
+		
+    # Run the analysis on a Batch system
+    if options.batch:
+        outText = rawText.substitute(Preamble = "\n".join(s for s in batch_params['preamble']),
+                                     Ratenv = batch_params['ratenv'],
+                                     Cwd = os.environ['PWD'].replace("/.", "/"),
+                                     RunCommand = "python -c 'import AnalyseData; AnalyseData.AnalysisFunction(\"" + options.index + "\")'")
+        outFile = open("AnalyseData.sh", "w")
+        outFile.write(outText)
+        outFile.close()
+		
+        os.system(batch_params["submit"] + " AnalyseData.sh")
+		
+    # Else run the macro locally on an interactive machine				
+    else:
+        os.system("python -c 'import AnalyseData; AnalyseData.AnalysisFunction(\"" + options.index + "\")'")
+		
 
 # returns the parameters for the Functional Form of Energy Reconstruction in the form of a complete RATDB entry
-def AnalyseRootFiles(options):
+def AnalysisFunction(index):
     
     Utilities.PlotsForEnergyCoeffs()
     energyCoefficients = Utilities.ExtractEnergyCoeffs()
@@ -25,7 +55,7 @@ def AnalyseRootFiles(options):
     diagFile.write("\n \n")
     diagFile.write("{ \n")
     diagFile.write("name: \"FIT_ENERGY_FUNCTIONAL\", \n")
-    diagFile.write("index: \"" + options.index + "\", \n")
+    diagFile.write("index: \"" + index + "\", \n")
     diagFile.write("valid_begin: [0, 0], \n")
     diagFile.write("valid_end: [0, 0], \n")
     diagFile.write("\n")
@@ -51,18 +81,18 @@ def AnalyseRootFiles(options):
         radiusCoeffStrings.append(coeffString)
 
     diagFile.write("radiusCoeffsLow: ["),
-    for index in range(0, Utilities.numberOfRadiusCoeffs_Low):
-        diagFile.write(radiusCoeffStrings[index])
+    for coeff in range(0, Utilities.numberOfRadiusCoeffs_Low):
+        diagFile.write(radiusCoeffStrings[coeff])
     diagFile.write("], \n")
     diagFile.write("midRadiusCut: " + str(Utilities.radiusFitRange_Mid[0]) + "d, \n")
     diagFile.write("radiusCoeffsMid: ["),
-    for index in range(Utilities.numberOfRadiusCoeffs_Low, (Utilities.numberOfRadiusCoeffs_Low + Utilities.numberOfRadiusCoeffs_Mid)):
-        diagFile.write(radiusCoeffStrings[index])
+    for coeff in range(Utilities.numberOfRadiusCoeffs_Low, (Utilities.numberOfRadiusCoeffs_Low + Utilities.numberOfRadiusCoeffs_Mid)):
+        diagFile.write(radiusCoeffStrings[coeff])
     diagFile.write("], \n")	
     diagFile.write("highRadiusCut: " + str(Utilities.radiusFitRange_High[0]) + "d, \n")
     diagFile.write("radiusCoeffsHigh: ["),
-    for index in range((Utilities.numberOfRadiusCoeffs_Low + Utilities.numberOfRadiusCoeffs_Mid), len(radiusCoeffStrings)):
-        diagFile.write(radiusCoeffStrings[index])
+    for coeff in range((Utilities.numberOfRadiusCoeffs_Low + Utilities.numberOfRadiusCoeffs_Mid), len(radiusCoeffStrings)):
+        diagFile.write(radiusCoeffStrings[coeff])
     diagFile.write("], \n")	
 
     diagFile.write("zCoeffs: ["),
@@ -86,6 +116,7 @@ def AnalyseRootFiles(options):
 import optparse
 if __name__ == '__main__':
     parser = optparse.OptionParser(usage = "usage: %prog [options] target", version = "%prog 1.0")
+    parser.add_option("-b", type = "string", dest = "batch", help = "Run the macros in Batch mode")
     parser.add_option("-i", type = "string", dest = "index", help = "RATDB index to place result.", default = "")
     (options, args) = parser.parse_args()
     AnalyseRootFiles(options)

@@ -1,6 +1,6 @@
 #!usr/bin/env python
-import ROOT, rat, string, math
-# Author K Majumdar - 05/09/2014 <Krishanu.Majumdar@physics.ox.ac.uk>
+import ROOT, rat, string, math, os
+# Author K Majumdar - 08/09/2014 <Krishanu.Majumdar@physics.ox.ac.uk>
 
 minTimeResid = -250.0
 maxTimeResid = 350.0
@@ -8,17 +8,47 @@ fidVolLow = 0.0
 fidVolHigh = 3500.0
 
 
-# returns the parameters for the BiPo (Log-Likelihood Difference Method) Classifier in the form of a complete RATDB entry
 def AnalyseRootFiles(options):
 
-    if (options.isotope == ""):
+    # Load any parameters for running the macros on a Batch system
+    batch_params = None
+    if options.batch:
+        batch_params = {}
+    execfile(options.batch, {}, batch_params)
+	
+	# Load the batch submission script template
+    inFile = open("Template_Batch.sh", "r")
+    rawText = string.Template(inFile.read())
+    inFile.close()
+		
+    # Run the analysis on a Batch system
+    if options.batch:
+        outText = rawText.substitute(Preamble = "\n".join(s for s in batch_params['preamble']),
+                                     Ratenv = batch_params['ratenv'],
+                                     Cwd = os.environ['PWD'].replace("/.", "/"),
+                                     RunCommand = "python -c 'import AnalyseData; AnalyseData.AnalysisFunction(\"" + options.index + "\", \"" + options.isotope + "\")'")
+        outFile = open("AnalyseData.sh", "w")
+        outFile.write(outText)
+        outFile.close()
+		
+        os.system(batch_params["submit"] + " AnalyseData.sh")
+		
+    # Else run the macro locally on an interactive machine				
+    else:
+        os.system("python -c 'import AnalyseData; AnalyseData.AnalysisFunction(\"" + options.index + "\", \"" + options.isotope + "\")'")
+		
+
+# returns the parameters for the BiPo (Log-Likelihood Difference Method) Classifier in the form of a complete RATDB entry
+def AnalysisFunction(index, isotope):
+
+    if (isotope == ""):
         print "An Isotope option (-p) must be specified for this Analysis Script: either '212' or '214' ... exiting"
         sys.exit()
 
     timeResidsTe = GetTimeResidsVector("130Te_NDBD.root")
-    timeResidsBi = GetTimeResidsVector(options.isotope + "Bi_Beta.root")
-    timeResidsPo = GetTimeResidsVector(options.isotope + "Po_Alpha.root")
-    meanAlphaNhits = GetMeanNhits(options.isotope + "Po_Alpha.root")
+    timeResidsBi = GetTimeResidsVector(isotope + "Bi_Beta.root")
+    timeResidsPo = GetTimeResidsVector(isotope + "Po_Alpha.root")
+    meanAlphaNhits = GetMeanNhits(isotope + "Po_Alpha.root")
 	
     ##############################
 	
@@ -27,7 +57,7 @@ def AnalyseRootFiles(options):
     print "\n"
     print "{"
     print "name: \"CLASSIFIER_BIPO_LIKELIHOODDIFF\","
-    print "index: \"" + options.index + "\","
+    print "index: \"" + index + "\","
     print "valid_begin: [0, 0],"
     print "valid_end: [0, 0],"
     print "\n",
@@ -128,6 +158,7 @@ def GetMeanNhits(infileName):
 import optparse
 if __name__ == '__main__':
     parser = optparse.OptionParser(usage = "usage: %prog [options] target", version = "%prog 1.0")
+    parser.add_option("-b", type = "string", dest = "batch", help = "Run the macros in Batch mode")
     parser.add_option("-i", type = "string", dest = "index", help = "RATDB index to place result.", default = "")
     parser.add_option("-p", type = "string", dest = "isotope", help = "REQUIRED Isotope ('212' or '214')", default = "")
     (options, args) = parser.parse_args()
