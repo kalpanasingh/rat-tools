@@ -35,7 +35,7 @@ def AnalyseRootFiles(options):
 		
 
 # returns the tail fraction value, optimised for minimum overlap between alpha and electron tail/total PMTs ratio distributions
-def AnalysisFunction(options):
+def AnalysisFunction(index):
 	
     minlap = 10**9
     minFraction = 1000.0
