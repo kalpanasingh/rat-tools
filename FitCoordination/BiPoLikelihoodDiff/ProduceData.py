@@ -26,7 +26,7 @@ def ProduceRunMacros(options):
     inFile1.close()
 	
     # Load the batch submission script template
-    inFile2 = open("Template_Submit.sh", "r")
+    inFile2 = open("Template_Batch.sh", "r")
     rawText2 = string.Template(inFile2.read())
     inFile2.close()
 	
