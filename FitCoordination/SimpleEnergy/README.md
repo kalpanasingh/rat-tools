@@ -24,8 +24,7 @@ The coordination results are written to screen - there will be a complete RATDB 
 -------------------------
 
 2) batch method, which needs to be invoked differently from the standard method:
-- copy this entire folder to a location with around 5GB of free disk-space
-- navigate into this new folder, and run the command:
+- in this folder, run the command:
 
     python ProduceData.py [options]
 
