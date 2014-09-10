@@ -31,7 +31,7 @@ def ProduceRunMacros(options):
                                    GeoFile = options.geoFile,
                                    ScintMaterial = options.scintMaterial,
                                    Particle = options.particle)
-    outFile1 = open("events_E=1MeV.mac", "w" )
+    outFile1 = open("events_E=1MeV.mac", "w")
     outFile1.write(outText1)
     outFile1.close()
 	
