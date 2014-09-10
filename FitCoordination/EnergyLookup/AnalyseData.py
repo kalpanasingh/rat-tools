@@ -59,19 +59,19 @@ def AnalysisFunction(index, material):
     print "energies: [0.0d,",
     for energy in energies:
         print str(energy) + "d,",
-    print "]"
+    print "],"
 
     print "radii: [",
     for position in Utilities.Positions:
         print str(position) + "d,",
-    print "]"
+    print "],"
 
     print "nhit_energy_radius: [",
     for singlePositionNhitsTable in nHitsTable:
         print "0.0d, ",
         for nHits in singlePositionNhitsTable:
             print nHits + "d, ",
-    print "]"
+    print "],"
     
     print "}"
     print "\n"
