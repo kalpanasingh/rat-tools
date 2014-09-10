@@ -53,7 +53,7 @@ def AnalysisFunction(index):
     print "Please place the text below into the database file: FIT_SIMPLE_ENERGY.ratdb located in rat/data, replacing any existing entry with the same index."
     print "\n"
     print "{"
-    print "{\name: \"FIT_SIMPLE_ENERGY\","
+    print "name: \"FIT_SIMPLE_ENERGY\","
     print "index: \"" + index + "\","
     print "valid_begin: [0, 0],"
     print "valid_end: [0, 0],"
