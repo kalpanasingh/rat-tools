@@ -34,10 +34,7 @@ The coordination results are written to screen - there will be a complete RATDB 
 The options for this script are: [-g], [-l], [-p] and [-s] as specified above, as well as:
 - [-b]: Batch configuration file ... absolute location
 
-There already exists a basic "batch.config" file in the "FitCoordination" folder.  However, users may specify their own configuration using that file as a template, and then provide the filename of their new configuration file here.
-
-This production script generates the rootfile as the standard method, but runs them on a Batch system, cutting the required time for the simulation.  
-The command above must be run in an interactive session, not through a batch script, since the production script itself creates and runs a set of batch scripts.
+There already exists a basic "batch.config" file in the "FitCoordination" folder.  However, users may specify their own configuration using that file as a template, and then provide the filename of their new configuration file here.  
 
 - once the production script is complete, the analysis script will NOT begin automatically - it must be run by the user.  To do this, while still in this folder, run the command:
 

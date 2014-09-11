@@ -33,19 +33,14 @@ The coordination results are written to the textfile whose name is given on scre
 The options for this script are: [-g], [-l], [-p] and [-s] as specified above, as well as:
 - [-b]: Batch configuration file ... absolute location
 
-There already exists a basic "batch.config" file in the "FitCoordination" folder.  However, users may specify their own configuration using that file as a template, and then provide the filename of their new configuration file here.
-
-This production script generates the same 5 rootfiles as the standard method, but runs them in parallel, cutting the required time for the whole production script.  
-The command above must be run in an interactive session, not through a batch script, since the production script itself creates and runs a batch script.
+There already exists a basic "batch.config" file in the "FitCoordination" folder.  However, users may specify their own configuration using that file as a template, and then provide the filename of their new configuration file here.  
 
 - once the production script is complete, the analysis script will NOT begin automatically - it must be run by the user.  To do this, while still in this folder, run the command:
 
     python AnalyseData.py [options]
 
-The only applicable options for this script are [-b], [-p] and [-s] as described above.  
-Note that the analysis script also requires an explicit [-p] to be set - it will exit if this is not done.    
+The only applicable options for this script are [-b], [-p] and [-s] as described above.  Note that the analysis script also requires an explicit [-p] to be set - it will exit if this is not done.  
 The coordination results are written to the textfile whose name is given in the Batch logfile - there will be a complete RATDB entry that should be placed in the ALPHA_BETA_CLASSIFIER.ratdb located in rat/data, replacing any existing entry with the same index.  
 
 -------------------------
-
 
