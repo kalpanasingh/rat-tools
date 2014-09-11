@@ -80,7 +80,7 @@ def AnalysisFunction(index, material):
 import optparse
 if __name__ == '__main__':
     parser = optparse.OptionParser(usage = "usage: %prog [options] target", version = "%prog 1.0")
-    parser.add_option("-b", type = "string", dest = "batch", help = "Run the macros in Batch mode")
+    parser.add_option("-b", type = "string", dest = "batch", help = "Run the analysis in Batch mode")
     parser.add_option("-i", type = "string", dest = "index", help = "RATDB index to place result.", default = "")
     parser.add_option("-s", type = "string", dest = "scintMaterial", help = "Scintillator Material to use, default = labppo_scintillator", default = "labppo_scintillator")
     (options, args) = parser.parse_args()
