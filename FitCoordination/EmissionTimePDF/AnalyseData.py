@@ -90,7 +90,7 @@ def PlotPDF():
 	
 import optparse
 if __name__ == '__main__':
-    parser = optparse.OptionParser( usage = "usage: %prog [options] target", version="%prog 1.0" )
+    parser = optparse.OptionParser(usage = "usage: %prog [options] target", version = "%prog 1.0")
     parser.add_option("-i", type = "string", dest = "index", help = "RATDB index to place result.", default = "")
     (options, args) = parser.parse_args()
     AnalyseRootFiles(options)
