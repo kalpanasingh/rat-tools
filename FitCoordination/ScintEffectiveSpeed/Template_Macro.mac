@@ -1,15 +1,12 @@
-# Parameters
+
 /rat/physics_list/OmitMuonicProcesses true
 /rat/physics_list/OmitHadronicProcesses true
-
 ${ExtraDB}
 /rat/db/set MC thin_factor 3.5
-
 /rat/db/set DETECTOR geo_file "${GeoFile}"
-/rat/db/set GEO[scint] material "${ScintMaterial}"
+/rat/db/set GEO[inner_av] material "${ScintMaterial}"
 /rat/db/set EFFECTIVE_VELOCITY[${ScintMaterial}] ScintVg ${Speed}d
-
-## use for labppo_scintillator or unknown material
+# Use the line below if you intend to use an unknown material, and comment out the line above this comment
 #/rat/db/set EFFECTIVE_VELOCITY ScintVg ${Speed}d
 
 /run/initialize
@@ -17,32 +14,27 @@ ${ExtraDB}
 /rat/proc frontend
 /rat/proc trigger
 /rat/proc eventbuilder
+/rat/proc calibratePMT
 /rat/proc count
 /rat/procset update 10
-/rat/proc calibratePMT
+
 /rat/proc fitter
 /rat/procset method "quad"
 /rat/proc fitter
 /rat/procset method "positionTimeLikelihood"
 /rat/procset optimiser "powell"
-#/rat/procset pdf "et1d-labppo_scintillator"
 /rat/procset pdf "et1d"
 /rat/procset seed "quad"
 /rat/procset selector "null"
-/rat/procset name "positionTimeLikelihood"
-/rat/proc prune 
-/rat/procset prune "mc.hit,mc.pmt.photon"
-/rat/proc outroot
-/rat/procset file "scintFit_${Speed}.root"
+/rat/procset name "positionTimeFit"
 
-# Generator
+/rat/proc outroot
+/rat/procset file "${FileName}"
 
 /generator/add combo gun:fill
 /generator/vtx/set ${Particle} 0 0 0 3.0
-
 /generator/pos/set 0.0 0.0 0.0
 /generator/rate/set 1
 
 /rat/run/start 500
-
 exit
