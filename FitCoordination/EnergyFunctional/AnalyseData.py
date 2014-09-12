@@ -12,7 +12,7 @@ def AnalyseRootFiles(options):
     execfile(options.batch, {}, batch_params)
 	
 	# Load the batch submission script template
-    inFile = open("Template_Submit.sh", "r")
+    inFile = open("Template_Batch.sh", "r")
     rawText = string.Template(inFile.read())
     inFile.close()
 		
@@ -116,7 +116,7 @@ def AnalysisFunction(index):
 import optparse
 if __name__ == '__main__':
     parser = optparse.OptionParser(usage = "usage: %prog [options] target", version = "%prog 1.0")
-    parser.add_option("-b", type = "string", dest = "batch", help = "Run the macros in Batch mode")
+    parser.add_option("-b", type = "string", dest = "batch", help = "Run the analysis in Batch mode")
     parser.add_option("-i", type = "string", dest = "index", help = "RATDB index to place result.", default = "")
     (options, args) = parser.parse_args()
     AnalyseRootFiles(options)
