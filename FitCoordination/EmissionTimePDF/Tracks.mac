@@ -5,6 +5,8 @@ ${ExtraDB}
 /rat/db/set DETECTOR geo_file "${GeoFile}"
 /rat/db/set GEO[scint] material "${ScintMaterial}"
 
+/rat/tracking/store full
+
 /run/initialize
 
 # BEGIN EVENT LOOP
@@ -15,8 +17,6 @@ ${ExtraDB}
 
 /rat/proc count
 /rat/procset update 10
-
-/tracking/storeTrajectory 1
 
 /rat/proc outroot
 /rat/procset file "Tracks.root"
