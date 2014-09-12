@@ -10,6 +10,7 @@
 
 #include <RAT/DU/DSReader.hh>
 #include <RAT/DU/Utility.hh>
+#include <RAT/DU/PMTInfo.hh>
 #include <RAT/DU/LightPathCalculator.hh>
 #include <RAT/DU/GroupVelocity.hh>
 #include <RAT/DU/EffectiveVelocity.hh>
@@ -210,7 +211,7 @@ void GetWaterPDF(string material)
 void FillWaterTimeResidualsPlot(string infile, TH1D* histogram)
 {
   RAT::DU::DSReader dsReader(infile);
-  RAT::DU::LightPathCalculator lightPath = RAT::DU::Utility::Get()->GetLightPath();
+  RAT::DU::LightPathCalculator lightPath = RAT::DU::Utility::Get()->GetLightPathCalculator();
   const RAT::DU::GroupVelocity& groupVelocity = RAT::DU::Utility::Get()->GetGroupVelocity();
   const RAT::DU::PMTInfo& pmtInfo = RAT::DU::Utility::Get()->GetPMTInfo();
 

@@ -14,6 +14,8 @@ ${ExtraDB}
 /rat/proc calibratePMT
 /rat/proc count
 /rat/procset update 10
+/rat/proc prune
+/rat/procset prune "mc.hits,mc.pmts.photons"
 
 /rat/proc outroot
 /rat/procset file "${FileName}"

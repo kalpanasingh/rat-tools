@@ -11,10 +11,10 @@ There are two methods for running the coordinator:
 
 The following fit coordination options apply:
 - [-d]: A location in which to run the scripts, e.g. on a data disk (default = [empty])
-- [-g]: Geometry File to use ... location relative to rat/data/ (default = geo/snoplus.geo)
+- [-g]: Geometry File to use ... location relative to rat/data/ (default = geo/snoplus_water.geo)
 - [-l]: Load an extra .ratdb directory
 - [-p]: Particle type to use ... see generator documentation for available particles (default = 'e-')
-- [-s]: Scintillator Material to use (default = labppo_scintillator)
+- [-s]: Scintillator Material to use (default = lightwater_sno)
 
 This method first runs the ProduceData.py script, which generates 1 rootfile containing 5000 10MeV events at the AV centre.  
 Once this is done, the AnalyseData.py script automatically begins.  

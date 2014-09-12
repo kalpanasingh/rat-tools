@@ -10,6 +10,7 @@
 
 #include <RAT/DU/DSReader.hh>
 #include <RAT/DU/Utility.hh>
+#include <RAT/DU/PMTInfo.hh>
 #include <RAT/DS/MC.hh>
 #include <RAT/DS/MCParticle.hh>
 #include <RAT/DS/EV.hh>

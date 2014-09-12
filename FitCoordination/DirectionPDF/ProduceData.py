@@ -61,10 +61,10 @@ import optparse
 if __name__ == '__main__':
     parser = optparse.OptionParser(usage = "usage: %prog [options] target", version = "%prog 1.0")
     parser.add_option("-b", type = "string", dest = "batch", help = "Run the macro in Batch mode")
-    parser.add_option("-g", type = "string", dest = "geoFile", help = "Geometry File to use - location relative to rat/data/, default = geo/snoplus.geo", default = "geo/snoplus.geo")
+    parser.add_option("-g", type = "string", dest = "geoFile", help = "Geometry File to use - location relative to rat/data/, default = geo/snoplus_water.geo", default = "geo/snoplus_water.geo")
     parser.add_option("-l", type = "string", dest = "loadDB", help = "Load an extra .ratdb directory")
     parser.add_option("-p", type = "string", dest = "particle", help = "Particle type to use (see generator documentation for available particles), default = 'e-'", default = "e-")
-    parser.add_option("-s", type = "string", dest = "scintMaterial", help = "Scintillator Material to use, default = labppo_scintillator", default = "labppo_scintillator")
+    parser.add_option("-s", type = "string", dest = "scintMaterial", help = "Scintillator Material to use, default = lightwater_sno", default = "lightwater_sno")
     (options, args) = parser.parse_args()
     ProduceRunMacros(options)
 
