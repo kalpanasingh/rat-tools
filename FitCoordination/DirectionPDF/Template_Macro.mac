@@ -1,26 +1,22 @@
-# Parameters
+
 /rat/physics_list/OmitMuonicProcesses true
 /rat/physics_list/OmitHadronicProcesses true
-
 ${ExtraDB}
 /rat/db/set MC thin_factor 3.5
 /rat/db/set DETECTOR geo_file "${GeoFile}"
-/rat/db/set GEO[scint] material "${ScintMaterial}"
+/rat/db/set GEO[inner_av] material "${ScintMaterial}"
 
 /run/initialize
 
 /rat/proc frontend
 /rat/proc trigger
 /rat/proc eventbuilder
+/rat/proc calibratePMT
 /rat/proc count
 /rat/procset update 10
-/rat/proc calibratePMT
-/rat/proc prune 
-/rat/procset prune "mc.hit,mc.pmt.photon"
-/rat/proc outroot
-/rat/procset file "data_for_pdf_1.root"
 
-# Generator
+/rat/proc outroot
+/rat/procset file "${FileName}"
 
 /generator/add combo gun:point
 /generator/vtx/set ${Particle} 0 0 0 10.0
@@ -28,5 +24,4 @@ ${ExtraDB}
 /generator/rate/set 1
 
 /rat/run/start 5000
-
 exit
