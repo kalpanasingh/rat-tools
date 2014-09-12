@@ -10,7 +10,7 @@ def AnalyseRootFiles(options):
     batch_params = None
     if options.batch:
         batch_params = {}
-    execfile(options.batch, {}, batch_params)
+        execfile(options.batch, {}, batch_params)
 	
     # Load the batch submission script template
     inFile = open("Template_Batch.sh", "r")

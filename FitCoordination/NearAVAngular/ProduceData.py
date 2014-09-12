@@ -12,7 +12,7 @@ def ProduceRunMacros(options):
     batch_params = None
     if options.batch:
         batch_params = {}
-    execfile(options.batch, {}, batch_params)
+        execfile(options.batch, {}, batch_params)
 
     # Load any extra .ratdb files
     extraDB = ""
