@@ -4,7 +4,7 @@ ${OmitHadrons}
 ${ExtraDB}
 /rat/db/set MC thin_factor 3.5
 /rat/db/set DETECTOR geo_file "${GeoFile}"
-/rat/db/set GEO[scint] material "${ScintMaterial}"
+/rat/db/set GEO[inner_av] material "${ScintMaterial}"
 
 /run/initialize
 

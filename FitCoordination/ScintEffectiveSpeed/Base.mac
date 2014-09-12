@@ -6,11 +6,11 @@ ${ExtraDB}
 /rat/db/set MC thin_factor 3.5
 
 /rat/db/set DETECTOR geo_file "${GeoFile}"
-/rat/db/set GEO[scint] material "${ScintMaterial}"
-/rat/db/set EFFECTIVE_VELOCITY[${ScintMaterial}] ScintVg ${Speed}d
+/rat/db/set GEO[inner_av] material "${ScintMaterial}"
+/rat/db/set EFFECTIVE_VELOCITY[${ScintMaterial}] inner_av_velocity ${Speed}
 
 ## use for labppo_scintillator or unknown material
-#/rat/db/set EFFECTIVE_VELOCITY ScintVg ${Speed}d
+#/rat/db/set EFFECTIVE_VELOCITY inner_av_velocity ${Speed}
 
 /run/initialize
 
