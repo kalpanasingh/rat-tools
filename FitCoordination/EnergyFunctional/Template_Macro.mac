@@ -15,6 +15,18 @@ ${ExtraDB}
 /rat/proc count
 /rat/procset update 50
 
+# This is the same position fitter that the scintFitter uses
+# Not using the full scintFitter itself to speed things up, even a little, since the scintFitter does other things that are not relevant here
+/rat/proc fitter
+/rat/procset method "quad"
+/rat/proc fitter
+/rat/procset method "positionTimeLikelihood"
+/rat/procset optimiser "powell"
+/rat/procset selector "null"
+/rat/procset pdf "et1d"
+/rat/procset seed "quad"
+/rat/procset name "positionFit"
+
 /rat/proc outroot
 /rat/procset file "${FileName}"
 

@@ -145,14 +145,14 @@ def PlotsForRadiusCoeffs(energyCoefficients):
     plotFileName = baseFileName + "PlotsForRadiusCoeffs.root"
     plotFile = ROOT.TFile(plotFileName, "UPDATE")
 
-    histRadiusVsHFactor = ROOT.TH2D("histRadiusVsHFactor", "H-Factor vs. Radius over All Energies; Radius, mm; H-Factor", 155, 0.0, 6200.0, 150, 0.0, 1.5)
+    histRadiusVsHFactor = ROOT.TH2D("histRadiusVsHFactor", "H-Factor vs. Radius over All Energies; Radius, mm; H-Factor", 155, 0.0, 6200.0, 200, 0.0, 2.0)
     histRadiusVsHFactor.SetStats(0)
     ROOT.gStyle.SetPalette(1)
     allHFactors, allRadii = [], []
 
     for energy in energies:
         histNameSingleEnergyRVsHFactor = "histSingleEnergyRVsHFactor_" + str(int(energy * 1000)) + "keV"
-        histSingleEnergyRVsHFactor = ROOT.TH2D(histNameSingleEnergyRVsHFactor, "H-Factor vs. Radius for a Single Energy; Radius, mm; H-Factor", 155, 0.0, 6200.0, 150, 0.0, 1.5)
+        histSingleEnergyRVsHFactor = ROOT.TH2D(histNameSingleEnergyRVsHFactor, "H-Factor vs. Radius for a Single Energy; Radius, mm; H-Factor", 155, 0.0, 6200.0, 200, 0.0, 2.0)
         histSingleEnergyRVsHFactor.SetStats(0)
         ROOT.gStyle.SetPalette(1)
         singleEnergyHFactors, singleEnergyRadii = [], []
@@ -165,7 +165,13 @@ def PlotsForRadiusCoeffs(energyCoefficients):
                     continue
                 calibratedPMTs = ds.GetEV(0).GetCalPMTs()
 
-                radius = ds.GetMC().GetMCParticle(0).GetPosition().Mag()
+                if not (ds.GetEV(0).FitResultExists("positionFit")):
+                    continue
+                if not (ds.GetEV(0).GetFitResult("positionFit").GetVertex(0).ContainsPosition()):
+                    continue
+                if not (ds.GetEV(0).GetFitResult("positionFit").GetVertex(0).ValidPosition()):
+                    continue
+                radius = ds.GetEV(0).GetFitResult("positionFit").GetVertex(0).GetPosition().Mag()
                 
                 Segmentor = rat.utility().GetSegmentor()
                 Segmentor.SetNumberOfDivisions(numberOfSegments)
@@ -201,7 +207,7 @@ def PlotsForRadiusCoeffs(energyCoefficients):
         graphSingleEnergyRVsHFactor.GetXaxis().SetTitle("Radius, mm")
         graphSingleEnergyRVsHFactor.GetXaxis().SetRangeUser(0.0, 6200.0)
         graphSingleEnergyRVsHFactor.GetYaxis().SetTitle("H-Factor")
-        graphSingleEnergyRVsHFactor.GetYaxis().SetRangeUser(0.0, 1.5)
+        graphSingleEnergyRVsHFactor.GetYaxis().SetRangeUser(0.0, 2.0)
         graphNameSingleEnergyRVsHFactor = "graphSingleEnergyRVsHFactor_" + str(int(energy * 1000)) + "keV"
         graphSingleEnergyRVsHFactor.SetName(graphNameSingleEnergyRVsHFactor)
 
@@ -220,7 +226,7 @@ def PlotsForRadiusCoeffs(energyCoefficients):
     graphRadiusVsHFactor.GetXaxis().SetTitle("Radius, mm")
     graphRadiusVsHFactor.GetXaxis().SetRangeUser(0.0, 6200.0)
     graphRadiusVsHFactor.GetYaxis().SetTitle("H-Factor")
-    graphRadiusVsHFactor.GetYaxis().SetRangeUser(0.0, 1.5)
+    graphRadiusVsHFactor.GetYaxis().SetRangeUser(0.0, 2.0)
     graphRadiusVsHFactor.SetName("graphRadiusVsHFactor")
 
     plotFile.cd()
@@ -311,8 +317,14 @@ def PlotsForZCoeffs(energyCoefficients, radiusCoefficients):
                     continue
                 calibratedPMTs = ds.GetEV(0).GetCalPMTs()
 
-                radius = ds.GetMC().GetMCParticle(0).GetPosition().Mag()
-                zCoord = ds.GetMC().GetMCParticle(0).GetPosition().Z()
+                if not (ds.GetEV(0).FitResultExists("positionFit")):
+                    continue
+                if not (ds.GetEV(0).GetFitResult("positionFit").GetVertex(0).ContainsPosition()):
+                    continue
+                if not (ds.GetEV(0).GetFitResult("positionFit").GetVertex(0).ValidPosition()):
+                    continue
+                radius = ds.GetEV(0).GetFitResult("positionFit").GetVertex(0).GetPosition().Mag()
+                zCoord = ds.GetEV(0).GetFitResult("positionFit").GetVertex(0).GetPosition().Z()
 				
                 Segmentor = rat.utility().GetSegmentor()
                 Segmentor.SetNumberOfDivisions(numberOfSegments)
