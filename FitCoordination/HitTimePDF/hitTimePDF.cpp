@@ -7,9 +7,9 @@
 #include <TNtuple.h>
 #include <TH1D.h>
 
-#include <RAT/DSReader.hh>
-
-#include <RAT/DU/LightPath.hh>
+#include <RAT/DU/DSReader.hh>
+#include <RAT/DU/Utility.hh>
+#include <RAT/DU/LightPathCalculator.hh>
 #include <RAT/DU/GroupVelocity.hh>
 #include <RAT/DU/EffectiveVelocity.hh>
 
@@ -19,16 +19,16 @@
 #include <RAT/DS/EV.hh>
 #include <RAT/DS/PMT.hh>
 #include <RAT/DS/PMTSet.hh>
-#include <RAT/DS/Root.hh>
+#include <RAT/DS/Entry.hh>
 #include <RAT/DS/Run.hh>
 #include <RAT/DB.hh>
 
 void FillScintTimeResiduals( string pFile, TH1D* hist, double velocity=-999 )
 {
 
-  RAT::DSReader dsReader(pFile);
+  RAT::DU::DSReader dsReader(pFile);
 
-  RAT::DU::LightPath lightPath = RAT::DU::Utility::Get()->GetLightPath();
+  RAT::DU::LightPathCalculator lightPath = RAT::DU::Utility::Get()->GetLightPathCalculator();
   const RAT::DU::EffectiveVelocity& effectiveVelocity = RAT::DU::Utility::Get()->GetEffectiveVelocity();
   const RAT::DU::PMTInfo& pmtInfo = RAT::DU::Utility::Get()->GetPMTInfo();
 
@@ -46,7 +46,7 @@ void FillScintTimeResiduals( string pFile, TH1D* hist, double velocity=-999 )
   for( size_t iEntry = 0; iEntry < dsReader.GetEntryCount(); iEntry++ ) 
     {
 
-      const RAT::DS::Root& rDS = dsReader.GetEntry( iEntry );
+      const RAT::DS::Entry& rDS = dsReader.GetEntry( iEntry );
 
       int evc = rds.GetEVCount();
       if(evc==0) continue;
@@ -69,11 +69,13 @@ void FillScintTimeResiduals( string pFile, TH1D* hist, double velocity=-999 )
 
           const RAT::DS::PMTCal& pCal = calPMTs.GetPMT(loop);
           double pmtTime = pCal.GetTime();
-          TVector3 pmtPos = pmtInfo.GetPos(pCal.GetID());
+          TVector3 pmtPos = pmtInfo.GetPosition(pCal.GetID());
 
           // Get straight line travel time to PMT
-          double distInScint, distInAV, distInWater;
           lightPath.CalcByPosition( mcPosition, pmtPos, distInScint, distInAV, distInWater);
+          double distInScint = lightPath.GetDistInScint();
+          double distInAV = lightPath.GetDistInAV();
+          double distInWater = lightPath.GetDistInWater();
           const double straightTime = effectiveVelocity.CalcByDistance( distInScint, distInAV, distInWater);
                     
           // Finally, get time residual
@@ -88,9 +90,9 @@ void FillScintTimeResiduals( string pFile, TH1D* hist, double velocity=-999 )
 void FillH2OTimeResiduals( string pFile, TH1D* hist )
 {
 
-  RAT::DSReader dsReader(pFile);
+  RAT::DU::DSReader dsReader(pFile);
 
-  RAT::DU::LightPath lightPath = RAT::DU::Utility::Get()->GetLightPath();
+  RAT::DU::LightPathCalculator lightPath = RAT::DU::Utility::Get()->GetLightPathCalculator();
   const RAT::DU::GroupVelocity& groupVelocity = RAT::DU::Utility::Get()->GetGroupVelocity();
   const RAT::DU::PMTInfo& pmtInfo = RAT::DU::Utility::Get()->GetPMTInfo();
 
@@ -99,7 +101,7 @@ void FillH2OTimeResiduals( string pFile, TH1D* hist )
   for( size_t iEntry = 0; iEntry < dsReader.GetEntryCount(); iEntry++ ) 
     {
 
-      const RAT::DS::Root& rDS = dsReader.GetEntry( iEntry );
+      const RAT::DS::Entry& rDS = dsReader.GetEntry( iEntry );
 
       int evc = rds.GetEVCount();
       if(evc==0) continue;
@@ -122,7 +124,7 @@ void FillH2OTimeResiduals( string pFile, TH1D* hist )
 
           const RAT::DS::PMTCal& pCal = calPMTs.GetPMT(loop);
           double pmtTime = pCal.GetTime();
-          TVector3 pmtPos = pmtInfo.GetPos(pCal.GetID());
+          TVector3 pmtPos = pmtInfo.GetPosition(pCal.GetID());
 
           // Get straight line travel time to PMT
           double distInScint, distInAV, distInWater;

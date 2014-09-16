@@ -15,7 +15,7 @@ def ProduceRatioHistogram(filename, t1, t2):
 
         dsUtility = RAT.DU.Utility.Get()
         effectiveVelocity = dsUtility.GetEffectiveVelocity()
-        lightPath = dsUtility.GetLightPath()
+        lightPath = dsUtility.GetLightPathCalculator()
         pmtInfo = dsUtility.GetPMTInfo()
 
 	for ds, run in rat.dsreader(filename):
@@ -30,15 +30,15 @@ def ProduceRatioHistogram(filename, t1, t2):
 		vertTime = ev.GetFitResult("scintFitter").GetVertex(0).GetTime()
 		peak = total = 0.0
 		
-		for j in range(0, ev.GetCalPMTs.GetCount()):
-			pmt = ev.GetCalPMTs.GetPMT(j)
+		for j in range(0, ev.GetCalPMTs().GetCount()):
+			pmt = ev.GetCalPMTs().GetPMT(j)
 			pmtPos = pmtInfo.GetPosition(pmt.GetID())
 			pmtTime = pmt.GetTime()
 
-			distInScint = ROOT.Double()
-			distInAV = ROOT.Double()
-			distInWater = ROOT.Double()
-			lightPath.CalcByPosition(vertPos, pmtPos, distInScint, distInAV, distInWater)
+			lightPath.CalcByPosition(vertPos, pmtPos)
+                        distInScint = lightPath.GetDistInScint()
+                        distInAv = lightPath.GetDistInAV()
+                        distInWater = lightPath.GetDistInWater()
 			flightTime = effectiveVelocity.CalcByDistance(distInScint, distInAV, distInWater)
 			timeresid = pmtTime - flightTime - vertTime
 			

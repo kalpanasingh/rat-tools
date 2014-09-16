@@ -16,9 +16,9 @@
 #include <TVirtualPad.h>
 using namespace ROOT;
 
-#include <RAT/DSReader.hh>
+#include <RAT/DU/DSReader.hh>
 
-#include <RAT/DS/Root.hh>
+#include <RAT/DS/Entry.hh>
 
 #include <string>
 #include <sstream>

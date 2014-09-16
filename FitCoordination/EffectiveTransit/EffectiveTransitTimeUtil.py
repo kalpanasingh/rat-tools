@@ -12,7 +12,7 @@ def UpdateData( filename, fullPlot ):
 
     dsUtility = RAT.DU.Utility.Get()
     groupVelocity = dsUtility.GetGroupVelocity()
-    lightPath = dsUtility.GetLightPath()
+    lightPath = dsUtility.GetLightPathCalculator()
     pmtInfo = dsUtility.GetPMTInfo()
     
     eventNum = 0
@@ -33,10 +33,10 @@ def UpdateData( filename, fullPlot ):
                 continue
             for iPE in range( 0, mcPMT.GetMCPECount() ):
                 mcPE = mcPMT.GetMCPE( iPE )
-                scintDist = ROOT.Double()
-                avDist = ROOT.Double()
-                waterDist = ROOT.Double()
-                lightPath.CalcByPosition( startPos, endPos, scintDist, avDist, waterDist )
+                lightPath.CalcByPosition( startPos, endPos )
+                distInScint = lightPath.GetDistInScint()
+                distInAv = lightPath.GetDistInAV()
+                distInWater = lightPath.GetDistInWater()
                 transitTime = groupVelocity.CalcByDistance( 0.0, avDist, waterDist )
                 fullPlot.Fill( scintDist, mcPE.GetCreationTime() - startTime - transitTime )
     return
@@ -76,7 +76,7 @@ def UpdateProfile( filename, profile ):
     
     dsUtility = RAT.DU.Utility.Get()
     groupVelocity = dsUtility.GetGroupVelocity()
-    lightPath = dsUtility.GetLightPath()
+    lightPath = dsUtility.GetLightPathCalculator()
     pmtInfo = dsUtility.GetPMTInfo()
 
     eventNum = 0
@@ -96,10 +96,10 @@ def UpdateProfile( filename, profile ):
                 continue
             for iPE in range( 0, mcPMT.GetMCPECount() ):
                 mcPE = mcPMT.GetMCPE( iPE )
-                scintDist = ROOT.Double()
-                avDist = ROOT.Double()
-                waterDist = ROOT.Double()
-                lightPath.CalcByPosition( startPos, endPos, scintDist, avDist, waterDist )
+                lightPath.CalcByPosition( startPos, endPos )
+                distInScint = lightPath.GetDistInScint()
+                distInAv = lightPath.GetDistInAV()
+                distInWater = lightPath.GetDistInWater()
                 transitTime = groupVelocity.CalcByDistance( 0.0, avDist, waterDist )
                 profile.Fill( scintDist, scintDist / ( mcPE.GetCreationTime() - startTime - transitTime ) )
                 

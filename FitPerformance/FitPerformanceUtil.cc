@@ -11,10 +11,6 @@
 
 using namespace ROOT;
 
-#include <RAT/DS/Root.hh>
-#include <RAT/DS/PMTProperties.hh>
-#include <RAT/DS/EV.hh>
-
 #include <string>
 #include <sstream>
 #include <iostream>

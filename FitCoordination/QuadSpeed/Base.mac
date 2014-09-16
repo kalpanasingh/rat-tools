@@ -6,15 +6,15 @@ ${ExtraDB}
 /rat/db/set MC thin_factor 3.5
 
 /rat/db/set DETECTOR geo_file "${GeoFile}"
-/rat/db/set GEO[scint] material "${ScintMaterial}"
+/rat/db/set GEO[inner_av] material "${ScintMaterial}"
 
 ## TODO: update following lines such that fitcoordinator
 ##       decides whether to use default or specified material
 ##       Requires access to RATDB from python
-/rat/db/set QUAD_FIT[${ScintMaterial}] transit_time ${Speed}
+/rat/db/set FIT_QUAD[${ScintMaterial}] light_speed ${Speed}
 
 ## for pure labppo or unknown material
-#/rat/db/set QUAD_FIT transit_time ${Speed}
+#/rat/db/set FIT_QUAD light_speed ${Speed}
 
 /run/initialize
 
