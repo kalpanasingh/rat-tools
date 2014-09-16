@@ -15,7 +15,7 @@ The waterFitter contains the following components that require coordinating and 
 - PDF for direction reconstruction: "positionDirectionPDF" - coordinate using **"DirectionPDF"**
 - **ScintEffectiveSpeed** (see below)
 
-The following components of the waterFitter use the effective speed of light in scintillator as part of their coordination, and so should be coordinated only **after "ScintEffectiveSpeed"**:  
+The following components of the waterFitter use the effective speed of light in scintillator as part of their coordination, and so should be coordinated only **after** "ScintEffectiveSpeed":  
 
 - ITR classifier - coordinate using **[no coordinator as of writing]**
 - QPDT classifier - coordinate using **[no coordinator as of writing]**
