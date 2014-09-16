@@ -15,8 +15,6 @@ ${ExtraDB}
 /rat/proc count
 /rat/procset update 100
 
-/rat/proc scintFitter
-
 /rat/proc outroot
 /rat/procset file "${FileName}"
 
