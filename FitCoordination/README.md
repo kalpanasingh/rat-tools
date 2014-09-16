@@ -24,25 +24,25 @@ The following components of the waterFitter use the effective speed of light in 
 
 ## ScintFitter
 
-The scintFitter contains the following components that require coordinating and require no prerequisites:  
+The scintFitter contains the following components that require coordinating and require no pre-requisites:  
 
 - seed method for position reconstruction: "quad" - coordinate using **"QuadSpeed"**
 - PDF for position reconstruction: "et1d" - coordinate using **"HitTimePDF"**
 - main method for nearAV position reconstruction: "nearAVAngular" - coordinate using **"NearAVAngular"**
 - **ScintEffectiveSpeed** (see below)
 
-The following components of the scintFitter use the effective speed of light in scintillator as part of their coordination, and so should be coordinated only **after "ScintEffectiveSpeed"**:  
+The following components of the scintFitter use the effective speed of light in scintillator as part of their coordination, and so should be coordinated only **after** "ScintEffectiveSpeed":  
 
 - ITR classifier - coordinate using **[no coordinator as of writing]**
 - QPDT classifier - coordinate using **[no coordinator as of writing]**
 
-The following components of the scintFitter use the effective speed of light in scintillator as well as reconstructed position and time as part of their coordination, and so should be coordinated only **after "ScintEffectiveSpeed", "QuadSpeed" and "HitTimePDF"**:  
+The following components of the scintFitter use the effective speed of light in scintillator as well as reconstructed position and time as part of their coordination, and so should be coordinated only **after** "ScintEffectiveSpeed", "QuadSpeed" and "HitTimePDF":  
 
 - energy method: "energyFunctional" - coordinate using **"EnergyFunctional"**
 - BiPo classifier (Log-Likelihood Difference method, both 212 and 214) - coordinate using **BiPoLikelihoodDiff**
 - AlphaBeta classifier (both 212 and 214) - coordinate using **AlphaBetaLikelihood**
 
-The following components of the scintFitter use the effective speed of light in scintillator as well as reconstructed position, time and energy as part of their coordination, and so should be coordinated only **after "ScintEffectiveSpeed", "QuadSpeed", "HitTimePDF" and "EnergyFunctional"**:  
+The following components of the scintFitter use the effective speed of light in scintillator as well as reconstructed position, time and energy as part of their coordination, and so should be coordinated only **after** "ScintEffectiveSpeed", "QuadSpeed", "HitTimePDF" and "EnergyFunctional":  
 
 - BiPo classifier (Cumulative Time Residuals method) - coordinate using **BiPoCumulTimeResid**
 
@@ -54,7 +54,7 @@ The following coordinators partner fitter/classifier components that are not par
 
 - **SimpleEnergy**
 - **AlphaUnseeded**
-- **AlphaSeeded** - this requires a reconstructed position, so should be run after the "QuadSpeed", "HitTimePDF" and "ScintEffectiveSpeed" coordinators
+- **AlphaSeeded** - this requires the effective speed of light in scintillator as well as reconstructed position and time, and so should be coordinated only **after** "ScintEffectiveSpeed", "QuadSpeed" and "HitTimePDF"
 
 The following coordinators are now redundant, but have been kept as alternate methods:  
 
