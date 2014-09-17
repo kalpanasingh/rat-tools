@@ -26,17 +26,9 @@ ${ExtraDB}
 /rat/procset pdf "et1d"
 /rat/procset seed "quad"
 /rat/procset selector "null"
-<<<<<<< HEAD:FitCoordination/ScintEffectiveSpeed/Template_Macro.mac
 /rat/procset name "positionTimeFit"
 /rat/proc prune
 /rat/procset prune "mc.hits,mc.pmts.photons"
-=======
-/rat/procset name "positionTimeLikelihood"
-/rat/proc prune 
-/rat/procset prune "mc.hits,mc.pmts.photons"
-/rat/proc outroot
-/rat/procset file "scintFit_${Speed}.root"
->>>>>>> snoplus/master:FitCoordination/ScintEffectiveSpeed/Base.mac
 
 /rat/proc outroot
 /rat/procset file "${FileName}"
