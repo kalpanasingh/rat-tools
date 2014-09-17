@@ -9,8 +9,11 @@
 
 #include <FitPerformanceUtil.hh>
 
-#include <RAT/DS/Root.hh>
-#include <RAT/DS/PMTProperties.hh>
+#include <RAT/DU/DSReader.hh>
+#include <RAT/DU/Utility.hh>
+#include <RAT/DU/PMTInfo.hh>
+
+#include <RAT/DS/Entry.hh>
 #include <RAT/DS/EV.hh>
 #include <RAT/DS/FitResult.hh>
 #include <RAT/DS/FitVertex.hh>

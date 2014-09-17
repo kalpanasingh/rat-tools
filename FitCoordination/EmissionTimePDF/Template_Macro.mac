@@ -5,6 +5,7 @@ ${ExtraDB}
 /rat/db/set MC thin_factor 3.5
 /rat/db/set DETECTOR geo_file "${GeoFile}"
 /rat/db/set GEO[inner_av] material "${ScintMaterial}"
+
 /rat/tracking/store full
 
 /run/initialize
@@ -14,7 +15,7 @@ ${ExtraDB}
 /rat/proc eventbuilder
 /rat/proc calibratePMT
 /rat/proc count
-/rat/procset update 5
+/rat/procset update 10
 
 /rat/proc outroot
 /rat/procset file "events_WithTracks.root"
