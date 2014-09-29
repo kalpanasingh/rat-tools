@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os, sys, string, ROOT, rat
+import ProduceData as ProductionScript
 # Author I T Coulter - 06/02/2013 <icoulter@hep.upenn.edu>
 #        K Majumdar - 12/09/2014 - Cleanup of Coordinators for new DS
 
@@ -16,13 +17,18 @@ def AnalyseRootFiles(options):
     inFile = open("Template_Batch.sh", "r")
     rawText = string.Template(inFile.read())
     inFile.close()
+	
+    numberOfRuns = ProductionScript.totalEvents / ProductionScript.eventsPerFile
+    remainder = ProductionScript.totalEvents % ProductionScript.eventsPerFile
+    if remainder != 0:
+        numberOfRuns += 1
 
     # Run the analysis on a Batch system
     if options.batch:
         outText = rawText.substitute(Preamble = "\n".join(s for s in batch_params['preamble']),
                                      Ratenv = batch_params['ratenv'],
                                      Cwd = os.environ['PWD'].replace("/.", "/"),
-                                     RunCommand = "python -c 'import AnalyseData; AnalyseData.AnalysisFunction(\"" + options.scintMaterial + "\", " + options.velocity + ")'")
+                                     RunCommand = "python -c 'import AnalyseData; AnalyseData.AnalysisFunction(\"" + options.scintMaterial + "\", " + numberOfRuns + ", " + options.velocity + ")'")
         outFile = open("AnalyseData.sh", "w")
         outFile.write(outText)
         outFile.close()
@@ -31,7 +37,7 @@ def AnalyseRootFiles(options):
 		
     # Else run the macro locally on an interactive machine				
     else:
-        os.system("python -c 'import AnalyseData; AnalyseData.AnalysisFunction(\"" + options.scintMaterial + "\", " + options.velocity + ")'")
+        os.system("python -c 'import AnalyseData; AnalyseData.AnalysisFunction(\"" + options.scintMaterial + "\", " + numberOfRuns + ", " + options.velocity + ")'")
 
 
 # returns the Hit Times PDF in the chosen material

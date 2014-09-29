@@ -20,10 +20,10 @@ ${ExtraDB}
 /rat/proc outroot
 /rat/procset file "${FileName}"
 
-/generator/add combo gun:fill
+/generator/add combo gun:fillshell
 /generator/vtx/set e- 0 0 0 ${Energy}
-/generator/pos/set 0.0 0.0 0.0
+/generator/pos/set 0 0 0 0 0 0 0 5500
 /generator/rate/set 1
 
-/rat/run/start 5000
+/rat/run/start
 exit

@@ -3,6 +3,9 @@ import os, sys, string
 # Author I T Coulter - 06/02/2013 <icoulter@hep.upenn.edu>
 #        K Majumdar - 11/09/2014 - Cleanup of Coordinators for new DS
 
+totalEvents = 100000
+eventsPerFile = 2000
+
 
 def ProduceRunMacros(options):
 
@@ -32,39 +35,44 @@ def ProduceRunMacros(options):
     if options.scintMaterial == "lightwater_sno":
         energy = "8.0"
 		
-    # Split the simulation into 20 parts of 5000 events each, since lots of events (100,000) are needed to get a good PDF
-    for p in range(1, 21):
+    outfileName = options.scintMaterial + "_DataForPDF"
 
-        outfileName = options.scintMaterial + "_DataForPDF_part" + str(p)
+    outText1 = rawText1.substitute(ExtraDB = extraDB,
+                                   GeoFile = options.geoFile,
+				                   ScintMaterial = options.scintMaterial,
+                                   FileName = outfileName + ".root",
+				                   Energy = energy)
+    outFile1 = open(outfileName + ".mac", "w")
+    outFile1.write(outText1)
+    outFile1.close()
 		
-        outText1 = rawText1.substitute(ExtraDB = extraDB,
-                                       GeoFile = options.geoFile,
-				                       ScintMaterial = options.scintMaterial,
-                                       FileName = outfileName + ".root",
-				                       Energy = energy)
-        outFile1 = open(outfileName + ".mac", "w")
-        outFile1.write(outText1)
-        outFile1.close()
+    # Run the macros on a Batch system
+    if options.batch:
+
+        numberOfRuns = totalEvents / eventsPerFile
+        remainder = totalEvents % eventsPerFile
+        if remainder != 0:
+            numberOfRuns += 1
 		
-        print "Running " + outfileName + ".mac and generating " + outfileName + ".root"
-        
-        # Run the macro on a Batch system
-        if options.batch:
+        for runNumber in range(numberOfRuns):
+
+            partName = outfileName + "_part" + str(runNumber + 1)
+			
             outText2 = rawText2.substitute(Preamble = "\n".join(s for s in batch_params['preamble']),
                                            Ratenv = batch_params['ratenv'],
                                            Cwd = os.environ['PWD'].replace("/.", "/"),
-                                           RunCommand = "rat " + outfileName + ".mac")
-            outFile2 = open(outfileName + ".sh", "w")
+                                           RunCommand = "rat -o " + partName + " -N " + eventsPerFile + " " + outfileName + ".mac")
+            outFile2 = open(partName + ".sh", "w")
             outFile2.write(outText2)
             outFile2.close()
 			
-            os.system( batch_params["submit"] + " " + outfileName +".sh" )        
+            os.system( batch_params["submit"] + " " + partName +".sh" )        
 				
-        # Else run the macro locally on an interactive machine				
-        else:
-            os.system("rat " + outfileName + ".mac")
-            # delete the macro when running is complete
-            os.remove(outfileName + ".mac")
+    # Else run the macro locally on an interactive machine				
+    else:
+        os.system("rat -o " + partName + " -N " + eventsPerFile + " " + outfileName + ".mac")
+        # delete the macro when running is complete
+        os.remove(outfileName + ".mac")
 	
 	
 import optparse	

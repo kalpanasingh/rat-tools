@@ -25,15 +25,15 @@ void FillScintTimeResidualsPlot(string, TH1D*, double);
 void FillWaterTimeResidualsPlot(string, TH1D*);
 
 
-void GetScintPDF(string material, double velocity)
+void GetScintPDF(string material, int numberOfRuns, double velocity)
 {
   TH1D* histogram1 = new TH1D("histogram1", "", 400, -99.5, 300.5);
   TH1D* histogram2 = new TH1D("histogram2", "", 400, -99.5, 300.5);
 
-  for(int i = 1; i < 21; i++)
+  for(int i = 0; i < numberOfRuns; i++)
   {
     stringstream fileNameStream;
-    fileNameStream << material + "_DataForPDF_part" << i << ".root";
+    fileNameStream << material + "_DataForPDF_part" << (i + 1) << ".root";
     FillScintTimeResidualsPlot(fileNameStream.str(), histogram1, velocity);
   }
 
@@ -136,9 +136,7 @@ void FillScintTimeResidualsPlot(string infile, TH1D* histogram, double velocity 
       const double transitTime = effectiveVelocity.CalcByDistance(distInScint, distInAV, distInWater);
 
       double timeResid = pmtTime - transitTime - eventTime;
-
-      // Fill histogram with those within a fiducial volume of 5.5m
-      if (mcPosition.Mag() < 5500) hist->Fill(timeResid);
+      hist->Fill(timeResid);
     }
   }
 }

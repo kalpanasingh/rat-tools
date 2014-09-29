@@ -5,9 +5,9 @@ ${ExtraDB}
 /rat/db/set MC thin_factor 3.5
 /rat/db/set DETECTOR geo_file "${GeoFile}"
 /rat/db/set GEO[inner_av] material "${ScintMaterial}"
-/rat/db/set FIT_QUAD[${ScintMaterial}] light_speed ${Speed}
+/rat/db/set QUAD_FIT[${ScintMaterial}] light_speed ${Speed}
 # Use the line below if you intend to use an unknown material, and comment out the line above this comment
-#/rat/db/set FIT_QUAD light_speed ${Speed}
+#/rat/db/set QUAD_FIT light_speed ${Speed}
 
 /run/initialize
 
@@ -24,7 +24,7 @@ ${ExtraDB}
 /rat/procset file "${FileName}"
 
 /generator/add combo gun:fill
-/generator/vtx/set ${Particle} 0 0 0 3.0
+/generator/vtx/set ${Particle} 0 0 0 ${Energy}
 /generator/pos/set 0.0 0.0 0.0
 /generator/rate/set 1
 

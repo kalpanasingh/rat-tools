@@ -27,6 +27,11 @@ def ProduceRunMacros(options):
     rawText2 = string.Template(inFile2.read())
     inFile2.close()
 
+    # Choose particle energy based on the material
+    energy = "3.0"
+    if options.scintMaterial == "lightwater_sno":
+        energy = "8.0"
+		
     # Generate the specific macro for each speed given in the Utilities table
     for speed in Utilities.Speeds:
 
@@ -37,7 +42,8 @@ def ProduceRunMacros(options):
                                        ScintMaterial = options.scintMaterial,
                                        Speed = speed,
                                        FileName = outfileName + ".root",
-                                       Particle = options.particle)
+                                       Particle = options.particle
+                                       Energy = energy)
         outFile1 = open(outfileName + ".mac", "w")
         outFile1.write(outText1)
         outFile1.close()
