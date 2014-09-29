@@ -6,7 +6,7 @@ import ROOT, rat
 
 Positions = [0.0, 2000.0, 4000.0, 5000.0, 5500.0, 5750.0, 5950.0, 6100.0, 6500.0, 7000.0, 7500.0, 8000.0]
 ScintEnergies = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 8.0, 10.0]    # Use these energies if using a scintillator-filled detector
-WaterEnergies = [3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0]    # Use these energies if using a water-filled detector
+WaterEnergies = [2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0]    # Use these energies if using a water-filled detector
 
 
 # Return a list of Nhits per Position/Energy combination, arranged as the following for "p" positions and "e" energies:
