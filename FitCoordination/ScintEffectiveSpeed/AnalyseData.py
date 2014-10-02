@@ -54,10 +54,10 @@ def AnalysisFunction(index):
     print "valid_begin: [0, 0],"
     print "valid_end: [0, 0],"
     print "\n",
-    print "inner_av_velocity: " + str(linearFit.GetParameter(0)) + "d,"
+    print "inner_av_velocity: " + str(linearFit.GetParameter(0)) + ","
     print "av_velocity: 1.93109181500140664d+02,"
     print "water_velocity: 2.17554021555098529d+02,"
-    print "offset: 0.6d,"
+    print "offset: 0.6,"
     print "}"
     print "\n"
 

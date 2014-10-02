@@ -62,9 +62,9 @@ def AnalysisFunction(index):
     print "valid_begin: [0, 0],"
     print "valid_end: [0, 0],"
     print "\n",
-    print "tail_fraction: " + str(minFraction) + "d,"
-    print "pmt_Min: " + str(Utilities.minTimeResid) + "d,"
-    print "pmt_Max: " + str(Utilities.maxTimeResid) + "d,"
+    print "tail_fraction: " + str(minFraction) + ","
+    print "pmt_Min: " + str(Utilities.minTimeResid) + ","
+    print "pmt_Max: " + str(Utilities.maxTimeResid) + ","
     print "}"
     print "\n"
 

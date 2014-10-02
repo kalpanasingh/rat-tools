@@ -50,7 +50,7 @@ void GetScintPDF(string material, int numberOfRuns, double velocity)
   std::cout << "time: [";
   for(int j = 0; j < 401; j++)
   {
-    std::cout << histogram1->GetBinCenter(j) << "d, ";
+    std::cout << histogram1->GetBinCenter(j) << ", ";
   }
   std::cout << "]," << std::endl;
   
@@ -61,18 +61,18 @@ void GetScintPDF(string material, int numberOfRuns, double velocity)
     if (j < 94)
 	{
       histogram2->Fill(histogram1->GetBinCenter(j), histogram1->GetBinContent(10));
-      std::cout << histogram1->GetBinContent(10) << "d, ";
+      std::cout << histogram1->GetBinContent(10) << ", ";
     }
     // Approximate late hits to a flat distribution
     else if (j > 320)
 	{
       histogram2->Fill(histogram1->GetBinCenter(j), histogram1->GetBinContent(320));
-      std::cout << histogram1->GetBinContent(320) << "d, ";
+      std::cout << histogram1->GetBinContent(320) << ", ";
     }
     else
 	{
       histogram2->Fill(histogram1->GetBinCenter(j), histogram1->GetBinContent(j));
-      std::cout << histogram1->GetBinContent(j) << "d, ";
+      std::cout << histogram1->GetBinContent(j) << ", ";
     }
   }
   std::cout << "]," << endl;  

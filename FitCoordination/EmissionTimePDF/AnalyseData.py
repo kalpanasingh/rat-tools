@@ -22,13 +22,13 @@ def AnalyseRootFiles(options):
     print "\n",
     print "time: [",
     for bin in range(startBin, endBin):
-        print str(pdf.GetXaxis().GetBinCenter(bin)) + "d, ",
+        print str(pdf.GetXaxis().GetBinCenter(bin)) + ", ",
     print "],"
     print "probability: [",
     for bin in range(startBin, endBin):
         tempString = str(pdf.GetBinContent(bin))
         if (tempString.find("e") == -1):
-            tempString += "d, "
+            tempString += ", "
         else:
             tempString = tempString.replace("e", "d") + ", "
         print tempString,

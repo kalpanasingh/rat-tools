@@ -173,43 +173,43 @@ void Coordination(string index)
 	stream0 << "fit_gradients: [";
 	for (unsigned int a = 0; a < gradients.size(); a++)
 	{
-		stream0 << gradients[a] << "d, ";
+		stream0 << gradients[a] << ", ";
 	}
 	stream0 << "]," << std::endl;
 	stream0 << "fit_intercepts: [";
 	for (unsigned int a = 0; a < intercepts.size(); a++)
 	{
-		stream0 << intercepts[a] << "d, ";
+		stream0 << intercepts[a] << ", ";
 	}
 	stream0 << "]," << std::endl;
 	stream0 << "ratio_cuts: [";
 	for (int a = 0; a < numberOfWindows; a++)
 	{
 		double ratioCut = ((nhitsWindows[a] * ratioGradient) + ratioIntercept);
-		stream0 << ratioCut << "d, ";
+		stream0 << ratioCut << ", ";
 	}
 	stream0 << "]," << std::endl;
 	stream0 << "ratio_bins: [";
 	for (int a = 0; a < numberOfBins; a++)
 	{
-		stream0 << ratioBins[a] << "d, ";
+		stream0 << ratioBins[a] << ", ";
 	}
 	stream0 << "]," << std::endl;
-	stream0 << "bin_width: " << binWidth << "d," << std::endl;
+	stream0 << "bin_width: " << binWidth << "," << std::endl;
 	stream0 << "negative_errors: [";
 	for (unsigned int a = 0; a < negativeErrors.size(); a++)
 	{
-		stream0 << negativeErrors[a] << "d, ";
+		stream0 << negativeErrors[a] << ", ";
 	}
 	stream0 << "]," << std::endl;
 	stream0 << "positive_errors: [";
 	for (unsigned int a = 0; a < positiveErrors.size(); a++)
 	{
-		stream0 << positiveErrors[a] << "d, ";
+		stream0 << positiveErrors[a] << ", ";
 	}
 	stream0 << "]," << std::endl;
-	stream0 << "theta_error: 0.1745d," << std::endl;
-	stream0 << "phi_error: 0.1745d," << std::endl;
+	stream0 << "theta_error: 0.1745," << std::endl;
+	stream0 << "phi_error: 0.1745," << std::endl;
 	stream0 << "}" << std::endl;
 	stream0 << std::endl;
 }

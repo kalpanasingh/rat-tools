@@ -56,11 +56,11 @@ def AnalysisFunction(index):
     print "valid_begin: [0, 0],"
     print "valid_end: [0, 0],"
     print "\n",
-    print "min_time_residual: " + str(minTimeResid) + "d,"
-    print "max_time_residual: " + str(maxTimeResid) + "d,"
+    print "min_time_residual: " + str(minTimeResid) + ","
+    print "max_time_residual: " + str(maxTimeResid) + ","
     print "cumulative_fractions: [",
     for probability in cumulTimeResids:
-        print str(probability) + "d, ",
+        print str(probability) + ", ",
     print "],"
     print "}"
     print "\n"

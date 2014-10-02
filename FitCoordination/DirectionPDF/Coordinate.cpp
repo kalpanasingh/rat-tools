@@ -65,17 +65,17 @@ void GetDirectionPDF(string material)
   std::cout << "valid_begin : [0, 0]," << std::endl;
   std::cout << "valid_end : [0, 0]," << std::endl;
 	
-  std::cout << "angle: [0.0d, ";
+  std::cout << "angle: [0.0, ";
   for(int j = 1; j < 101; j++)
   {
-    std::cout << histogram.GetBinCenter(j) << "d, ";
+    std::cout << histogram.GetBinCenter(j) << ", ";
   }
-  std::cout << "3.14d,]," << std::endl;
+  std::cout << "3.14,]," << std::endl;
   
   std::cout << "probability: [";
   for(int j = 0; j < 102; j++)
   {
-    std::cout << histogram.GetBinContent(j) << "d, ";
+    std::cout << histogram.GetBinContent(j) << ", ";
   }
   std::cout << "]," << std::endl;
   

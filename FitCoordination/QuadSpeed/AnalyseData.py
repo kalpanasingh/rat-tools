@@ -54,7 +54,7 @@ def AnalysisFunction(index):
     print "valid_begin: [0, 0],"
     print "valid_end: [0, 0],"
     print "\n",
-    print "light_speed: " + str(linearFit.GetParameter(0)) + "d,    // Effective overall speed of light"
+    print "light_speed: " + str(linearFit.GetParameter(0)) + ",    // Effective overall speed of light"
     print "num_points: 4000,    // Maximum number of points generated in quad-cloud"
     print "limit_points: 20000, // Number of attempts to generate points"
     print "calc_time: 1,        // Whether to calculate the reconstructed time"

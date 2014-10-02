@@ -56,21 +56,21 @@ def AnalysisFunction(index, material):
     print "valid_end: [0, 0],"
     print "\n",
     
-    print "energies: [0.0d,",
+    print "energies: [0.0,",
     for energy in energies:
-        print str(energy) + "d,",
+        print str(energy) + ",",
     print "],"
 
     print "radii: [",
     for position in Utilities.Positions:
-        print str(position) + "d,",
+        print str(position) + ",",
     print "],"
 
     print "nhit_energy_radius: [",
     for singlePositionNhitsTable in nHitsTable:
-        print "0.0d, ",
+        print "0.0, ",
         for nHits in singlePositionNhitsTable:
-            print nHits + "d, ",
+            print nHits + ", ",
     print "],"
     
     print "}"

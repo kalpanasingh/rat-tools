@@ -61,21 +61,21 @@ def AnalysisFunction(index, isotope):
     print "valid_begin: [0, 0],"
     print "valid_end: [0, 0],"
     print "\n",
-    print "min_time_residual: " + str(minTimeResid) + "d,"
-    print "max_time_residual: " + str(maxTimeResid) + "d,"
+    print "min_time_residual: " + str(minTimeResid) + ","
+    print "max_time_residual: " + str(maxTimeResid) + ","
     print "pdf_Te: [",
     for probability in timeResidsTe:
-        print str(probability) + "d, ",
+        print str(probability) + ", ",
     print "],"
     print "pdf_Bi: [",
     for probability in timeResidsBi:
-        print str(probability) + "d, ",
+        print str(probability) + ", ",
     print "],"
     print "pdf_Po: [",
     for probability in timeResidsPo:
-        print str(probability) + "d, ",
+        print str(probability) + ", ",
     print "],"
-    print "meanPoAlphaNhits: " + str(meanAlphaNhits) + "d,"
+    print "meanPoAlphaNhits: " + str(meanAlphaNhits) + ","
     print "}"
     print "\n"
 

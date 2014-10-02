@@ -54,8 +54,8 @@ def AnalysisFunction(index):
     print "valid_begin: [0, 0],"
     print "valid_end: [0, 0],"
     print "\n",
-    print "Intercept: " + linearFit.GetParameter(0) + "d,"
-    print "Speed: " + float(1.0 / linearFit.GetParameter(1)) + "d,"
+    print "Intercept: " + linearFit.GetParameter(0) + ","
+    print "Speed: " + float(1.0 / linearFit.GetParameter(1)) + ","
     print "}"
     print "\n"
 

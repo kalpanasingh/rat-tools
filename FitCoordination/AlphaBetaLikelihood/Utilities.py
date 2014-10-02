@@ -71,14 +71,14 @@ def OutputFileChunk(pdfList, particle, material, description, f):
 	
     f.write("times: [")
     for time in range(-300, 1000):
-       f.write(str(time) + "d, ")
+       f.write(str(time) + ", ")
     f.write("],\n")
 
     for pdfIndex, pdf in enumerate(pdfList):
         f.write(str(pdfNames[pdfIndex]) + ": [")
 
         for pdfIndex, pdfValue in enumerate(pdf):
-            f.write(str(pdfValue) + "d, ")
+            f.write(str(pdfValue) + ", ")
         f.write("],\n")
 
     f.write("}\n")

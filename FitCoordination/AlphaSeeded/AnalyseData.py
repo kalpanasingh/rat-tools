@@ -65,9 +65,9 @@ def AnalysisFunction(index):
     print "valid_begin: [0, 0],"
     print "valid_end: [0, 0],"
     print "\n",
-    print "t1: " + str(mint1) + "d,"
-    print "t2: " + str(mint2) + "d,"
-    print "tmax: " + str(Utilities.maxTimeResid) + "d,"
+    print "t1: " + str(mint1) + ","
+    print "t2: " + str(mint2) + ","
+    print "tmax: " + str(Utilities.maxTimeResid) + ","
     print "}"
     print "\n"
 

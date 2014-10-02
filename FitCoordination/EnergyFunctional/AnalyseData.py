@@ -65,7 +65,7 @@ def AnalysisFunction(index):
     for coeff in energyCoefficients:
         coeffString = str(coeff)
         if (coeffString.find("e") == -1):
-            coeffString += "d, "
+            coeffString += ", "
         else:
             coeffString = coeffString.replace("e", "d") + ", "
         diagFile.write(coeffString)
@@ -75,7 +75,7 @@ def AnalysisFunction(index):
     for coeff in radiusCoefficients:
         coeffString = str(coeff)
         if (coeffString.find("e") == -1):
-            coeffString += "d, "
+            coeffString += ", "
         else:
             coeffString = coeffString.replace("e", "d") + ", "
         radiusCoeffStrings.append(coeffString)
@@ -84,12 +84,12 @@ def AnalysisFunction(index):
     for coeff in range(0, Utilities.numberOfRadiusCoeffs_Low):
         diagFile.write(radiusCoeffStrings[coeff])
     diagFile.write("], \n")
-    diagFile.write("midRadiusCut: " + str(Utilities.radiusFitRange_Mid[0]) + "d, \n")
+    diagFile.write("midRadiusCut: " + str(Utilities.radiusFitRange_Mid[0]) + ", \n")
     diagFile.write("radiusCoeffsMid: ["),
     for coeff in range(Utilities.numberOfRadiusCoeffs_Low, (Utilities.numberOfRadiusCoeffs_Low + Utilities.numberOfRadiusCoeffs_Mid)):
         diagFile.write(radiusCoeffStrings[coeff])
     diagFile.write("], \n")	
-    diagFile.write("highRadiusCut: " + str(Utilities.radiusFitRange_High[0]) + "d, \n")
+    diagFile.write("highRadiusCut: " + str(Utilities.radiusFitRange_High[0]) + ", \n")
     diagFile.write("radiusCoeffsHigh: ["),
     for coeff in range((Utilities.numberOfRadiusCoeffs_Low + Utilities.numberOfRadiusCoeffs_Mid), len(radiusCoeffStrings)):
         diagFile.write(radiusCoeffStrings[coeff])
@@ -100,7 +100,7 @@ def AnalysisFunction(index):
     for coeff in zCoefficients:
         coeffString = str(coeff)
         if (coeffString.find("e") == -1):
-            coeffString += "d, "
+            coeffString += ", "
         else:
             coeffString = coeffString.replace("e", "d") + ", "
         diagFile.write(coeffString)

@@ -58,9 +58,9 @@ def AnalysisFunction(index):
     print "valid_begin: [0, 0],"
     print "valid_end: [0, 0],"
     print "\n",
-	print "nhit_per_mev: " + originFit.GetParameter(1) + "d,"
-	print "nhit_intercept: " + nearAVFit.GetParameter(0) + "d,"
-	print "nhit_gradient: " + nearAVFit.GetParameter(1) + "d,"
+	print "nhit_per_mev: " + originFit.GetParameter(1) + ","
+	print "nhit_intercept: " + nearAVFit.GetParameter(0) + ","
+	print "nhit_gradient: " + nearAVFit.GetParameter(1) + ","
     print "}"
     print "\n"
 
