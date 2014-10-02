@@ -63,21 +63,13 @@ def AnalysisFunction(index):
     diagFile.write("energyCoeffs: ["),
     energyCoeffStrings = []
     for coeff in energyCoefficients:
-        coeffString = str(coeff)
-        if (coeffString.find("e") == -1):
-            coeffString += ", "
-        else:
-            coeffString = coeffString.replace("e", "d") + ", "
+        coeffString = str(coeff) + ", "
         diagFile.write(coeffString)
     diagFile.write("], \n")
 
     radiusCoeffStrings = []
     for coeff in radiusCoefficients:
-        coeffString = str(coeff)
-        if (coeffString.find("e") == -1):
-            coeffString += ", "
-        else:
-            coeffString = coeffString.replace("e", "d") + ", "
+        coeffString = str(coeff) + ", "
         radiusCoeffStrings.append(coeffString)
 
     diagFile.write("radiusCoeffsLow: ["),
@@ -98,11 +90,7 @@ def AnalysisFunction(index):
     diagFile.write("zCoeffs: ["),
     zCoeffStrings = []
     for coeff in zCoefficients:
-        coeffString = str(coeff)
-        if (coeffString.find("e") == -1):
-            coeffString += ", "
-        else:
-            coeffString = coeffString.replace("e", "d") + ", "
+        coeffString = str(coeff) + ", "
         diagFile.write(coeffString)
     diagFile.write("], \n")
 	

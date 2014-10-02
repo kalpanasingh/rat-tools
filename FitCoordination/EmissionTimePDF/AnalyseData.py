@@ -26,11 +26,7 @@ def AnalyseRootFiles(options):
     print "],"
     print "probability: [",
     for bin in range(startBin, endBin):
-        tempString = str(pdf.GetBinContent(bin))
-        if (tempString.find("e") == -1):
-            tempString += ", "
-        else:
-            tempString = tempString.replace("e", "d") + ", "
+        tempString = str(pdf.GetBinContent(bin)) + ", "
         print tempString,
     print "],"
 	
