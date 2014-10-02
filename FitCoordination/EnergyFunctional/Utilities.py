@@ -27,10 +27,10 @@ energyFitFunction = "[0]+([1]*x)"
 energyFitRange = [0.0, energies[-1]]
 numberOfRadiusCoeffs_Low = 3
 radiusFitFunction_Low = "[0]+([1]*x)+([2]*x*x)"
-radiusFitRange_Low = [0.0, 2000.0]
+radiusFitRange_Low = [0.0, 3000.0]
 numberOfRadiusCoeffs_Mid = 4
 radiusFitFunction_Mid = "[0]+([1]*x)+([2]*x*x)+([3]*x*x*x)"
-radiusFitRange_Mid = [2000.0, 5300.0]
+radiusFitRange_Mid = [3000.0, 5300.0]
 numberOfRadiusCoeffs_High = 3
 radiusFitFunction_High = "[0]+([1]*x)+([2]*x*x)"
 radiusFitRange_High = [5300.0, 6005.3]
@@ -145,14 +145,14 @@ def PlotsForRadiusCoeffs(energyCoefficients):
     plotFileName = baseFileName + "PlotsForRadiusCoeffs.root"
     plotFile = ROOT.TFile(plotFileName, "UPDATE")
 
-    histRadiusVsHFactor = ROOT.TH2D("histRadiusVsHFactor", "H-Factor vs. Radius over All Energies; Radius, mm; H-Factor", 155, 0.0, 6200.0, 200, 0.0, 2.0)
+    histRadiusVsHFactor = ROOT.TH2D("histRadiusVsHFactor", "H-Factor vs. Radius over All Energies; Radius, mm; H-Factor", 155, 0.0, 6200.0, 200, 0.0, 4.0)
     histRadiusVsHFactor.SetStats(0)
     ROOT.gStyle.SetPalette(1)
     allHFactors, allRadii = [], []
 
     for energy in energies:
         histNameSingleEnergyRVsHFactor = "histSingleEnergyRVsHFactor_" + str(int(energy * 1000)) + "keV"
-        histSingleEnergyRVsHFactor = ROOT.TH2D(histNameSingleEnergyRVsHFactor, "H-Factor vs. Radius for a Single Energy; Radius, mm; H-Factor", 155, 0.0, 6200.0, 200, 0.0, 2.0)
+        histSingleEnergyRVsHFactor = ROOT.TH2D(histNameSingleEnergyRVsHFactor, "H-Factor vs. Radius for a Single Energy; Radius, mm; H-Factor", 155, 0.0, 6200.0, 200, 0.0, 4.0)
         histSingleEnergyRVsHFactor.SetStats(0)
         ROOT.gStyle.SetPalette(1)
         singleEnergyHFactors, singleEnergyRadii = [], []
@@ -207,7 +207,7 @@ def PlotsForRadiusCoeffs(energyCoefficients):
         graphSingleEnergyRVsHFactor.GetXaxis().SetTitle("Radius, mm")
         graphSingleEnergyRVsHFactor.GetXaxis().SetRangeUser(0.0, 6200.0)
         graphSingleEnergyRVsHFactor.GetYaxis().SetTitle("H-Factor")
-        graphSingleEnergyRVsHFactor.GetYaxis().SetRangeUser(0.0, 2.0)
+        graphSingleEnergyRVsHFactor.GetYaxis().SetRangeUser(0.0, 4.0)
         graphNameSingleEnergyRVsHFactor = "graphSingleEnergyRVsHFactor_" + str(int(energy * 1000)) + "keV"
         graphSingleEnergyRVsHFactor.SetName(graphNameSingleEnergyRVsHFactor)
 
@@ -226,7 +226,7 @@ def PlotsForRadiusCoeffs(energyCoefficients):
     graphRadiusVsHFactor.GetXaxis().SetTitle("Radius, mm")
     graphRadiusVsHFactor.GetXaxis().SetRangeUser(0.0, 6200.0)
     graphRadiusVsHFactor.GetYaxis().SetTitle("H-Factor")
-    graphRadiusVsHFactor.GetYaxis().SetRangeUser(0.0, 2.0)
+    graphRadiusVsHFactor.GetYaxis().SetRangeUser(0.0, 4.0)
     graphRadiusVsHFactor.SetName("graphRadiusVsHFactor")
 
     plotFile.cd()
