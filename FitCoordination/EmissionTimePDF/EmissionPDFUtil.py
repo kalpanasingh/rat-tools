@@ -13,7 +13,7 @@ def ProducePDF():
 		eventNum += 1
 		mc = ds.GetMC()
 		startTime = mc.GetMCParticle(0).GetTime()
-		startPos = mc.GetMCParticle(0).GetPos()
+		startPos = mc.GetMCParticle(0).GetPosition()
 		for iTrack in range( 0, mc.GetMCTrackCount() ):
 			# Only Photons here
 			track = mc.GetMCTrack( iTrack )

@@ -9,8 +9,11 @@
 
 #include <FitPerformanceUtil.hh>
 
-#include <RAT/DS/Root.hh>
-#include <RAT/DS/PMTProperties.hh>
+#include <RAT/DU/DSReader.hh>
+#include <RAT/DU/Utility.hh>
+#include <RAT/DU/PMTInfo.hh>
+
+#include <RAT/DS/Entry.hh>
 #include <RAT/DS/EV.hh>
 #include <RAT/DS/FitResult.hh>
 #include <RAT/DS/FitVertex.hh>
@@ -81,22 +84,20 @@ ExtractValidity(
   double valid = 0.0;
   // Now extract the data
   // Load the first file
-  RAT::DS::Root* rDS;
-  RAT::DS::PMTProperties* rPMTList;
-  TChain* tree;
 
-  LoadRootFile( lFile, &tree, &rDS, &rPMTList );
+  RAT::DU::DSReader dsReader(lFile.c_str());
+  RAT::DU::PMTInfo rPMTList = DS::DU::Utility::Get()->GetPMTInfo();
 
-  for( int iLoop = 0; iLoop < tree->GetEntries(); iLoop++ )
+  for( size_t iEntry = 0; iEntry < dsReader.GetEntryCount(); iEntry++ )
     {
-      tree->GetEntry( iLoop );
-      for( int iEvent = 0; iEvent < rDS->GetEVCount(); iEvent++ )
+      const RAT::DS::Entry& rDS = dsReader.GetEntry( iEntry );
+      for( size_t iEV = 0; iEV < rDS.GetEVCount(); iEV++ )
         {
-		  if( iEvent > 0 ) // Only prompt events characterise
+		  if( iEV > 0 ) // Only prompt events characterise
 			continue;
 		  events += 1.0;
-		  RAT::DS::EV *rEV = rDS->GetEV( iEvent );
-          if( rEV->GetFitResult( lFit ).GetValid() == false )
+		  const RAT::DS::EV& rEV = rDS.GetEV( iEV );
+          if( rEV.GetFitResult( lFit ).GetValid() == false )
             continue;
 		  valid += 1.0;
         }

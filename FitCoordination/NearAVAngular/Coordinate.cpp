@@ -13,11 +13,17 @@
 #include <TAxis.h>
 #include <TF1.h>
 
+#include <RAT/DU/DSReader.hh>
+
+#include <RAT/DU/Utility.hh>
+#include <RAT/DU/PMTInfo.hh>
+
 #include <RAT/DS/MC.hh>
 #include <RAT/DS/MCParticle.hh>
 #include <RAT/DS/EV.hh>
-#include <RAT/DS/PMTCal.hh>
-#include <RAT/DS/Root.hh>
+#include <RAT/DS/PMT.hh>
+#include <RAT/DS/PMTSet.hh>
+#include <RAT/DS/Entry.hh>
 #include <RAT/DS/Run.hh>
 
 const double lowNhitsCut = 50;
@@ -205,179 +211,162 @@ void Coordination(char* infile5000, char* infile5300, char* infile5400, char* in
 
 TH1D* Hist5000(char* infile, double lowNhits, TH1D* histo)
 {
-	TFile *f = new TFile(infile);
 
-	TTree *eventtree = (TTree*)f->Get("T");
-	RAT::DS::Root *eventds = new RAT::DS::Root();
-	eventtree->SetBranchAddress("ds", &eventds);
+  RAT::DU::DSReader dsReader(pFile);
 	
-	TTree *pmttree = (TTree*)f->Get("runT");
-	RAT::DS::Run *pmtds = new RAT::DS::Run();
-	pmttree->SetBranchAddress("run", &pmtds);
-	pmttree->GetEntry();
-	RAT::DS::PMTProperties *pmtProps = pmtds->GetPMTProp();
-	
-	for (int i = 0; i < eventtree->GetEntries(); i++)
+  const RAT::DU::PMTInfo& pmtInfo = RAT::DU::Utility::Get()->GetPMTInfo();
+
+  for( size_t iEntry = 0; iEntry < dsReader.GetEntryCount(); iEntry++ ) 
 	{
-		eventtree->GetEntry(i);
-		if ((eventds->GetEVCount()) == 0) continue;
-		RAT::DS::EV *eventev = eventds->GetEV(0);
-		if (eventev->GetPMTCalCount() < lowNhitsCut) continue;    // Ignore events with too few Nhits
-		if ((eventev->GetPMTCalCount() < lowNhits) || (eventev->GetPMTCalCount() >= (lowNhits + windowWidth))) continue;
+      
+      const RAT::DS::Entry& rDS = dsReader.GetEntry( iEntry );
+      if ( rds.GetEVCount() == 0 ) continue;
+      const RAT::DS::EV& eventev = rds->GetEV( 0 );
+      const RAT::DS::CalPMTs& calPMTs = eventev.GetCalPMTs();
+      if ( calPMTs.GetCount() < lowNhitsCut ) continue;    // Ignore events with too few Nhits
+      if ( (calPMTs.GetCount() < lowNhits) || (calPMTs.GetCount() >= (lowNhits + windowWidth)) ) continue;
 		
-		TVector3 eventvector;
-		for (int j = 0; j < eventev->GetPMTCalCount(); j++)
+      TVector3 eventvector;
+      for ( size_t iPMT = 0; iPMT < calPMTs.GetCount(); iPMT++ )
 		{
-			RAT::DS::PMTCal *pmt = eventev->GetPMTCal(j);
-			TVector3 pmtvector = pmtProps->GetPos(pmt->GetID());
-			eventvector += pmtvector;
+          const RAT::DS::PMTCal& pmt = calPMTs.GetPMT( iPMT );
+          TVector3 pmtvector = pmtInfo.GetPosition( pmt.GetID() );
+          eventvector += pmtvector;
 		}
 		
-		double pmtcount = 0.0, total = 0.0;
-		for (int k = 0; k < eventev->GetPMTCalCount(); k++)
+      double pmtcount = 0.0, total = 0.0;
+      for ( size_t iPMT = 0; iPMT < calPMTs.GetCount(); iPMT++ )
 		{
-			RAT::DS::PMTCal *pmt = eventev->GetPMTCal(k);
-			TVector3 pmtvector = pmtProps->GetPos(pmt->GetID());
+          const RAT::DS::PMTCal& pmt = calPMTs.GetPMT( iPMT );
+          TVector3 pmtvector = pmtInfo.GetPosition( pmt.GetID() );
 
-			double angle = acos((eventvector.Dot(pmtvector)) / (eventvector.Mag() * pmtvector.Mag())) * (180 / pi);
-
-			if ((angle >= dipLow) && (angle <= dipHigh))
+          double angle = acos((eventvector.Dot(pmtvector)) / (eventvector.Mag() * pmtvector.Mag())) * (180 / pi);
+            
+          if ((angle >= dipLow) && (angle <= dipHigh))
 			{
-				pmtcount += 1.0;
+              pmtcount += 1.0;
 			}
-			total += 1.0;
+          total += 1.0;
 		}
 
-		double ratio = (pmtcount / total);
-		histo->Fill(ratio);
+      double ratio = (pmtcount / total);
+      histo->Fill(ratio);
 	}
-
-	f->Close();
-	return histo;
+  
+  f->Close();
+  return histo;
 }
 
 
 double MeanRatio(char *infile, double lowNhits)
 {
-	vector<double> ratios;
+  vector<double> ratios;
 
-	TFile *f = new TFile(infile);
+  RAT::DU::DSReader dsReader(pFile);
 	
-	TTree *eventtree = (TTree*)f->Get("T");
-	RAT::DS::Root *eventds = new RAT::DS::Root();
-	eventtree->SetBranchAddress("ds", &eventds);
+  const RAT::DU::PMTInfo& pmtInfo = RAT::DU::Utility::Get()->GetPMTInfo();
 
-	TTree *pmttree = (TTree*)f->Get("runT");
-	RAT::DS::Run *pmtds = new RAT::DS::Run();
-	pmttree->SetBranchAddress("run", &pmtds);
-	pmttree->GetEntry();
-	RAT::DS::PMTProperties *pmtProps = pmtds->GetPMTProp();
-	
-	for (int i = 0; i < eventtree->GetEntries(); i++)
+  for( size_t iEntry = 0; iEntry < dsReader.GetEntryCount(); iEntry++ ) 
 	{
-		eventtree->GetEntry(i);
-		if ((eventds->GetEVCount()) == 0) continue;
-		RAT::DS::EV *eventev = eventds->GetEV(0);
-		if (eventev->GetPMTCalCount() < lowNhitsCut) continue;    // Ignore events with too few Nhits
-		if ((eventev->GetPMTCalCount() < lowNhits) || (eventev->GetPMTCalCount() >= (lowNhits + windowWidth))) continue;
+      
+      const RAT::DS::Entry& rDS = dsReader.GetEntry( iEntry );
+      if ( rds.GetEVCount() == 0 ) continue;
+      const RAT::DS::EV& eventev = rds.GetEV( 0 );
+      const RAT::DS::CalPMTs& calPMTs = eventev.GetCalPMTs();
+      if ( calPMTs.GetCount() < lowNhitsCut) continue;    // Ignore events with too few Nhits
+      if ( (calPMTs.GetCount() < lowNhits) || (calPMTs.GetCount() >= (lowNhits + windowWidth)) ) continue;
 		
-		TVector3 eventvector;
-		for (int j = 0; j < eventev->GetPMTCalCount(); j++)
+      TVector3 eventvector;
+      for ( size_t iPMT = 0; iPMT < calPMTs.GetCount(); iPMT++ )
 		{
-			RAT::DS::PMTCal *pmt = eventev->GetPMTCal(j);
-			TVector3 pmtvector = pmtProps->GetPos(pmt->GetID());
-			eventvector += pmtvector;
+          const RAT::DS::PMTCal& pmt = calPMTs.GetPMT( iPMT );
+          TVector3 pmtvector = pmtInfo.GetPosition( pmt.GetID() );
+          eventvector += pmtvector;
 		}
 		
-		double pmtcount = 0.0, total = 0.0;
-		for (int k = 0; k < eventev->GetPMTCalCount(); k++)
+      double pmtcount = 0.0, total = 0.0;
+      for ( size_t iPMT = 0; iPMT < calPMTs.GetCount(); iPMT++ )
 		{
-			RAT::DS::PMTCal *pmt = eventev->GetPMTCal(k);
-			TVector3 pmtvector = pmtProps->GetPos(pmt->GetID());
+          const RAT::DS::PMTCal& pmt = calPMTs.GetPMT( iPMT );
+          TVector3 pmtvector = pmtInfo.GetPosition( pmt.GetID() );
 
-			double angle = acos((eventvector.Dot(pmtvector)) / (eventvector.Mag() * pmtvector.Mag())) * (180 / pi);
+          double angle = acos((eventvector.Dot(pmtvector)) / (eventvector.Mag() * pmtvector.Mag())) * (180 / pi);
 
-			if ((angle >= dipLow) && (angle <= dipHigh))
+          if ((angle >= dipLow) && (angle <= dipHigh))
 			{
-				pmtcount += 1.0;
+              pmtcount += 1.0;
 			}
-			total += 1.0;
+          total += 1.0;
 		}
 
-		double ratio = (pmtcount / total);
-		ratios.push_back(ratio);
+      double ratio = (pmtcount / total);
+      ratios.push_back(ratio);
 	}
-
-	f->Close();
+  
+  f->Close();
 	
-	sort(ratios.begin(), ratios.end());
-	int s = ratios.size();
+  sort(ratios.begin(), ratios.end());
+  int s = ratios.size();
 		
-	if ((s % 2) == 0)
-	{
-		return ((ratios[s / 2] + ratios[(s / 2) - 1]) / 2);
+  if ((s % 2) == 0)
+    {
+      return ((ratios[s / 2] + ratios[(s / 2) - 1]) / 2);
 	}
-	else
+  else
 	{
-		double midIndex = ((s / 2) - 0.5);
-		int u = (int)midIndex;
-		return ratios[u];
+      double midIndex = ((s / 2) - 0.5);
+      int u = (int)midIndex;
+      return ratios[u];
 	}
 }
 
 
 TH1D* ErrorHist(char* infile, double lowNhits, double lowRatio, TH1D* histo)
 {
-	TFile *f = new TFile(infile);
 
-	TTree *eventtree = (TTree*)f->Get("T");
-	RAT::DS::Root *eventds = new RAT::DS::Root();
-	eventtree->SetBranchAddress("ds", &eventds);
+  RAT::DU::DSReader dsReader(pFile);
 	
-	TTree *pmttree = (TTree*)f->Get("runT");
-	RAT::DS::Run *pmtds = new RAT::DS::Run();
-	pmttree->SetBranchAddress("run", &pmtds);
-	pmttree->GetEntry();
-	RAT::DS::PMTProperties *pmtProps = pmtds->GetPMTProp();
-	
-	for (int i = 0; i < eventtree->GetEntries(); i++)
+  const RAT::DU::PMTInfo& pmtInfo = RAT::DU::Utility::Get()->GetPMTInfo();
+
+  for( size_t iEntry = 0; iEntry < dsReader.GetEntryCount(); iEntry++ ) 
 	{
-		eventtree->GetEntry(i);
-		if ((eventds->GetEVCount()) == 0) continue;
-		RAT::DS::EV *eventev = eventds->GetEV(0);
-		if (eventev->GetPMTCalCount() < lowNhitsCut) continue;    // Ignore events with too few Nhits
-		if ((eventev->GetPMTCalCount() < lowNhits) || (eventev->GetPMTCalCount() >= (lowNhits + windowWidth))) continue;
-		
-		TVector3 eventvector;
-		for (int j = 0; j < eventev->GetPMTCalCount(); j++)
+      const RAT::DS::Entry& rDS = dsReader.GetEntry( iEntry );
+      if ( rds.GetEVCount() == 0 ) continue;
+      const RAT::DS::EV& eventev = rds.GetEV( 0 );
+      const RAT::DS::CalPMTs& calPMTs = eventev.GetCalPMTs();
+      if ( calPMTs.GetCount() < lowNhitsCut) continue;    // Ignore events with too few Nhits
+      if ( (calPMTs.GetCount() < lowNhits) || (calPMTs.GetCount() >= (lowNhits + windowWidth)) ) continue;
+      
+      TVector3 eventvector;
+      for ( size_t iPMT = 0; iPMT < calPMTs.GetCount(); iPMT++ )
 		{
-			RAT::DS::PMTCal *pmt = eventev->GetPMTCal(j);
-			TVector3 pmtvector = pmtProps->GetPos(pmt->GetID());
-			eventvector += pmtvector;
+          const RAT::DS::PMTCal& pmt = calPMTs.GetPMT( iPMT );
+          TVector3 pmtvector = pmtInfo.GetPosition( pmt.GetID() );
+          eventvector += pmtvector;
 		}
 		
-		double pmtcount = 0.0, total = 0.0;
-		for (int k = 0; k < eventev->GetPMTCalCount(); k++)
+      double pmtcount = 0.0, total = 0.0;
+      for ( size_t iPMT = 0; iPMT < calPMTs.GetCount(); iPMT++ )
 		{
-			RAT::DS::PMTCal *pmt = eventev->GetPMTCal(k);
-			TVector3 pmtvector = pmtProps->GetPos(pmt->GetID());
+          const RAT::DS::PMTCal& pmt = calPMTs.GetPMT( iPMT );
+          TVector3 pmtvector = pmtInfo.GetPosition( pmt.GetID() );
 
-			double angle = acos((eventvector.Dot(pmtvector)) / (eventvector.Mag() * pmtvector.Mag())) * (180 / pi);
+          double angle = acos((eventvector.Dot(pmtvector)) / (eventvector.Mag() * pmtvector.Mag())) * (180 / pi);
 
-			if ((angle >= dipLow) && (angle <= dipHigh))
+          if ((angle >= dipLow) && (angle <= dipHigh))
 			{
-				pmtcount += 1.0;
+              pmtcount += 1.0;
 			}
-			total += 1.0;
+          total += 1.0;
 		}
 
-		double ratio = (pmtcount / total);
-		if ((ratio < lowRatio) || (ratio >= (lowRatio + binWidth))) continue;
-
-		RAT::DS::MC *eventmc = eventds->GetMC();
-		RAT::DS::MCParticle *eventpart = eventmc->GetMCParticle(0);
-		TVector3 MCvector = eventpart->GetPos();
-		histo->Fill(MCvector.Mag());
+      double ratio = (pmtcount / total);
+      if ( (ratio < lowRatio) || (ratio >= (lowRatio + binWidth)) ) continue;
+      
+      const RAT::DS::MC& eventmc = rds.GetMC();
+      const RAT::DS::MCParticle& eventpart = eventmc.GetMCParticle( 0 );
+      TVector3 MCvector = eventpart.GetPosition();
+      histo->Fill(MCvector.Mag());
 	}
 
 	return histo;

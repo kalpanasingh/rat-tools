@@ -38,9 +38,9 @@ def GetFileInfo(filename):
             fitTime = fitVertex.GetTime()
             if (fitVertex.ContainsEnergy()):
                 energyList.append(fitVertex.GetEnergy())
-            calibratedPMTs = ev.GetCalPMTs()
-            for iPMT in range(0,calibratedPMTs.GetCount()):
-                pmt = calibratedPMTs.GetPMT(iPMT)
+            calPMTs = ev.GetCalPMTs()
+            for iPMT in range(0,calPMTs.GetCount()):
+                pmt = calPMTs.GetPMT(iPMT)
                 pmtPos = pmtInfo.GetPosition(pmt.GetID())
                 pmtTime = pmt.GetTime()
                 distInScint = ROOT.Double()

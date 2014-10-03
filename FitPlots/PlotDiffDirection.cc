@@ -12,8 +12,9 @@
 
 #include <FitPlotsUtil.hh>
 
-#include <RAT/DS/Root.hh>
-#include <RAT/DS/PMTProperties.hh>
+#include <RAT/DU/DSReader.hh>
+
+#include <RAT/DS/Entry.hh>
 #include <RAT/DS/EV.hh>
 #include <RAT/DS/FitResult.hh>
 #include <RAT/DS/FitVertex.hh>
@@ -179,32 +180,30 @@ ExtractDiffDirection(
 
   // Now extract the data
   // Load the first file
-  RAT::DS::Root* rDS;
-  RAT::DS::PMTProperties* rPMTList;
-  TChain* tree;
 
-  LoadRootFile( lFile, &tree, &rDS, &rPMTList );
+  RAT::DU::DSReader dsReader(lFile.c_str());
 
   int graphPoint = 0;
   graphPoint++;
-  for( int iLoop = 0; iLoop < tree->GetEntries(); iLoop++ )
-    {
-      tree->GetEntry( iLoop );
-      RAT::DS::MC *rMC = rDS->GetMC();
 
-      TVector3 mcPos = rMC->GetMCParticle(0)->GetPos();
-      TVector3 mcDirection = rMC->GetMCParticle(0)->GetMom();
+  for( size_t iEntry = 0; iEntry < dsReader.GetEntryCount(); iEntry++ )
+    {
+      const RAT::DS::Entry& rDS = dsReader.GetEntry( iEntry );
+      const RAT::DS::MC& rMC = rDS.GetMC();
+
+      TVector3 mcPos = rMC.GetMCParticle(0).GetPosition();
+      TVector3 mcDirection = rMC.GetMCParticle(0).GetMomentum();
       
-      for( int iEvent = 0; iEvent < rDS->GetEVCount(); iEvent++ )
+      for( size_t iEV = 0; iEV < rDS.GetEVCount(); iEV++ )
         {
-          if( gIgnoreRetriggers && iEvent > 0 )
+          if( gIgnoreRetriggers && iEV > 0 )
             continue;
 
-          RAT::DS::EV *rEV = rDS->GetEV( iEvent );
+          const RAT::DS::EV& rEV = rDS.GetEV( iEV );
           TVector3 fitDirection;
           try
             {
-              RAT::DS::FitVertex fitVertex = rEV->GetFitResult( lFit ).GetVertex(0);
+              RAT::DS::FitVertex fitVertex = rEV.GetFitResult( lFit ).GetVertex(0);
               if( fitVertex.ContainsDirection() && fitVertex.ValidDirection() )
                 fitDirection = fitVertex.GetDirection();
               else if( !fitVertex.ContainsDirection() )
@@ -219,7 +218,7 @@ ExtractDiffDirection(
             }
           catch( std::runtime_error& e )
             {
-              cout << lFit << " failed for event " << iEvent << ". Continuing..." << endl;
+              cout << lFit << " failed for event " << iEV << ". Continuing..." << endl;
               continue;
             }
 

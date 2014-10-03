@@ -14,7 +14,7 @@ def ProduceNhitRadiusGraph():
 			continue
 		ev = ds.GetEV(0)
 		# Fill the Plot
-		nhitRadiusPlot.SetPoint( plotPoint, mc.GetMCParticle(0).GetPos().Mag(), ev.GetPMTCalCount() )
+		nhitRadiusPlot.SetPoint( plotPoint, mc.GetMCParticle(0).GetPosition().Mag(), ev.GetCalPMTs().GetCount() )
 		plotPoint = plotPoint + 1
 
 	return nhitRadiusPlot
@@ -30,7 +30,7 @@ def ProduceNhitOriginHistogram():
 			continue
 		ev = ds.GetEV(0)
 		# Fill the Plot
-		if( mc.GetMCParticle(0).GetPos().Mag() < 10 ):
-			nhitOriginHisto.Fill( ev.GetPMTCalCount() )
+		if( mc.GetMCParticle(0).GetPosition().Mag() < 10 ):
+			nhitOriginHisto.Fill( ev.GetCalPMTs().GetCount() )
 
 	return nhitOriginHisto

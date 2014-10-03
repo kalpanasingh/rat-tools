@@ -34,7 +34,7 @@ def ProduceRunMacFiles(options):
         elif index == 1:
             generator = "/generator/vtx/set e- 0 0 0 " + str(energy)
             outfile = SeededUtilities.Particles[1]
-            hadrons = "/PhysicsList/OmitHadronicProcesses true"
+            hadrons = "/rat/physics_list/OmitHadronicProcesses true"
             
         outText = rawText.substitute(Generator = generator,
                                      GeoFile = options.geoFile,

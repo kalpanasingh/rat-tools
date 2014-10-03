@@ -1,12 +1,12 @@
 # In this file the source is at 0.0 ${SourcePos} 0.0
 
 # Parameters
-/PhysicsList/OmitMuonicProcesses true
-/PhysicsList/OmitHadronicProcesses true
+/rat/physics_list/OmitMuonicProcesses true
+/rat/physics_list/OmitHadronicProcesses true
 
 ${ExtraDB}
 /rat/db/set DETECTOR geo_file "${GeoFile}"
-/rat/db/set GEO[scint] material "${ScintMaterial}"
+/rat/db/set GEO[inner_av] material "${ScintMaterial}"
 
 /rat/db/set OPTICS[${ScintMaterial}] SCINTWAVEFORM_value1 [ -0.0d, ]
 /rat/db/set OPTICS[${ScintMaterial}] SCINTWAVEFORM_value2 [ 1.0d, ]

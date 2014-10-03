@@ -10,8 +10,9 @@
 
 #include <FitPlotsUtil.hh>
 
-#include <RAT/DS/Root.hh>
-#include <RAT/DS/PMTProperties.hh>
+#include <RAT/DU/DSReader.hh>
+
+#include <RAT/DS/Entry.hh>
 #include <RAT/DS/EV.hh>
 #include <RAT/DS/FitResult.hh>
 #include <RAT/DS/FitVertex.hh>
@@ -192,39 +193,38 @@ ExtractDiffEnergy(
 
   // Now extract the data
   // Load the first file
-  RAT::DS::Root* rDS;
-  RAT::DS::PMTProperties* rPMTList;
-  TChain* tree;
 
-  LoadRootFile( lFile, &tree, &rDS, &rPMTList );
+  RAT::DU::DSReader dsReader(lFile.c_str());
 
   int graphPoint = 0;
   (*gResVE)->SetPoint( graphPoint, 0.0, 0.0 );
   graphPoint++;
-  for( int iLoop = 0; iLoop < tree->GetEntries(); iLoop++ )
+
+  for( size_t iEntry = 0; iEntry < dsReader.GetEntryCount(); iEntry++ )
     {
-      tree->GetEntry( iLoop );
-      RAT::DS::MC *rMC = rDS->GetMC();
-	  int npart = rMC->GetMCParticleCount();
+      
+      const RAT::DS::Entry& rDS = dsReader.GetEntry( iEntry );
+      const RAT::DS::MC& rMC = rDS.GetMC();
+	  int npart = rMC.GetMCParticleCount();
 
       // assume even if multiple particles in vertex - define position by first particle
-	  TVector3 mcPos = rMC->GetMCParticle(0)->GetPos();
+	  TVector3 mcPos = rMC.GetMCParticle(0).GetPosition();
 	  double mcEnergy = 0;
 	  for(int ipart=0;ipart<npart;++ipart){
-        mcEnergy += rMC->GetMCParticle(ipart)->GetKE();
+        mcEnergy += rMC.GetMCParticle(ipart).GetKineticEnergy();
       }
 
-      for( int iEvent = 0; iEvent < rDS->GetEVCount(); iEvent++ )
+      for( size_t iEV = 0; iEV < rDS.GetEVCount(); iEV++ )
         {
-          if( gIgnoreRetriggers && iEvent > 0 )
+          if( gIgnoreRetriggers && iEV > 0 )
             continue;
 
-          RAT::DS::EV *rEV = rDS->GetEV( iEvent );
+          const RAT::DS::EV& rEV = rDS.GetEV( iEV );
           double fitEnergy;
           try
             {
               RAT::DS::FitVertex fitVertex =rEV->GetFitResult( lFit ).GetVertex(0);
-              if( fitVertex.ContainsEnergy()&& fitVertex.ValidEnergy() )
+              if( fitVertex.ContainsEnergy() && fitVertex.ValidEnergy() )
                 fitEnergy = fitVertex.GetEnergy();
               else if( !fitVertex.ContainsEnergy() )
                 cout <<lFit <<" has not reconstructed energy." << endl;
@@ -238,7 +238,7 @@ ExtractDiffEnergy(
             }
           catch( std::runtime_error& e )
             {
-              cout << lFit << " failed for event " << iEvent << ". Continuing..." << endl;
+              cout << lFit << " failed for event " << iEV << ". Continuing..." << endl;
               continue;
             }
           double deltaE = fitEnergy - mcEnergy;

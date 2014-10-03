@@ -26,22 +26,13 @@ namespace DS
 }
 
 void
-LoadRootFile(
-			 std::string lFile,
-			 TChain** tree,
-			 RAT::DS::Root** rDS,
-			 RAT::DS::PMTProperties** rPMTList );
-
-void
 ArrangeStatBox(
                TH1D* hHistogram,
 			   Int_t color,
 			   TVirtualPad* pad );
 
-
 std::vector<std::string>
-GetFitNames(
-			std::string lFile );
+GetFitNames( std::string lFile );
 
 extern bool gIgnoreRetriggers;
 

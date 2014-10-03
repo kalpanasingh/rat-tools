@@ -1,31 +1,36 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include "TROOT.h"
-#include "TFile.h"
-#include "TNtuple.h"
-#include "TH1D.h"
+
+#include <TROOT.h>
+#include <TFile.h>
+#include <TNtuple.h>
+#include <TH1D.h>
+
+#include <RAT/DU/DSReader.hh>
+#include <RAT/DU/Utility.hh>
+#include <RAT/DU/LightPathCalculator.hh>
+#include <RAT/DU/GroupVelocity.hh>
+#include <RAT/DU/EffectiveVelocity.hh>
+
 #include <RAT/DS/MC.hh>
+#include <RAT/DS/MCEV.hh
 #include <RAT/DS/MCParticle.hh>
 #include <RAT/DS/EV.hh>
 #include <RAT/DS/PMT.hh>
-#include <RAT/DS/Root.hh>
+#include <RAT/DS/PMTSet.hh>
+#include <RAT/DS/Entry.hh>
 #include <RAT/DS/Run.hh>
 #include <RAT/DB.hh>
 
 void FillScintTimeResiduals( string pFile, TH1D* hist, double velocity=-999 )
 {
-  TFile *file = new TFile(pFile.c_str());
-  TTree *tree = (TTree*) file->Get("T");
-  RAT::DS::Root *rds = new RAT::DS::Root();
-  tree->SetBranchAddress("ds", &rds);
 
-  // PMT Properties are contained in different tree
-  TTree *runtree = (TTree*) file->Get( "runT");
-  RAT::DS::Run *pmtds = new RAT::DS::Run();
-  runtree->SetBranchAddress("run", &pmtds);
-  runtree->GetEntry();
-  RAT::DS::PMTProperties *pmtProp = pmtds->GetPMTProp();
+  RAT::DU::DSReader dsReader(pFile);
+
+  RAT::DU::LightPathCalculator lightPath = RAT::DU::Utility::Get()->GetLightPathCalculator();
+  const RAT::DU::EffectiveVelocity& effectiveVelocity = RAT::DU::Utility::Get()->GetEffectiveVelocity();
+  const RAT::DU::PMTInfo& pmtInfo = RAT::DU::Utility::Get()->GetPMTInfo();
 
   if( velocity > 0 )
     {
@@ -37,96 +42,103 @@ void FillScintTimeResiduals( string pFile, TH1D* hist, double velocity=-999 )
     cout << "Running with default velocity: " << pmtds->GetEffectiveVelocityTime()->GetVg() << newline;
 
   // loop over each event
-  for(int j=0; j<tree->GetEntries(); j++)
+
+  for( size_t iEntry = 0; iEntry < dsReader.GetEntryCount(); iEntry++ ) 
     {
-      tree->GetEntry(j);
-      int evc = rds->GetEVCount();
+
+      const RAT::DS::Entry& rDS = dsReader.GetEntry( iEntry );
+
+      int evc = rds.GetEVCount();
       if(evc==0) continue;
 
       // Get MC info
-      RAT::DS::MC *pmc = rds->GetMC();
-      RAT::DS::MCParticle *mc_part = pmc->GetMCParticle(0);
-      TVector3 mc_pos = mc_part->GetPos();
+      const RAT::DS::MC& pmc = rds.GetMC();
+      const RAT::DS::MCParticle& mcPart = pmc.GetMCParticle(0);
+      TVector3 mcPos = mcPart.GetPosition();
 
       // Get Number of PMT hits
-      RAT::DS::EV *pev = rds->GetEV(0);
-      Int_t PMThits = pev->GetPMTCalCount();
+      const RAT::DS::EV& pev = rds.GetEV(0);
+      const RAT::DS::CalPMTs& calPMTs = pev.GetCalPMTs();
 
       // Get event time
-      double eventTime = 390 - pev->GetGTrigTime();
+      double eventTime = 390 - pmc.GetMCEV(0).GetGTTime();
 
       // Loop over each PMT hit and get time
-      for( Int_t loop=0; loop < PMThits; loop++)
+      for( size_t loop=0; loop < calPMTs.GetCount(); loop++)
         {
-          RAT::DS::PMTCal *pCal = pev->GetPMTCal(loop);
-          double pmtTime = pCal->GetTime();
-          TVector3 pmtPos = pmtProp->GetPos(pCal->GetID());
+
+          const RAT::DS::PMTCal& pCal = calPMTs.GetPMT(loop);
+          double pmtTime = pCal.GetTime();
+          TVector3 pmtPos = pmtInfo.GetPosition(pCal.GetID());
 
           // Get straight line travel time to PMT
-          double distInScint, distInAV, distInWater;
-          pmtds->GetLightPath()->CalcByPosition( mc_pos, pmtPos, distInScint, distInAV, distInWater);
-          double straightTime = pmtds->GetEffectiveVelocityTime()->CalcByDistance( distInScint, distInAV, distInWater);
-
+          lightPath.CalcByPosition( mcPosition, pmtPos, distInScint, distInAV, distInWater);
+          double distInScint = lightPath.GetDistInScint();
+          double distInAV = lightPath.GetDistInAV();
+          double distInWater = lightPath.GetDistInWater();
+          const double straightTime = effectiveVelocity.CalcByDistance( distInScint, distInAV, distInWater);
+                    
           // Finally, get time residual
           double tres= pmtTime - straightTime - eventTime;
 
           // Fill histogram with those within a fiducial volume of 5.5m
-          if(mc_pos.Mag() < 5500)  hist->Fill(tres);
+          if(mcPos.Mag() < 5500)  hist->Fill(tres);
         }
     }
 }
 
 void FillH2OTimeResiduals( string pFile, TH1D* hist )
 {
-  TFile *file = new TFile(pFile.c_str());
-  TTree *tree = (TTree*) file->Get("T");
-  RAT::DS::Root *rds = new RAT::DS::Root();
-  tree->SetBranchAddress("ds", &rds);
 
-  // PMT Properties are contained in different tree
-  TTree *runtree = (TTree*) file->Get( "runT");
-  RAT::DS::Run *pmtds = new RAT::DS::Run();
-  runtree->SetBranchAddress("run", &pmtds);
-  runtree->GetEntry();
-  RAT::DS::PMTProperties *pmtProp = pmtds->GetPMTProp();
+  RAT::DU::DSReader dsReader(pFile);
+
+  RAT::DU::LightPathCalculator lightPath = RAT::DU::Utility::Get()->GetLightPathCalculator();
+  const RAT::DU::GroupVelocity& groupVelocity = RAT::DU::Utility::Get()->GetGroupVelocity();
+  const RAT::DU::PMTInfo& pmtInfo = RAT::DU::Utility::Get()->GetPMTInfo();
 
   // loop over each event
-  for(int j=0; j<tree->GetEntries(); j++)
+
+  for( size_t iEntry = 0; iEntry < dsReader.GetEntryCount(); iEntry++ ) 
     {
-      tree->GetEntry(j);
-      int evc = rds->GetEVCount();
+
+      const RAT::DS::Entry& rDS = dsReader.GetEntry( iEntry );
+
+      int evc = rds.GetEVCount();
       if(evc==0) continue;
 
       // Get MC info
-      RAT::DS::MC *pmc = rds->GetMC();
-      RAT::DS::MCParticle *mc_part = pmc->GetMCParticle(0);
-      TVector3 mc_pos = mc_part->GetPos();
+      const RAT::DS::MC& pmc = rds.GetMC();
+      const RAT::DS::MCParticle& mcPart = pmc.GetMCParticle(0);
+      TVector3 mcPos = mcPart.GetPosition();
 
       // Get Number of PMT hits
-      RAT::DS::EV *pev = rds->GetEV(0);
-      Int_t PMThits = pev->GetPMTCalCount();
+      const RAT::DS::EV& pev = rds.GetEV(0);
+      const RAT::DS::CalPMTs& calPMTs = pev.GetCalPMTs();
 
       // Get event time
-      double eventTime = 390 - pev->GetGTrigTime();
+      double eventTime = 390 - pmc.GetMCEV(0).GetGTTime();
 
       // Loop over each PMT hit and get time
-      for( Int_t loop=0; loop < PMThits; loop++)
+      for( size_t loop=0; loop < calPMTs.GetCount(); loop++)
         {
-          RAT::DS::PMTCal *pCal = pev->GetPMTCal(loop);
-          double pmtTime = pCal->GetTime();
-          TVector3 pmtPos = pmtProp->GetPos(pCal->GetID());
 
+          const RAT::DS::PMTCal& pCal = calPMTs.GetPMT(loop);
+          double pmtTime = pCal.GetTime();
+          TVector3 pmtPos = pmtInfo.GetPosition(pCal.GetID());
+
+          // Get straight line travel time to PMT
           double distInScint, distInAV, distInWater;
-          pmtds->GetLightPath()->CalcByPosition( mc_pos, pmtPos, distInScint, distInAV, distInWater);
-          double straightTime = pmtds->GetGroupVelocityTime()->CalcByDistance(distInScint,distInAV,distInWater);
-
+          lightPath.CalcByPosition( mcPosition, pmtPos, distInScint, distInAV, distInWater);
+          const double straightTime = groupVelocity.CalcByDistance( distInScint, distInAV, distInWater);
+                    
           // Finally, get time residual
           double tres= pmtTime - straightTime - eventTime;
 
-          // Fill histogram with a fiducial volume of 5.5m
-          if(mc_pos.Mag() < 5500)  hist->Fill(tres);
+          // Fill histogram with those within a fiducial volume of 5.5m
+          if(mcPos.Mag() < 5500)  hist->Fill(tres);
         }
     }
+
 }
 
 void GetScintPDF(string material="labppo_scintillator", int nFiles=1, double velocity=-999)

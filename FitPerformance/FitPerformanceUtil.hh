@@ -24,13 +24,6 @@ namespace DS
 }
 }
 
-void
-LoadRootFile(
-			 std::string lFile,
-			 TChain** tree,
-			 RAT::DS::Root** rDS,
-			 RAT::DS::PMTProperties** rPMTList );
-
 vector< std::pair< string, string> >
 PositionFiles();
 

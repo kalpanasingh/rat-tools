@@ -5,6 +5,7 @@ import os
 import sys
 import string
 import QuadSpeedUtil
+import rat
 
 def ProduceRunMacFile( options ):
     """Produces and then runs the appropriate mac files."""
@@ -29,10 +30,15 @@ def ProduceRunMacFile( options ):
         extraDB = "/rat/db/load " + options.loadDB
 
     for speed in QuadSpeedUtil.transitTime:
+        # TODO:
+        # Load the database and check whether a QUAD_FIT table exists for this material
+        # If not, use the default material
+        # Currently cannot do this: can't load DB in python
         outText = rawText.substitute( Speed = str( "%.0f" % speed ),
                                       GeoFile = options.geoFile,
                                       ScintMaterial = options.scintMaterial,
                                       Particle = options.particle,
+                                      TransitTime = transitTimeText,
                                       ExtraDB = extraDB)
         outFileName = "quad_%.0f.mac" % speed
         outFile = open( outFileName, "w" )
@@ -64,6 +70,8 @@ if __name__ == '__main__':
     parser.add_option( "-g", type="string", dest="geoFile", help="Geometry File to use, location must be absolute or relative to target.", default="geo/snoplus.geo" )
     parser.add_option( "-s", type="string", dest="scintMaterial", help="Scintillator material.", default="labppo_scintillator" )
     parser.add_option( "-p", type="string", dest="particle", help="Particle type.", default="e-" )
+    parser.add_option( "-t", type="string", dest="transitTimes", help="Transit times (accepts a list).",
+                       action="callback", callback=QuadSpeedUtil.parse_list_arg)
     parser.add_option("-b", type="string", dest="batch", help="Run in batch mode" )
     parser.add_option("-l", type="string", dest="loadDB", help="Load an extra DB directory")
     (options, args) = parser.parse_args()

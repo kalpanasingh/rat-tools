@@ -1,11 +1,11 @@
 
 # Parameters
-/PhysicsList/OmitMuonicProcesses true
-/PhysicsList/OmitHadronicProcesses true
+/rat/physics_list/OmitMuonicProcesses true
+/rat/physics_list/OmitHadronicProcesses true
 
 ${ExtraDB}
 /rat/db/set DETECTOR geo_file "${GeoFile}"
-/rat/db/set GEO[scint] material "${ScintMaterial}"
+/rat/db/set GEO[inner_av] material "${ScintMaterial}"
 /rat/db/set MC thin_factor 3.5
 
 /run/initialize
