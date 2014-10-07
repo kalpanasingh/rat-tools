@@ -15,7 +15,7 @@
 #include <RAT/DU/GroupVelocity.hh>
 #include <RAT/DU/EffectiveVelocity.hh>
 #include <RAT/DS/MC.hh>
-#include <RAT/DS/MCEV.hh
+#include <RAT/DS/MCEV.hh>
 #include <RAT/DS/MCParticle.hh>
 #include <RAT/DS/EV.hh>
 #include <RAT/DS/PMT.hh>
