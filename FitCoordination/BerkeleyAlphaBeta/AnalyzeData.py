@@ -34,7 +34,7 @@ def AnalyzeRootFiles(options):
 import optparse
 if __name__ == '__main__':
     parser = optparse.OptionParser(usage = "usage: %prog [options] target", version = "%prog 1.0")
-    parser.add_option("-i", type = "string", dest = "index", help = "RATDB index to place result.", default = "a50b5_center")
+    parser.add_option("-i", type = "string", dest = "index", help = "RATDB index to place result.", default = "")
     parser.add_option("-f", type = 'float', dest = 'timeFirst', help = "First time in the time residual PDF.", default = -200.0)
     parser.add_option("-l", type = 'float', dest = 'timeLast', help = "Last time in the time residual PDF.", default = 1000.0)
     parser.add_option("-s", type = 'float', dest = 'timeStep', help = "Step time in the time residual PDF.", default = 1.0)
