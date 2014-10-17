@@ -4,9 +4,8 @@ There are two methods for running this coordinator:
 
 -------------------------
 
-
-1) standard method, which is the same as other coordinators:
-- navigate to one directory up from this, and then do:
+1) Standard method, which is the same as other coordinators:
+- Navigate to one directory up from this, and then run:
 
     python fitcoordinate [options] BerkeleyAlphaBeta
 
@@ -31,23 +30,23 @@ The contents of this file should replace the table with the same index in the si
 
 ------------------------------
 
+2) Batch method, which needs to be invoked differently from the standard method. 
+This requires a batch condiguration. There already exists a basic "batch.config" file in the "FitCoordination" folder.  
+Users may specify their own configuration using that file as a template, and then provide the filename of their new configuration file here.  
+Specify your batch configuration with the option:
 
-2) batch method, which needs to be invoked differently from the standard method:
-- in this folder, run the command:
+- Begin batch run of data production with (executed from this folder):
 
-    python ProduceData.py [options]
+    python ProduceData.py -b /path/to/batch/config/file [options]
 
-The options for this script are: [-g], [-l] and [-s] as specified above, as well as:
-- [-b]: Batch configuration file ... absolute location
+Data production options as described above are applicable.
 
-There already exists a basic "batch.config" file in the "FitCoordination" folder.  However, users may specify their own configuration using that file as a template, and then provide the filename of their new configuration file here.  
+- After data production finishes, batch run the analysis with (executed from this folder):
 
-- once the production script is complete, the analysis script will NOT begin automatically - it must be run by the user.  To do this, while still in this folder, run the command:
-
-    python AnalyseData.py [options]
+    python AnalyseData.py -b /path/to/batch/config/file [options]
 
 Data analysis options as described above are applicable.  
-The coordination results are written to the Batch logfile - there will be a complete RATDB entry that should be placed in the CLASSIFIER_ALPHA_UNSEEDED.ratdb located in rat/data, replacing any existing entry with the same index.  
 
+The output of the batch method is identical to the bare method above.
 -------------------------
 
