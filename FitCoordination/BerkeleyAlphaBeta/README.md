@@ -23,8 +23,7 @@ For data analysis:
 - [-s]: Step time (in ns) in the time residual PDF (default = 1)
 - [-r]: Max retrigger wait time (in ns) from start of previous event (default = 600)
 
-This method first runs the ProduceData.py script, which generates 2 rootfiles of 100000 events: electrons at 5MeV and alphas at 50MeV, at the center of the detector.  
-Once this is done, the AnalyseData.py script automatically begins.  
+This method does a full production/analysis which generates 2 ROOT files, electrons at 5MeV and alphas at 50MeV, of 100000 events at the center of the detector.  
 The coordination results are written to CLASSIFIER_BERKELEY_AB.ratdb as a full ratdb table.
 The contents of this file should replace the table with the same index in the similarly named file located in rat/data, or be added to that file if no table with the given index exists.  
 
@@ -33,7 +32,6 @@ The contents of this file should replace the table with the same index in the si
 2) Batch method, which needs to be invoked differently from the standard method. 
 This requires a batch condiguration. There already exists a basic "batch.config" file in the "FitCoordination" folder.  
 Users may specify their own configuration using that file as a template, and then provide the filename of their new configuration file here.  
-Specify your batch configuration with the option:
 
 - Begin batch run of data production with (executed from this folder):
 
