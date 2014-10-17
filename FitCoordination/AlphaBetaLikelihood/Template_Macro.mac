@@ -1,0 +1,28 @@
+
+/rat/physics_list/OmitMuonicProcesses true
+${Hadrons}
+${ExtraDB}
+/rat/db/set DETECTOR geo_file "${GeoFile}"
+/rat/db/set GEO[inner_av] material "${ScintMaterial}"
+${PulseLengthTimeConstant}
+${PulseLengthRatio}
+
+/run/initialize
+
+/rat/proc frontend
+/rat/proc trigger
+/rat/proc eventbuilder
+/rat/proc calibratePMT
+
+/rat/proc scintFitter
+
+/rat/proc outroot
+/rat/procset file "${FileName}"
+
+/generator/add combo decay0:fill:uniform
+${Vertex}
+/generator/pos/set 0 0 0
+/generator/rate/set 1
+
+/rat/run/start 5000
+exit

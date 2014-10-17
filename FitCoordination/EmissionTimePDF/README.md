@@ -1,11 +1,29 @@
 # EmissionTimePDF Coordinator
-To run use the fitcoordinate script one directory up from this. Then do:
+This folder contains the files needed to coordinate the EmissionTimePDF fitter.  
 
-    python fitcoordinate EmissionTimePDF
+To run this coordinator:
+- navigate to one directory up from this, and then do:
 
-Normal fit coordination options apply.
+    python fitcoordinate [options] EmissionTimePDF
 
-## Diagnostic scripts
-This folder contains a diagnostic plotting script, to plot the EmissionTimePDF fitcoordinator performance. To run, first coordinate then to plot the pdf:
+The following fit coordination options apply:
+- [-d]: A location in which to run the scripts, e.g. on a data disk (default = [empty])
+- [-g]: Geometry File to use ... location relative to rat/data/ (default = geo/snoplus.geo)
+- [-i]: RATDB index to place result (default = [empty])
+- [-l]: Load an extra .ratdb directory
+- [-p]: Particle type to use ... see generator documentation for available particles (default = 'e-')
+- [-s]: Scintillator Material to use (default = labppo_scintillator)
 
-    python DiagnosticPlotFiles.py
+This first runs the ProduceData.py script, which generates a rootfile containing 20 events at 3MeV.  
+Once this is done, the AnalyseData.py script automatically begins.  
+The coordination results are written to screen - there will be a complete RATDB entry that should be placed in the ET1D.ratdb located in rat/data, replacing any existing entry with the same index.  
+
+-------------------------
+
+The Analysis script contains the following function that can be used to get extra information about the emission times PDF:  
+- PlotPDF(): draw the PDF plot  
+
+To run this function, first run the full coordinator as described above, and then do the following:
+
+    python -c 'import AnalyseData.py; AnalyseData.PlotPDF()'
+
