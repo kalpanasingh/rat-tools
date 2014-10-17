@@ -1,14 +1,14 @@
 #!usr/bin/env python
 # Benjamin Land - 15/10/14 <benland100@berkeley.edu>
 
-import Common
+import Utilities
 
 def AnalyzeRootFiles(options):
-    alphafile = 'BerkeleyAlphaBeta_alpha_' + str(Common.AlphaEnergy) + '.root'
-    betafile = 'BerkeleyAlphaBeta_beta_' + str(Common.BetaEnergy) + '.root'
+    alphafile = 'BerkeleyAlphaBeta_alpha_' + str(Utilities.AlphaEnergy) + '.root'
+    betafile = 'BerkeleyAlphaBeta_beta_' + str(Utilities.BetaEnergy) + '.root'
     
-    alphapdf = Common.BinHitTimeResiduals(alphafile,options.timeFirst,options.timeLast,options.timeStep,options.retrigcutoff)
-    betapdf = Common.BinHitTimeResiduals(betafile,options.timeFirst,options.timeLast,options.timeStep,options.retrigcutoff)
+    alphapdf = Utilities.BinHitTimeResiduals(alphafile,options.timeFirst,options.timeLast,options.timeStep,options.retrigcutoff)
+    betapdf = Utilities.BinHitTimeResiduals(betafile,options.timeFirst,options.timeLast,options.timeStep,options.retrigcutoff)
     
     ratdb  = '''
 {

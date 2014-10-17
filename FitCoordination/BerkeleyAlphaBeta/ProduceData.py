@@ -1,38 +1,38 @@
 #!/usr/bin/env python
 # Benjamin Land - 15/10/14 <benland100@berkeley.edu>
 
-import os, sys, string, Common
+import os, sys, string, Utilities
 
 def ProduceData(options):
     '''Generates macros to generate the root files containing events to be processed.'''
     
     #load the template for the macros
-    macroin = open('macro.template', 'r')
+    macroin = open('Template_Macro.mac', 'r')
     basemacro = string.Template(macroin.read())
     macroin.close()
 
     extraDB = ('/rat/db/load ' + options.loadDB) if options.loadDB else ''
     
     #generate the alpha macro
-    alphafile = 'BerkeleyAlphaBeta_alpha_' + str(Common.AlphaEnergy)
+    alphafile = 'BerkeleyAlphaBeta_alpha_' + str(Utilities.AlphaEnergy)
     alphaout = open(alphafile+'.mac', 'w')
-    alphaout.write(basemacro.substitute(Generator = '/generator/vtx/set alpha 0 0 0 ' + str(Common.AlphaEnergy),
+    alphaout.write(basemacro.substitute(Generator = '/generator/vtx/set alpha 0 0 0 ' + str(Utilities.AlphaEnergy),
                                         OutFileName = alphafile + '.root',
                                         GeoFile = options.geoFile,
                                         ScintMaterial = options.scintMaterial,
                                         ExtraDB = extraDB,
-                                        NEvents = str(Common.TotalEvents) ))
+                                        NEvents = str(Utilities.TotalEvents) ))
     alphaout.close()
 
     #generate the beta macro
-    betafile = 'BerkeleyAlphaBeta_beta_' + str(Common.BetaEnergy)
+    betafile = 'BerkeleyAlphaBeta_beta_' + str(Utilities.BetaEnergy)
     betaout = open(betafile+'.mac', 'w')
-    betaout.write(basemacro.substitute( Generator = '/generator/vtx/set e- 0 0 0 ' + str(Common.BetaEnergy),
+    betaout.write(basemacro.substitute( Generator = '/generator/vtx/set e- 0 0 0 ' + str(Utilities.BetaEnergy),
                                         OutFileName = betafile + '.root',
                                         GeoFile = options.geoFile,
                                         ScintMaterial = options.scintMaterial,
                                         ExtraDB = extraDB,
-                                        NEvents = str(Common.TotalEvents) ))
+                                        NEvents = str(Utilities.TotalEvents) ))
     betaout.close()
     
     #list-o-macros
@@ -42,7 +42,7 @@ def ProduceData(options):
     if options.batch:
         batch_params = {}
         execfile( options.batch, {}, batch_params )
-        batchin = open('batch.template', 'r' )
+        batchin = open('Template_Batch.sh', 'r' )
         basebatch = string.Template( batchin.read() )
         batchin.close()
     
