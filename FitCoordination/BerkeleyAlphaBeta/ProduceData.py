@@ -48,24 +48,25 @@ def ProduceData(options):
     
     #run the macros
     for macro in macros:
+        launch = 'rat ' + macro + ' -l ' + macro + '.log'
         if options.batch:
             batch = basebatch.substitute( Preamble = '\n'.join(s for s in batch_params['preamble']),
                                           Cwd = os.environ['PWD'].replace('/.', '/'),
-                                          Macro = macro,
+                                          RunCommand = launch,
                                           Ratenv = batch_params['ratenv'] )
             batchout = open(macro + '.sh', 'w')
             batchout.write(batch)
             batchout.close()
             os.system(batch_params['submit'] + ' ' + macro +'.sh' )
         else:
-            os.system('rat ' + macro + ' -l ' + macro + '.log')
+            os.system(launch)
 
 
 import optparse
 if __name__ == '__main__':
     parser = optparse.OptionParser(usage = 'usage: %prog [options] target', version = '%prog 1.0')
-    parser.add_option('-g', type = 'string', dest = 'geoFile', help = 'Geometry File to use - location must be absolute or relative to target.', default = 'geo/snoplus.geo')
-    parser.add_option('-s', type = 'string', dest = 'scintMaterial', help = 'Scintillator material.', default = 'labppo_scintillator')
+    parser.add_option('-g', type = 'string', dest = 'geoFile', help = 'Geometry File to use (geo/snoplus.geo).', default = 'geo/snoplus.geo')
+    parser.add_option('-s', type = 'string', dest = 'scintMaterial', help = 'Scintillator material (labppo_scintillator)', default = 'labppo_scintillator')
     parser.add_option('-p', type = 'string', dest = 'particle', help = 'Particle type (ignored for this coordinator)', default = '')
     parser.add_option('-b', type='string', dest='batch', help='Run in batch mode' )
     parser.add_option('-l', type='string', dest='loadDB', help='Load an extra DB directory')

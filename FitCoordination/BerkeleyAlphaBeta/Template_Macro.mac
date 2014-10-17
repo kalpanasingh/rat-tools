@@ -17,7 +17,7 @@ ${ExtraDB}
 /rat/proc outroot
 /rat/procset file "${OutFileName}"
 
-/generator/add combo gun:fill:poisson
+/generator/add combo gun:point:poisson
 ${Generator}
 /generator/pos/set 0 0 0
 /generator/rate/set 1
