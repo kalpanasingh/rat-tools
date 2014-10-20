@@ -13,6 +13,7 @@
 import os
 import sys
 import database
+import grid
 try:
     import argparse
 except:
@@ -21,6 +22,11 @@ try:
     import json
 except:
     raise ImportError("json not available; python version needs to be 2.7+")
+
+
+# Copy type will be set to SURL if lcg-utils or gfal are not available
+copy_type = "GUID"
+server_list = []
 
 
 def get_runs():
@@ -79,6 +85,7 @@ def write_output(output, names, sizes, guids, adlers):
        print "No files found!"
        sys.exit()
     list_file = open(output, "w")
+    list_file.write("%s\n" % copy_type)
     for i, n in enumerate(names):
         list_file.write("%s\t%s\t%s\t%s\n" % (n, sizes[i], guids[i], adlers[i]))
     list_file.close()
