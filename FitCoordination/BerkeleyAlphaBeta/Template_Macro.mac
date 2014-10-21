@@ -1,0 +1,27 @@
+${ExtraDB}
+
+/rat/db/set DETECTOR geo_file "${GeoFile}"
+/rat/db/set GEO[inner_av] material "${ScintMaterial}"
+
+/run/initialize
+
+/rat/proc frontend
+/rat/proc trigger
+/rat/proc eventbuilder
+/rat/proc calibratePMT
+/rat/proc count
+/rat/procset update 50
+
+/rat/proc scintFitter
+
+/rat/proc outroot
+/rat/procset file "${OutFileName}"
+
+/generator/add combo gun:point:poisson
+${Generator}
+/generator/pos/set 0 0 0
+/generator/rate/set 1
+
+/rat/run/start ${NEvents}
+exit
+

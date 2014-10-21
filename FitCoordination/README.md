@@ -52,6 +52,7 @@ The following components of the scintFitter use the effective speed of light in 
 
 The following coordinators partner fitter/classifier components that are not part of either the waterFitter or scintFitter:  
 
+- **BerkeleyAlphaBeta**
 - **SimpleEnergy**
 - **AlphaUnseeded**
 - **AlphaSeeded** - this requires the effective speed of light in scintillator as well as reconstructed position and time, and so should be coordinated only **after** "ScintEffectiveSpeed", "QuadSpeed" and "HitTimePDF"
