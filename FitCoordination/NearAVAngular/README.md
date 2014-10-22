@@ -1,20 +1,5 @@
 # NearAVAngular Coordinator
-This folder contains the files needed to coordinate the NearAV-Angular fitter.  The following files should be found here:
-
-- AnalyseData.py
-- AnalyseData_Short.py
-- Coordinate.cpp
-- fitcoordinate.config
-- ProduceData.py
-- ProduceData_Short.py
-- README.md
-- Template_Coordinate.sh
-- Template_Macro.mac
-- Template_Submit.sh
-- Utilities.py
-
-Any other files that are present SHOULD BE DELETED, since they will interfere with the running of the coordinator.
-
+This folder contains the files needed to coordinate the NearAV (Angular Positions Method) fitter.  
 There are two methods for running the coordinator:
 
 -------------------------
@@ -24,36 +9,38 @@ There are two methods for running the coordinator:
 
     python fitcoordinate [options] NearAVAngular
 
-Normal fit coordination options apply (-g, -s, -d), but do not specify a particle type using "-p" - this coordinator does not take that option.  
-This method first runs the ProduceData.py script, which generates 8 rootfiles (1 for each of the radius values given in Utilities.py) of 5000 events each.  Each one takes roughly 8-9 hours to complete.  
-Once this is done, the AnalyseData.py script automatically begins, which runs the Coordination function found in Coordinate.cpp.  This takes around 17-18 hours.  
-** NOTE: the standard method of coordination takes upwards of 3 days to complete, since the 8 rootfiles are generated one after the other, so it is strongly advised that the user perform the coordination on a batch system.
+The following fit coordination options apply:
+- [-d]: A location in which to run the scripts, e.g. on a data disk (default = [empty])
+- [-g]: Geometry File to use ... location relative to rat/data/ (default = geo/snoplus.geo)
+- [-i]: RATDB index to place result (default = [empty])
+- [-l]: Load an extra .ratdb directory
+- [-s]: Scintillator Material to use (default = labppo_scintillator)
+
+This method first runs the ProduceData.py script, which generates 8 rootfiles (1 for each of the radius values given in the ProduceData.py script) of 5000 events each.  Each one takes roughly 6-7 hours to complete, depending mainly on the scintillator material being used in the simulation.  
+Once this is done, the AnalyseData.py script automatically begins - this takes around 6-7 hours to complete.  
+The coordination results are written to the Coordinate_Results.txt file - there will be a complete RATDB entry that should be placed in the FIT_NEAR_AV_ANGULAR.ratdb located in rat/data, replacing any existing entry with the same index.  
+
+** NOTE: the standard method of coordination takes upwards of 3 days to complete, since the rootfiles are generated one after the other, so it is strongly advised that the user perform the coordination on a batch system using the 2nd method below.
 
 -------------------------
 
-2) time-saving method, which needs to be invoked differently from the standard method:
-- copy this folder to a location with enough space to hold 8 rootfiles of ~3Gb each, and write the ABSOLUTE value of this new location (as a string) to the "currentLoc" field in Utilities.py
-- write the ABSOLUTE locations (as strings) of the user's RAT folder and environment setup file into the "ratLoc" and "envrnLoc" fields respectively
-- navigate into the folder copy, and run the command:
+2) batch method, which needs to be invoked differently from the standard method:
+- copy this entire folder to a location with around 8GB of free disk-space
+- navigate into this new folder, and run the command:
 
-    python ProduceData_Short.py [options]
+    python ProduceData.py [options]
 
-Normal options for the production script apply (-g, -s), but do not specify a particle type using "-p" - this coordinator does not take that option.  
-This production script generates the same 8 rootfiles as the standard method, but runs them in parallel, cutting the required time for the whole production script to around 8-9 hours in total.  
-The user SHOULD NOT run this command on a batch system, since the script itself creates and runs a set of batch commands - the command above must be run in an interactive session.
+The options for this script are: [-g], [-l] and [-s] as specified above, as well as:
+- [-b]: Batch configuration file ... absolute location
 
-** NOTE: Batch commands in "ProduceData_Short.py" are currently given as "qsub ... " - this may not work on all systems.  If this is the case, please replace "qsub" with the equivalent batch command.
+There already exists a basic "batch.config" file in the "FitCoordination" folder.  However, users may specify their own configuration using that file as a template, and then provide the filename of their new configuration file here.  
 
-- once the production script is complete (i.e. there are 8 complete rootfiles), the analysis script will not begin automatically - it must be run by the user.  To do this, while in the folder copy run the command:
+- once the production script is complete (i.e. all rootfiles have been generated), the analysis script will NOT begin automatically - it must be run by the user.  To do this, while still in this folder, run the command:
 
-    python AnalyseData_Short.py
+    python AnalyseData.py [options]
 
-This analysis script takes no options, and takes the same time to run as in the standard method.  
-The AnalyseData_Short script (like the ProduceData_Short script) generates and then runs a batch script, so must be invoked interactively.
-
-** NOTE: Batch commands in "AnalyseData_Short.py" are currently given as "qsub ... " - this may not work on all systems.  If this is the case, please replace "qsub" with the equivalent batch command.
+The only applicable options for this script are [-b] and [-i] as described above, and it takes a few hours to complete.  
+The coordination results are written to the Coordinate_Results.txt file - there will be a complete RATDB entry that should be placed in the FIT_NEAR_AV_ANGULAR.ratdb located in rat/data, replacing any existing entry with the same index.  
 
 -------------------------
 
-Both methods output the coordinated values to a textfile, "Coordinate_Results.txt".  The progress of the analysis script can be monitored via this text file as the script is being run.  
-Once complete, the final section of text in this file should be copy-pasted into the NearAV_Angular fitter's RATDB file located in the rat/data folder: FIT_NEAR_AV_ANGULAR.ratdb .

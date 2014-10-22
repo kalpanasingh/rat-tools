@@ -1,0 +1,39 @@
+
+/rat/physics_list/OmitMuonicProcesses true
+/rat/physics_list/OmitHadronicProcesses true
+${ExtraDB}
+/rat/db/set MC thin_factor 3.5
+/rat/db/set DETECTOR geo_file "${GeoFile}"
+/rat/db/set GEO[inner_av] material "${ScintMaterial}"
+
+/run/initialize
+
+/rat/proc frontend
+/rat/proc trigger
+/rat/proc eventbuilder
+/rat/proc calibratePMT
+/rat/proc count
+/rat/procset update 50
+
+# This is the same position fitter that the scintFitter uses
+# Not using the full scintFitter itself to speed things up, even a little, since the scintFitter does other things that are not relevant here
+/rat/proc fitter
+/rat/procset method "quad"
+/rat/proc fitter
+/rat/procset method "positionTimeLikelihood"
+/rat/procset optimiser "powell"
+/rat/procset selector "null"
+/rat/procset pdf "et1d"
+/rat/procset seed "quad"
+/rat/procset name "positionFit"
+
+/rat/proc outroot
+/rat/procset file "${FileName}"
+
+/generator/add combo gun:${PositionType}:poisson
+/generator/vtx/set e- 0 0 0 ${Energy}
+/generator/pos/set ${PositionArg}
+/generator/rate/set 1
+
+/rat/run/start 1000
+exit
