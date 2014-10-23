@@ -1,5 +1,6 @@
 #!usr/bin/env python
 import Utilities, os
+import string
 # Author E Marzece - 13/03/2014 <marzece@sas.upenn.edu>
 #        K Majumdar - 08/09/2014 - Cleanup of Coordinators for new DS
 
@@ -37,22 +38,31 @@ def AnalyseRootFiles(options):
 def AnalysisFunction(particle, material):
 
     pdfs = {}
+    energies={}
+    energyRatio={}
+    betaEnergies=[]
     particleNames = Utilities.ParticleNames[particle]
 	
-    for particleIndex, particle in enumerate(particleNames):
+    for particleIndex, particleName in enumerate(particleNames):
 	
-        for pulseIndex, pulseDescription in enumerate(Utilities.ParticlePulseDict[particle]):
-		
-            infileName = particle + pulseDescription
-            pdfs[infileName] = Utilities.ProduceTimeResidualPDF(infileName + ".root")
-			
+        for pulseIndex, pulseDescription in enumerate(Utilities.ParticlePulseDict[particleName]):
+
+            infileName = particleName + pulseDescription
+            fileInfo = Utilities.ProduceTimeResAndEnergyPDF(infileName+".root")
+            pdfs[infileName] = fileInfo[0]
+            energies[infileName] = fileInfo[1]
+            if (infileName.find("Bi")!=-1): #The Bi212 file has beta energies
+                 betaEnergies = energies[infileName]
+        for infileName in energies:
+            if infileName.find("Po") != -1 :
+                energyRatio[infileName] = Utilities.GetEnergyRatio(betaEnergies,energies[infileName])
     outfileName = "AlphaBetaOutput" + particle + ".txt"
     print "The relevant PDFs for the AlphaBetaClassifier have been output to:  " + str(outfileName) 
     print "Please replace any existing entry that has the same index in the database file: ALPHA_BETA_CLASSIFIER.ratdb located in rat/data with the text found in this textfile"
 
     f = open(outfileName, 'w')
     for pulseIndex, pulseDescription in enumerate(Utilities.ParticlePulseDict[particleNames[1]]):
-        Utilities.OutputFileChunk([pdfs[particleNames[0]], pdfs[particleNames[1] + pulseDescription], pdfs[particleNames[2]]], particle, material, pulseDescription, f)
+        Utilities.OutputFileChunk([pdfs[particleNames[0]], pdfs[particleNames[1] + pulseDescription], pdfs[particleNames[2]]],energyRatio[particleNames[1]+pulseDescription], particle, material, pulseDescription, f)
     f.close()
 	
 	
