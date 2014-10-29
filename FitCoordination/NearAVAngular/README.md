@@ -16,8 +16,8 @@ The following fit coordination options apply:
 - [-l]: Load an extra .ratdb directory
 - [-s]: Scintillator Material to use (default = labppo_scintillator)
 
-This method first runs the ProduceData.py script, which generates 8 rootfiles (1 for each of the radius values given in the ProduceData.py script) of 5000 events each.  Each one takes roughly 6-7 hours to complete, depending mainly on the scintillator material being used in the simulation.  
-Once this is done, the AnalyseData.py script automatically begins - this takes around 6-7 hours to complete.  
+This method first runs the ProduceData.py script, which generates 8 rootfiles (1 for each of the radius values given in the ProduceData.py script) of 5000 events each.  Each one takes roughly 10-11 hours to complete, depending mainly on the scintillator material being used in the simulation.  
+Once this is done, the AnalyseData.py script automatically begins - this takes around 20 minutes to complete.  
 The coordination results are written to the Coordinate_Results.txt file - there will be a complete RATDB entry that should be placed in the FIT_NEAR_AV_ANGULAR.ratdb located in rat/data, replacing any existing entry with the same index.  
 
 ** NOTE: the standard method of coordination takes upwards of 3 days to complete, since the rootfiles are generated one after the other, so it is strongly advised that the user perform the coordination on a batch system using the 2nd method below.
@@ -39,7 +39,7 @@ There already exists a basic "batch.config" file in the "FitCoordination" folder
 
     python AnalyseData.py [options]
 
-The only applicable options for this script are [-b] and [-i] as described above, and it takes a few hours to complete.  
+The only applicable options for this script are [-b] and [-i] as described above, and it takes a few minutes to complete.  
 The coordination results are written to the Coordinate_Results.txt file - there will be a complete RATDB entry that should be placed in the FIT_NEAR_AV_ANGULAR.ratdb located in rat/data, replacing any existing entry with the same index.  
 
 -------------------------
