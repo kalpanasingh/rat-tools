@@ -3,8 +3,8 @@ import ROOT, rat, string, math, ProduceData, os
 # Author K Majumdar - 08/09/2014 <Krishanu.Majumdar@physics.ox.ac.uk>
 
 infileName = ProduceData.outfileName + ".root"
-minTimeResid = -10.0
-maxTimeResid = 400.0
+minTimeResid = -250.0
+maxTimeResid = 250.0
 fidVolLow = 0.0
 fidVolHigh = 3500.0
 
@@ -43,7 +43,10 @@ def AnalyseRootFiles(options):
 def AnalysisFunction(index):
     
     energyWindow = GetEnergyWindow()
-    cumulTimeResids = GetCDFVector(energyWindow[0], energyWindow[1])
+	
+    numberOfBins = int(math.fabs(minTimeResid) + math.fabs(maxTimeResid))
+
+    cumulTimeResids = GetCDFVector(energyWindow[0], energyWindow[1], numberOfBins)
 	
     ##############################
 	
@@ -94,10 +97,10 @@ def GetEnergyWindow():
     
     return energyWindow
 
+	
 # returns a vector containing the normalised cumulative time residuals over many events
-def GetCDFVector(energyLow, energyHigh):
+def GetCDFVector(energyLow, energyHigh, numberOfBins):
 
-    numberOfBins = int(math.fabs(minTimeResid) + math.fabs(maxTimeResid))
     numberOfEvents = 0.0
     cumuHist = ROOT.TH1D("cumuHist", "cumuHist", numberOfBins, minTimeResid, maxTimeResid)
 	

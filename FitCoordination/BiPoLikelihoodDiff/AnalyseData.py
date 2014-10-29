@@ -2,10 +2,12 @@
 import ROOT, rat, string, math, os
 # Author K Majumdar - 08/09/2014 <Krishanu.Majumdar@physics.ox.ac.uk>
 
-minTimeResid = -250.0
-maxTimeResid = 350.0
+minTimeResid = -200.0
+maxTimeResid = 300.0
 fidVolLow = 0.0
 fidVolHigh = 3500.0
+triggerWindowStartTime = -180.0
+triggerWindowEndTime = 220.0
 
 
 def AnalyseRootFiles(options):
@@ -45,9 +47,15 @@ def AnalysisFunction(index, isotope):
         print "An Isotope option (-p) must be specified for this Analysis Script: either '212' or '214' ... exiting"
         sys.exit()
 
-    timeResidsTe = GetTimeResidsVector("130Te_NDBD.root")
-    timeResidsBi = GetTimeResidsVector(isotope + "Bi_Beta.root")
-    timeResidsPo = GetTimeResidsVector(isotope + "Po_Alpha.root")
+    numberOfBins = int(math.fabs(minTimeResid) + math.fabs(maxTimeResid))
+
+    times = []
+    for currentTime in range(int(minTimeResid), int(maxTimeResid)):
+        times.append(currentTime)
+    
+    timeResidsTe = GetTimeResidsVector("130Te_NDBD.root", numberOfBins)
+    timeResidsBi = GetTimeResidsVector(isotope + "Bi_Beta.root", numberOfBins)
+    timeResidsPo = GetTimeResidsVector(isotope + "Po_Alpha.root", numberOfBins)
     meanAlphaNhits = GetMeanNhits(isotope + "Po_Alpha.root")
 	
     ##############################
@@ -61,8 +69,10 @@ def AnalysisFunction(index, isotope):
     print "valid_begin: [0, 0],"
     print "valid_end: [0, 0],"
     print "\n",
-    print "min_time_residual: " + str(minTimeResid) + ","
-    print "max_time_residual: " + str(maxTimeResid) + ","
+    print "times: [",
+    for time in times:
+        print str(float(time)) + ", ",
+    print "],"
     print "pdf_Te: [",
     for probability in timeResidsTe:
         print str(probability) + ", ",
@@ -76,14 +86,15 @@ def AnalysisFunction(index, isotope):
         print str(probability) + ", ",
     print "],"
     print "meanPoAlphaNhits: " + str(meanAlphaNhits) + ","
+    print "triggerWindowStartTime: " + str(float(triggerWindowStartTime)) + ","
+    print "triggerWindowEndTime: " + str(float(triggerWindowEndTime)) + ","
     print "}"
     print "\n"
 
 
 # returns a vector containing the normalised time residuals over many events
-def GetTimeResidsVector(infileName):
+def GetTimeResidsVector(infileName, numberOfBins):
  
-    numberOfBins = int(math.fabs(minTimeResid) + math.fabs(maxTimeResid))
     numberOfPMTs = 0.0
     timeResidsHist = ROOT.TH1D("timeResidsHist", "timeResidsHist", numberOfBins, minTimeResid, maxTimeResid)
 	
@@ -132,6 +143,7 @@ def GetTimeResidsVector(infileName):
         timeResidsVector.append(timeResidsHist.GetBinContent(l))
 
     return timeResidsVector
+
 
 # returns the mean Nhits of a Po Alpha decay event	
 def GetMeanNhits(infileName):
