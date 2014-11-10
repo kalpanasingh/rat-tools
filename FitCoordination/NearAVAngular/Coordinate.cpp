@@ -26,23 +26,23 @@
 #include <RAT/DS/MCParticle.hh>
 
 static const int numberOfRadii = 8;
-double radii[numberOfRadii] = {5000, 5300, 5400, 5500, 5600, 5700, 5800, 5900};		// This should contain the same values as the "radius" vector in ProduceData.py
+static double radii[numberOfRadii] = {5000, 5300, 5400, 5500, 5600, 5700, 5800, 5900};		// This should contain the same values as the "radius" vector in ProduceData.py
 static const int numberOfNhitsWindows = 12;
-double nhitsWindows[numberOfNhitsWindows] = {0, 250, 500, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750};	// Difference between consecutive values = "nhitsWindowWidth" as defined below
-const double nhitsWindowWidth = 250;
+static double nhitsWindows[numberOfNhitsWindows] = {0, 250, 500, 750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750};	// Difference between consecutive values = "nhitsWindowWidth" as defined below
+static double nhitsWindowWidth = 250;
 static const int numberOfRatioBins = 6;
-double ratioBins[numberOfRatioBins] = {0.0, 0.1, 0.2, 0.3, 0.4, 0.5};	// Difference between consecutive values = "ratioBinWidth" as defined below
-std::string ratioBinNames[numberOfRatioBins] = {"0p0", "0p1", "0p2", "0p3", "0p4", "0p5"};
-const double ratioBinWidth = 0.1;
-const double fraction = 0.90;
-const double dipLow = 40.0;
-const double dipHigh = 90.0;
-const double pi = 3.14159265358979323846;
-int numberOfParameters = 3;		// Number of parameters in the fit function below
-const char* fitFunction = "pol2";
-const char* plotsFileName = "Coordinate_DebuggingPlots.root";
-const double thetaError = 0.0555;
-const double phiError = 0.0655;
+static double ratioBins[numberOfRatioBins] = {0.0, 0.1, 0.2, 0.3, 0.4, 0.5};	// Difference between consecutive values = "ratioBinWidth" as defined below
+static std::string ratioBinNames[numberOfRatioBins] = {"0p0", "0p1", "0p2", "0p3", "0p4", "0p5"};
+static double ratioBinWidth = 0.1;
+static double fraction = 0.90;
+static double dipLow = 40.0;
+static double dipHigh = 90.0;
+static double pi = 3.14159265358979323846;
+static int numberOfParameters = 3;		// Number of parameters in the fit function below
+static const char* fitFunction = "pol2";
+static const char* plotsFileName = "Coordinate_DebuggingPlots.root";
+static const double thetaError = 0.0555;
+static const double phiError = 0.0655;
 
 std::vector< std::vector<double> > CalculateMMTSValues(std::string);
 std::vector< std::vector<double> > CalculateRatioVsRadiusFitsAndErrors(std::vector<std::string>);
