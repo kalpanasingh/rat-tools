@@ -179,6 +179,16 @@ def list_reps(guid):
         raise Exception('Cannot find replicas for %s' % (guid))
     return out
 
+def check_copy_mode():
+    if copy==lcg_copy:
+        print "LCG-utils copy mode"
+    elif copy==gfal_copy:
+        print "GFAL2 copy mode"
+    elif copy==srm_copy:
+        print "SRMCP copy mode"
+    else:
+        print "No copy mode defined"
+
 
 ##############################################################
 # Functions for SURL mode
