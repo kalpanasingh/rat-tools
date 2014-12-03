@@ -72,7 +72,7 @@ def download_file(directory, filename, guid, adler32, size):
         size = _GB # This is usually the max
     timeout = 60 + 10 * int(size / _MB)
     # Ensure correct guid format (some are missing prefix)
-    if not guid.startswith("guid:"):
+    if copy_type=="GUID" and not guid.startswith("guid:"):
         guid = "guid:" + guid
     try:
         grid.copy(guid, os.path.join(directory, filename), timeout=timeout)
@@ -139,6 +139,9 @@ if __name__=="__main__":
    guids = []
    adlers = []
    fin = open(args.list, "r")
+   copy_type = fin.readline().strip()
+   if copy_type!="GUID" and copy_type!="SURL":
+       raise Exception("Unknown copy type")
    for line in fin.readlines():
        f, s, g, a = line.split()
        files.append(f.strip())

@@ -15,6 +15,7 @@
 import os
 import sys
 import database
+import grid
 try:
     import argparse
 except:
@@ -24,6 +25,11 @@ try:
 except:
     raise ImportError("json not available; python version needs to be 2.7+")
     
+
+# Copy type will be set to SURL if lcg-utils or gfal are not available
+copy_type = "GUID"
+server_list = []
+
 
 def get_module_list_version(data_type, rat_version=None):
     """Get a list of available modules.
@@ -63,16 +69,24 @@ def get_list_by_module_version(data_type, module, rat_version, run_range):
                    endkey = [module, rat_version+"_"],
                    reduce=False)
     for row in rows:
-        if not row["value"][2] or row["value"][2]=="":
-            print "Cannot get file %s, no GUID" % (row["value"][0])
-            continue
+        if copy_type=="GUID":
+            if not row["value"][2] or row["value"][2]=="":
+                print "Cannot get file %s, no GUID" % (row["value"][0])
+                continue
+        else:
+            if len(row["value"][4])==0 or row["value"][4]=="":
+                print "Cannot get file %s, no SURL" % row["value"][0]
+                continue
         # Run range is after pass in the key, have to filter here rather than on server
         if run_range:
             if row["key"][3] < run_range[0] or row["key"][3] > run_range[1]:
                 continue
         names.append(row["value"][0])
         sizes.append(row["value"][1])
-        guids.append(row["value"][2])
+        if copy_type=="GUID":
+            guids.append(row["value"][2])
+        else:
+            guids.append(grid.get_closest_copy(server_list, row["value"][4]))
         adlers.append(row["value"][5])
     return names, sizes, guids, adlers
 
@@ -94,11 +108,19 @@ def get_list_by_label_module(data_type, label, module, run_range):
     rows = database.view("_design/proddata/_view/%s_by_label" % (data_type),
                    startkey=startkey, endkey=endkey, reduce=False)
     for row in rows:
-        if not row["value"][1] or row["value"][1]=="":
-            print "Cannot get file %s, no GUID" % (row["value"][0])
-            continue
+        if copy_type=="GUID":
+            if not row["value"][1] or row["value"][1]=="":
+                print "Cannot get file %s, no GUID" % (row["value"][0])
+                continue
+        else:
+            if len(row["value"][4])==0 or row["value"][4]=="":
+                print "Cannot get file %s, no SURL" % row["value"][0]
+                continue
         names.append(row["value"][0])
-        guids.append(row["value"][1])
+        if copy_type=="GUID":
+            guids.append(row["value"][1])
+        else:
+            guids.append(grid.get_closest_copy(server_list, row["value"][4]))
         adlers.append(row["value"][2])
         sizes.append(row["value"][3])
     return names, sizes, guids, adlers
@@ -250,6 +272,7 @@ def write_output(output, names, sizes, guids, adlers):
        print "No files found!"
        sys.exit()
     list_file = open(output, "w")
+    list_file.write("%s\n" % copy_type)
     for i, n in enumerate(names):
         list_file.write("%s\t%s\t%s\t%s\n" % (n, sizes[i], guids[i], adlers[i]))
     list_file.close()
@@ -262,7 +285,7 @@ if __name__=="__main__":
                         default="production")
     parser.add_argument("-s", dest="db_server",
                         help="Data-flow database server [snoplus.westgrid.ca]",
-                        default="snoplus.westgrid.ca")
+                        default="snoplus.cpp.ualberta.ca")
     parser.add_argument("-p", dest="db_port",
                         help="Data-flow database server port [5984]", default=5984, type=int)
     parser.add_argument("-f", dest="full_data", help="[Ntuple] or full datasets (set option for full)",
@@ -320,6 +343,11 @@ if __name__=="__main__":
         if len(args.run_range)!=2:
             print "Require two arguments for run range (lower upper)"
             sys.exit()
+
+    if grid.copy == grid.srm_copy:
+        # Use SRMs to copy from 
+        copy_type = "SURL"
+        server_list = grid.get_server_preferences()
 
     # Now handle either rat version or labelled data
     if args.label:

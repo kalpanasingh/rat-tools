@@ -21,7 +21,11 @@ import sys
 import re
 import getpass
 import subprocess
+import urlparse
 
+
+##############################################################
+# Utility commands
 
 def check_environment():
     '''Ensure grid environment variables are set
@@ -31,6 +35,15 @@ def check_environment():
         if check not in os.environ:
             print "WARNING: %s not set in shell environment (to: %s)" % (check, _checks[check])
             _env[check] = _checks[check]
+
+
+def search_path(name):
+    """Check PATH environment for a binary
+    """
+    for directory in os.environ["PATH"].split(":"):
+        if os.path.exists(os.path.join(directory, name)):
+            return True
+    return False
 
 
 def execute(command, *args):
@@ -123,7 +136,7 @@ def proxy_create():
 ##############################################################
 # Data management commands
 
-def copy(url, local, timeout=None):
+def lcg_copy(url, local, timeout=None):
     '''Copy a file listed at a LFN/SURL to a local filename/path.
 
     URL can also be a guid (requires correct format)
@@ -134,7 +147,29 @@ def copy(url, local, timeout=None):
     else:
         rtc, out, err = execute('lcg-cp', '--sendreceive-timeout', str(timeout), url, local)
     if rtc:
-        raise Exception('Unable to copy %s to %s\nError: %s'%(url, local, err))
+        raise Exception('Unable to copy %s to %s\nError: %s' % (url, local, err))
+
+
+def gfal_copy(url, local, timeout=None):
+    '''Copy a file using gfal copy tools
+    '''
+    context = gfal2.creat_context() # Typo is theirs, not mine!
+    params = context.transfer_parameters()
+    if timeout:
+        params.timeout = timeout
+    # Gfal needs absolute paths with a file:// prefix (plus / at start of path)
+    local = "file:///%s" % os.path.abspath(local)
+    context.filecopy(params, url, local)
+
+
+def srm_copy(url, local, timeout=None):
+    '''Copy a file using srm copy tools
+    '''
+    local = "file:///%s" % os.path.abspath(local)
+    rtc, out, err = execute('srmcp', '-2', '-streams_num=1', url, local)
+    if rtc:
+        raise Exception('Unable to copy %s to %s\nError: %s' % (url, local, err))
+
 
 def list_reps(guid):
     """Get the SURLS of a file.
@@ -144,9 +179,76 @@ def list_reps(guid):
         raise Exception('Cannot find replicas for %s' % (guid))
     return out
 
+def check_copy_mode():
+    if copy==lcg_copy:
+        print "LCG-utils copy mode"
+    elif copy==gfal_copy:
+        print "GFAL2 copy mode"
+    elif copy==srm_copy:
+        print "SRMCP copy mode"
+    else:
+        print "No copy mode defined"
+
+
+##############################################################
+# Functions for SURL mode
+
+def get_server_preferences():
+    '''Return a rank of hostname suffixes in order of distance.
+    
+    For now, only test .ca, .uk and .gov (Canada, UK and USA).
+    Tests are using pings to nearby hosts; may be unreliable!
+    '''
+    servers = {'.ac.uk': 'gridpp.ac.uk',
+               '.ca': 'westgrid.ca',
+               '.gov': 'fnal.gov'}
+    time_list = []
+    server_list = []
+    for s in servers:
+        ping_time = 1e9
+        rtc, out, err = execute('ping', '-c1', servers[s])
+        if not rtc:
+            try:
+                ping_time = int(out[-2].partition('time')[2].strip(' ms'))
+            except:
+                print "Failed to parse ping output from %s" % servers[s]
+        else:
+            print "Unable to ping %s" % servers[s]
+        time_list.append(ping_time)
+        server_list.append(s)
+    time_list, server_list = (list(x) for x in zip(*sorted(zip(time_list, server_list))))
+    return server_list
+
+
+def get_closest_copy(preference_list, surl_list):
+    '''Find best url from list.
+
+    Pass in list of preferable suffixes and SURLs
+    '''
+    hosts = [urlparse.urlparse(surl).hostname for surl in surl_list]
+    for suffix in preference_list:
+        for i, host in enumerate(hosts):
+            if host.endswith(suffix):
+                return surl_list[i]
+    # No preferable server, just use the first one!
+    return hosts[0]
+
 
 # Check environment variables
 _env = {}
 _checks = {"LFC_HOST": "lfc.gridpp.rl.ac.uk",
            "LCG_GFAL_INFOSYS": "lcgbdii.gridpp.rl.ac.uk:2170"}
 check_environment()
+
+# Check the copy method
+try:
+    import gfal2 # This is still available to the rest of the module
+    copy = gfal_copy
+except ImportError:
+    # Test to see if srmcp or lcg-cp are available
+    if search_path("lcg-cp"):
+        copy = lcg_copy
+    elif search_path("srmcp"):
+        copy = srm_copy
+    else:
+        raise Exception("No grid transfer methods available")
