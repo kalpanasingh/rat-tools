@@ -1,0 +1,41 @@
+# File: Y90.mac
+# Brief: Macro showing how simulate Y90 in the SPECTRE setup.
+#
+# Date: 2015-01-07
+# Contact: P G Jones, <p.g.jones@qmul.ac.uk>
+# Revisions:
+#
+# This mac file should simulate Y90 decays in the capilary within the SPECTRE
+# setup.
+
+# Choose the snoman geometry and materials (for salt phase)
+/rat/db/set DETECTOR geo_file "SPECTRE.geo"
+/rat/db/set DETECTOR pmt_info_file "SPECTRE_PMTINFO.ratdb"
+
+/rat/db/load PMT.ratdb
+/rat/db/load PMT_OPTICAL_PARAMETERS.ratdb
+/rat/db/load PMTTRANSIT.ratdb
+/rat/db/load MATERIALS.ratdb
+/rat/db/load OPTICS.ratdb
+/rat/db/load SURFACES.ratdb
+
+/rat/db/set PMTCALIB use_qhs_hhp 0
+
+/run/initialize
+
+# BEGIN EVENT LOOP
+/rat/proc count
+/rat/procset update 1
+
+/rat/proc outroot
+/rat/procset file "Y90.root"
+
+# END EVENT LOOP
+/generator/add combo decay0:fill:uniform
+/generator/vtx/set backg Y90 
+
+/generator/pos/set 0.0 0.0 11.30
+/generator/rate/set 1
+
+/rat/run/start 10
+exit

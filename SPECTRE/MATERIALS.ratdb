@@ -1,0 +1,25 @@
+{
+name: "MATERIAL",
+index: "acrylic_uva_McMaster",
+valid_begin: [0, 0],
+valid_end: [0, 0],
+
+density: 1.14,
+nelements: 3,
+nmaterials: 0,
+elements: ["Hydrogen", "Carbon", "Oxygen",],
+elemprop: [0.0703, 0.558, 0.3717],
+}
+
+{
+name: "MATERIAL",
+index: "photocathode-HQE",
+valid_begin : [0, 0],
+valid_end : [0, 0],
+
+density: 5.0,
+nelements: 1,
+nmaterials: 0,
+elements: ["Potassium"],
+elemprop: [1.0],
+}
