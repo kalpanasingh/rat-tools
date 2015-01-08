@@ -27,8 +27,6 @@ def create_dqxx(runnumber):
     """
     # First, get the Db username and password from the user
     # database server
-    DATA_AUTH = 'snoplus:PureTe->Dirac!=True'
-    db_server = 'couch.snopl.us'
     db_user = raw_input("[%s] Username: " % db_server)
     db_pswd = getpass.getpass("[%s] Password: " % db_server)
     auth = db_user + ":" + db_pswd
