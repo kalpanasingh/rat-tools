@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 #######################
 #
-# createDQXX.py
-# This code will output a PMT_DQXX ratdb file
+# runinfo.py
+# This code will output the status of a run
 # for the specified runnumber. It is work in progress
 # as many DQXX definitions are not yet available in
 # the ORCA configuration file.
@@ -30,4 +30,18 @@ if __name__ == "__main__":
     else:
         print "Assembling DQXX info for run " + args.runnumber
         dqcr, dqch, dqid = chstools.create_dqxx(args.runnumber)
-        chstools.dqxx_print(dqcr, dqch, dqid, args.runnumber)
+        dqxx = chstools.form_dqxx(dqcr, dqch)
+        number_offline_tubes = chstools.count_offline_channels(dqxx)
+        print " ++++++++ Run " + args.runnumber + " ++++++++ "
+        print " Number of offline tubes is " + str(number_offline_tubes)
+        print " Tube status summary: "
+        for bit in chstools.DQXX_DEFINITION:
+            if bit[2] == '1':
+                print "   " + bit[1] + " -> " + str(chstools.count_bits(dqxx, int(bit[0])))
+            else:
+                print "   " + bit[1] + " -> not yet implemented"
+        print_dqxx = raw_input("Print out SNO-style DQXX file? [Y,n] : ")
+        if print_dqxx == 'n':
+            print 'Not printing DQXX file, have a nice day!!'
+        else:
+            chstools.dqxx_print(dqcr, dqch, dqid, args.runnumber)    
