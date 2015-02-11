@@ -34,7 +34,7 @@
 /generator/add combo decay0:fill:uniform
 /generator/vtx/set backg Y90 
 
-/generator/pos/set 0.0 0.0 11.30
+/generator/pos/set 0.0 0.0 -240.4
 /generator/rate/set 1
 
 /rat/run/start 10

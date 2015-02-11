@@ -189,7 +189,7 @@ enable: 1,
 factory: "solid",
 solid: "tube",
 
-r_max: 1.0,
+r_max: 0.55,
 half_z:21.25,
 
 position: [0.0, 0.0 ,11.30],
@@ -207,13 +207,30 @@ enable: 1,
 factory: "solid",
 solid: "tube",
 
-r_max: 0.9,
+r_max: 0.45,
 half_z:21.225,
 
-position: [0.0, 0.0 ,11.30],
+position: [0.0, 0.0 ,0.0],
 material: "air",
 }
 
+{
+name: "GEO",
+index: "source_droplet",
+valid_begin: [0, 0],
+valid_end: [0, 0],
+mother: "capillary_airgap",
+enable: 1,
+
+factory: "solid",
+solid: "tube",
+
+r_max: 0.45,
+half_z:3.0,
+
+position: [0.0, 0.0 ,0.0],
+material: "lightwater_sno",
+}
 
 {
 name: "GEO",
