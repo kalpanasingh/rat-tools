@@ -1,0 +1,56 @@
+{ //HQE
+name: "PMT",
+index: "r11780-HQE",
+valid_begin: [0,0],
+valid_end: [0,0],
+
+model_type: "PMTOptics0",
+model_params: "PMTOptics0_HQE",
+
+dynode_material: "stainless_steel",
+glass_material: "glass",
+pmt_vacuum_material: "pmt_vacuum", // dilute air
+photocathode_surface: "photocathode-HQE",
+mirror_surface: "mirror",
+
+dynode_radius: 41.5, // mm
+dynode_top:   -46.0, // mm
+wall_thickness: 3.0, // mm
+
+photocathode_mirror_overlap_top: 0.75, // mm, above this in z is pure photocathode MUST BE A z_edge Co-ord IN THE LISTS BELOW:
+photocathode_mirror_overlap_bottom: 0.0, // mm, above this but below overlap_top is mirror and photocathode, below is mirror. MUST BE A z_edge Co-ord IN THE LISTS BELOW:
+
+model_shape: 0,
+
+z_edge:   [ 112.50d, 79.59d,   0.75d,   0.00d, -79.59d, -119.79d,  -127.50d, -285.0d],
+rho_edge: [  0.00d, 108.87d, 151.35d, 151.50d,  108.87d,  66.48d,   63.0d, 63.0d],
+z_origin: [-84.00d,  0.00d,   0.00d,   0.00d,  84.00d, -127.5d, -285.0d],
+}
+
+{
+name: "PMT",
+index: "r7081",
+valid_begin: [0,0],
+valid_end: [0,0],
+
+model_type: "PMTOptics0",
+model_params: "PMTOptics0_0",
+
+dynode_material: "stainless_steel",
+glass_material: "glass",
+pmt_vacuum_material: "pmt_vacuum", // dilute air
+photocathode_surface: "photocathode-1408",
+mirror_surface: "mirror",
+
+dynode_radius: 27.5, // mm
+dynode_top:   -5.9, // mm
+wall_thickness: 3.0, // mm
+
+photocathode_mirror_overlap_top: 40.0, // mm, above this in z is pure photocathode MUST BE A z_edge Co-ord IN THE LISTS BELOW:
+photocathode_mirror_overlap_bottom: -40.0, // mm, above this but below overlap_top is mirror and photocathode, below is mirror. MUST BE A z_edge Co-ord IN THE LISTS BELOW:
+
+model_shape: 0, // Torus shape
+z_edge: [ 96.7d, 40.0d, 0.0d, -40.0d, -90.0d, -142.0d ],
+rho_edge: [ 0.0d, 111.0d, 130.0d, 111.0d, 42.25d, 42.25d ],
+z_origin: [ -40.0d, 0.0d, 0.0d, 40.0d, -142.0d ],
+}
