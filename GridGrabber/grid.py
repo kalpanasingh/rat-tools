@@ -242,6 +242,8 @@ check_environment()
 
 # Check the copy method
 try:
+    # DON'T USE GFAL YET!
+    raise ImportError
     import gfal2 # This is still available to the rest of the module
     copy = gfal_copy
 except ImportError:
