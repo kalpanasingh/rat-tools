@@ -126,7 +126,11 @@ def form_dqxx_word(dqcr, dqch):
     dqxx = [0 for i in range(19 * 16 * 32)]
     for lcn in range(len(dqxx)):
         dqch_word = dqch[lcn]
-        dqcr_word = dqcr[lcn]
+        # get the crate number
+        crate = (lcn & 0x3e00) >> 9
+        # get the card number
+        card = (lcn & 0x1e0 ) >> 5
+        dqcr_word = dqcr[crate * 16 + card]
         # get the channel number
         ch = lcn & 0x1f
         # Get the daughterboard number for this channel
@@ -225,7 +229,7 @@ def create_dqcr_dqch_dqid(runnumber, data):
         fecs = value['doc']['fec32_card']
     # Create the arrays that will hold the dqid, dqcr and dqch info
     dqid = [0x0 for i in range(19 * 96)]
-    dqcr = [0x0 for i in range(19 * 16 * 32)]
+    dqcr = [0x0 for i in range(19 * 16)]
     dqch = [0x0 for i in range(19 * 16 * 32)]
     # Now loop over crate/card/channel and fill the DQID, DQCR and DQCH words
     for crate in range(0, 19):
@@ -354,13 +358,13 @@ def create_dqcr_dqch_dqid(runnumber, data):
                 else:
                     dqch_word = 0x0
                 dqch[(crate * 16 * 32) + (card * 32) + ch] = dqch_word
-                dqcr[(crate * 16 * 32) + (card * 32) + ch] = dqcr_word
+            dqcr[(crate * 16) + card] = dqcr_word
     return dqcr, dqch, dqid
 
 
 def dqxx_write_to_file(dqcr, dqch, dqid, runnumber):
     """Function that writes out the SNO-style DQXX file.
-    :param: dqcr: A list of 9728 DQCR words (one per channel).
+    :param: dqcr: A list of 304 DQCR words (one per FEC card).
     :param: dqch: A list of 9728 DQCH words (one per channel).
     :param: dqid: A list of 1824 DQID words (6 per FEC card).
     :param: The run-number.
@@ -369,10 +373,12 @@ def dqxx_write_to_file(dqcr, dqch, dqid, runnumber):
     # RAT has an issue with reading in the dqch integer array,
     # therefore, we are manually writing out the file for now:
     outfilename = "PMT_DQXX_%i.ratdb" % runnumber
+    runrange = "run_range: [%i, 100000]," % (runnumber)
     f = open(outfilename, 'w')
-    f.write('{\n name: "PMT_DQXX",\n valid_begin: [0,0], \n valid_end: [0,0], \n')
+    f.write(' {\n name: "PMT_DQXX",\n ')
+    f.write( runrange )
     # The following variables are zero by default for now? (Freija)
-    f.write(' cratestatus_n100: 0, \n cratestatus_n20: 0, \n cratestatus_esumL: 0, ')
+    f.write(' \n cratestatus_n100: 0,\n cratestatus_n20: 0, \n cratestatus_esumL: 0, ')
     f.write(' \n cratestatus_esumH: 0,\n cratestatus_owlN: 0, \n cratestatus_owlEL: 0, ')
     f.write(' \n cratestatus_owlEH: 0,')
     f.write('\n\n dqid : [ ')
@@ -386,7 +392,7 @@ def dqxx_write_to_file(dqcr, dqch, dqid, runnumber):
         f.write(', ')
     f.write('],\n ')
     f.write('\n dqcr : [ ')
-    for x in range(0, 19 * 16 * 32):
+    for x in range(0, 19 * 16):
         f.write(str(hex(dqcr[x])))
         f.write(', ')
     f.write('],\n }')
