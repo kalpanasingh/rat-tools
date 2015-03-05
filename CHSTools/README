@@ -1,0 +1,85 @@
+# chs tools by F. Descamps <fbdescamps@lbl.gov>
+
+Scripts to access the channel hardware status information from the ORCA run configuration files. 
+The SNO-style DQXX information will be written out to PMT_DQXX_#runnumber.ratdb if requested. This
+file can then be loaded in a macro when analyzing that specific run.
+
+IMPORTANT: always supply the snoplus password between quotes.
+
+EXAMPLES and details:
+1) Get the available hardware status for tube with lcn number 5621 for run 8600 and 
+write out the SNO-style DQXX file:
+
+python tubeinfo.py -n 8600 -t 5621 -u 'snoplus' -p 'definepasswordhere' --output
+output:
+Assembling DQXX info for run 8600
+Warning: no FEC info for crate/card 1/1
+
+DQXX status for tube 5621 is: 
+   SLOT OP  ->  False
+ CR ONLINE  ->  True
+     CR HV  ->  False
+   Card MB  ->  True
+        DC  ->  True
+  VTHR MAX  ->  True
+  RELAY HV  ->  True
+
+2) Print a summary for the specified run and 
+write out the SNO-style DQXX file:
+
+python runinfo.py -n 8600 -u 'snoplus' -p 'definepasswordhere' --output
+output:
+Assembling DQXX info for run 8600
+Warning: no FEC info for crate/card 1/1
+
+ ++++++++++ Run 8600 ++++++++++ 
+ Number of offline tubes is 6930
+ Tube status summary: 
+        CRATE  ->  N/A
+      SLOT OP  ->  8800
+           GT  ->  N/A
+    CR ONLINE  ->  9728
+        CR HV  ->  3072
+      Card MB  ->  9696
+           DC  ->  9696
+          DAQ  ->  N/A
+    SEQUENCER  ->  N/A
+        100NS  ->  N/A
+         20NS  ->  N/A
+     VTHR MAX  ->  9694
+         QINJ  ->  N/A
+         N100  ->  N/A
+          N20  ->  N/A
+        PMTIC  ->  N/A
+     RELAY HV  ->  9232
+     RESISTOR  ->  N/A
+        CABLE  ->  N/A
+        75OHM  ->  N/A
+       NOT OP  ->  N/A
+
+3) Create a SNO-style DQXX file
+
+python createDQXX.py -n 8600 -u 'snoplus' -p 'definepasswordhere'
+output:
+Assembling DQXX info for run 8600
+Warning: no FEC info for crate/card 1/1
+
+
+4) Available functions in chstools.py:
+
+check_bit(word, n):        
+    Function that returns True if the n'th bit is set in the word.
+count_bits(dqxx, n):       
+    Function that returns the number of channels that have bit n set.
+is_tube_online(dqxx, lcn): 
+    Function that returns a boolean array defining if Tube is online or not.
+count_offline_tubes(dqxx): 
+    Function that returns the number of offline channels.
+form_dqxx_word(dqcr, dqch): 
+    Function to form the DQXX bitmaps that show the detector status.
+get_run_configuration_from_db(runnumber, db_username, db_password):
+    Function to retrieve the ORCA runconfiguration document
+create_dqcr_dqch_dqid(runnumber, data):
+    Function that creates the dqcr, dqch and dqid words for runnumber.
+dqxx_write_to_file(dqcr, dqch, dqid, runnumber):
+    Function that writes out the SNO-style DQXX file.
