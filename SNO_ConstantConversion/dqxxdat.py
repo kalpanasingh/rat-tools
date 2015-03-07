@@ -5,10 +5,15 @@ import sys
 
 """
 Conversion of DQXX Constants from SNO to SNOPLUS Format
-Using code from Freija Descamps, PhD
+Using logic from a SNO macro written by Gabriel Orebi Gann, PhD
 """
 
 """The following lambda expression takes a number and flips bits from r[0] to r[1] excluding r[1]"""
+def listdouble(l,n):
+    if n==0:
+	return l
+    return listdouble(l,n-1)+listdouble(l,n-1)
+
 
 parser = argparse.ArgumentParser(description="Input SNO DQXX File")
 parser.add_argument("filename",
@@ -66,7 +71,7 @@ with open('./PMT_DQXX0'+str(runnum)+'.ratdb','w') as f2:
 ///
 ////////////////////////////////////////////////////////////////////
 {
-name: "PMT_DQXX"
+name: "PMT_DQXX",
 valid_begin: [0,0],
 valid_end: [0,0],
 
