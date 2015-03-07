@@ -6,8 +6,8 @@ import sys
 """
 Conversion of TECA Constants from SNO to SNOPLUS Format
 Using code from Freija Descamps, PhD
-
 Following Documentation on page 43-44 of SNO-STR-2001-005 (New Format for Time Slope Titles Banks)
+Auth: Chris Dock 2015
 """
 
 """The following lambda expression takes a number and flips bits from r[0] to r[1] excluding r[1]"""

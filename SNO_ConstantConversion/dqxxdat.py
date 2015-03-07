@@ -6,6 +6,7 @@ import sys
 """
 Conversion of DQXX Constants from SNO to SNOPLUS Format
 Using logic from a SNO macro written by Gabriel Orebi Gann, PhD
+Auth: Chris Dock 2015
 """
 
 """The following lambda expression takes a number and flips bits from r[0] to r[1] excluding r[1]"""
