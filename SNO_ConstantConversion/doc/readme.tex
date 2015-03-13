@@ -38,7 +38,7 @@ Optionally, one can move the resulting $.ratdb$ files into the $/rat/data$ direc
 \section{Calibration}
 \paragraph{}Below is the RAT macro I use (generalized) for reading in uncalibrated SNO $.zdab$ files, calibrating them, and saving the calibrated output to a root file.
 \begin{verbatim}
-/PhysicsList/OmitAll true
+/rat/physics_list/OmitAll true
 /rat/db/load pmt/airfill2.ratdb
 /rat/db/load pmt/snoman.ratdb
 /rat/db/set DETECTOR geo_file "geo/snod2o.geo"
