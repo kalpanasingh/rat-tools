@@ -1,0 +1,62 @@
+\documentclass[12pt,letterpaper]{article}
+\usepackage{ifpdf}
+\usepackage{mla}
+\usepackage{setspace}
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{url}
+\usepackage[top=1in, bottom=1in, left=1in, right=1in]{geometry}
+
+\singlespacing
+\setlength\voffset{0in}
+\title{Calibration of SNO Data using converted ECA/PCA/DQXX Constant Banks}
+\author{Chris Dock, SNO+ Group}
+\begin{document}
+\maketitle
+\section{Constant Conversion}
+\paragraph{}The calibration of data in both SNO and SNO+ relies on banks of experimentally determined constants stored in pseudo database files ($.dat$ in SNO and $.ratdb$ in SNO+). The values of these constants have changed since SNO, and so any attempt at calibrating SNO data files using RAT with its default SNO+ constant banks will fail. The SNO constant banks are also in a different format, and so the solution is to convert the SNO constant banks to the SNO+ format and force RAT to use the converted constant banks in calibration. The SNO constant banks (as described in SNO-STR-2001-005) are stored in files with titles of the form
+\newline
+\newline
+$yy$ca\_$rrrrrrrrrr\_yyyymmdd\_hh$.dat
+\newline
+dqxx\_$rrrrrrrrrr$.dat
+\newline
+\newline
+Where $yy$ denotes the kind ECA/PCA of constants stored -- for example $yy$ is $pe$ for Pedestal and $te$ for Time Slope. The internal formats of those particular files are also described in detail in SNO-STR-2001-005. In general, the format of the numerical values is the same between SNO and SNO+ -- it is only the arrangement of the constants that has changed. This is not, however, true of the teca banks. SNO used CERN's BUNCH routine to bitpack the ADC counts of each Time Slope into 12 bit integers (as well as packing the fit parameters and two of the three associated flags). By contrast, SNO+ uses raw values and has merged the two packed SNO flags ``suspicious'' and ``bad'' into a single ``bad'' flag. 
+
+\paragraph{} I wrote a Python script that converts the teca\_$rrrrrrrrrr\_yyyymmdd\_hh$.dat file into a SNO+ TSLP\_$RRRRRRRRRRR\_HH$.ratdb file and another that converts the \\dqxx\_$rrrrrrrrrr$.dat into a PMT\_DQXX\_$RRRRRR$.ratdb. The scripts read in the $.dat$ files and extract all of the information to be stored in the $.ratdb$ files. The teca script unpacks the ADC Counts and the fit parameters, logically and's the appropriate flags, and writes all of that information to the $.ratdb$ file. There are two similar scripts written by Freija Descamps for converting peca, gpca, and wpca2 constant files (the gpcadat.py script takes either a gpca file or a wpca2 file as its argument). In order to convert all of the necessary files for calibration, run the following:
+
+\begin{verbatim}
+python tecadat.py teca_rrrrrrrrrr_yyyymmdd_hh.dat
+python dqxxdat.py dqxx_rrrrrrrrrr.dat
+python pecadat.py peca_rrrrrrrrrr_yyyymmdd_hh.dat
+python gpcadat.py gpca_rrrrrrrrrr_yyyymmdd_hh.dat
+python gpcadat.py wpca2_rrrrrrrrrr_yyyymmdd_hh.dat
+\end{verbatim}
+
+Optionally, one can move the resulting $.ratdb$ files into the $/rat/data$ directory where they will be easily available to the calibration RAT macro (this the location of the default constant banks).
+\section{Calibration}
+\paragraph{}Below is the RAT macro I use (generalized) for reading in uncalibrated SNO $.zdab$ files, calibrating them, and saving the calibrated output to a root file.
+\begin{verbatim}
+/rat/physics_list/OmitAll true
+/rat/db/load pmt/airfill2.ratdb
+/rat/db/load pmt/snoman.ratdb
+/rat/db/set DETECTOR geo_file "geo/snod2o.geo"
+/rat/db/load /path/to/TSLP_33899.ratdb #converted TSLP (teca.dat)
+/rat/db/load /path/to/PMT_DQXX_020643.ratdb #converted DQXX (dqxx.dat)
+/rat/db/load /path/to/PDST_33895_0.ratdb #converted PDST (peca.dat)
+/rat/db/load /path/to/PMTCALIB_33101.ratdb #converted PMTCALIB (gpca.dat)
+/rat/db/load /path/to/PCATW_33101.ratdb #converted PCATW (wpca2.dat)
+/run/initialize
+/rat/proc count
+/rat/procset update 1
+/rat/proc calibratePMT
+/rat/proclast outroot
+/rat/procset file "calibrated_sno_file.root"
+/rat/inzdab/read /path/to/sno_data.zdab
+exit
+\end{verbatim}
+The resulting $.root$ file can then be analyzed using ROOT.
+\section{Caveats}
+\paragraph{}The conversion of the Time Slope bank causes an arbitrary displacement (without distortion) of the distribution of PMT times. For the purposes of data cleaning this is fine, as the displacement is irrelevant, but it may be a problem in other areas of analysis. I have as yet been unable to find the source of the displacement. Another problem is that the calibration macro will fail unless the DQID values in each of the converted .ratdb's match; thus if you are only using some of the converted files you have to manually set the DQID values of the default constant banks in RAT's /data directory.
+\end{document}
