@@ -49,13 +49,6 @@ def ReadinFile(textfile):
 		else:
 			print "Not correct number of inputs\n"
 			print "should be\n base directory \t path \t file \t and optional storage endpoint "
-	
-	#print words[0]
-	#print words[1]
-	print directory[0]
-	# print directory[1]
-	print file_path[0]
-#	print file_path[1]
 	return directory, file_path, filename, storage
 
 def BaseDirectory(directory):
@@ -78,26 +71,6 @@ def BaseDirectory(directory):
 			print directory[i]
 			return False
 		i+=1
-
-def MakeFolderPath(griddir,directory,path):
-	i=0
-	for lines in path:
-		createfolder = griddir+"/"+directory[i]
-		words = []
-		words.append(path[i].split('/'))
-		print words
-		words_array = numpy.array(words)
-		#print "the size is"
-		length = len(words_array.T)
-		for j in range (0, length):
-			path1 = words_array[:,j]
-			createfolder += '/%s'%path1[0]
-			print createfolder
-			os.system('lfc-mkdir '+ createfolder)
-		i+=1
-#      lfc_dir = "lfn:/grid/snoplus.snolab.ca/%s/%s/"%(directory[i],path[i])
-
-
 
 def GridFile(griddir,directory,path,filename,storage):
 	print "here"
@@ -122,5 +95,4 @@ if __name__ == '__main__':
 	if BaseDirectory(Directory) != True:
 		print "not valid base directory"
 		exit()
-#	MakeFolderPath(Griddir, Directory, Path)
 	GridFile(Griddir, Directory, Path, Filename, Storage)
