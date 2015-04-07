@@ -13,9 +13,15 @@
 #
 #####################
 
-from os.path import dirname
-#from numpy import array
+import os
+import sys
+import re
+import subprocess
 import numpy
+
+#####################################
+#Code for uploading
+#####################################
 
 def ReadinFile(textfile):
 	directory = []
@@ -26,7 +32,7 @@ def ReadinFile(textfile):
 	with open(textfile, 'r') as f:
 		data = f.readlines()
 		for line in data:
-			words.append(line.split('\t'))
+			words.append(line.rstrip('\n').split('\t'))
 			print words[i]
 			i+=1
 		words_array = numpy.array(words)
@@ -36,6 +42,13 @@ def ReadinFile(textfile):
 		directory = words_array[:,0]
 		file_path = words_array[:,1]
 		filename = words_array[:,2]
+		if words_array.shape[1] == 3:
+			storage = 'sehn02.atlas.ualberta.ca'
+		elif words_array.shape[1] == 4:
+			storage == words_array[:,3]
+		else:
+			print "Not correct number of inputs\n"
+			print "should be\n base directory \t path \t file \t and optional storage endpoint "
 	
 	#print words[0]
 	#print words[1]
@@ -43,22 +56,22 @@ def ReadinFile(textfile):
 	# print directory[1]
 	print file_path[0]
 #	print file_path[1]
-	return directory, file_path, filename
+	return directory, file_path, filename, storage
 
 def BaseDirectory(directory):
 	i=0
 	for entry in directory:
-		if directory[i] == "user":
+		if directory[i] == 'user':
 			return True
-		elif directory[i] == "sw":
+		elif directory[i] == 'sw':
 			return True
-		elif directory[i] == "snotflow":
+		elif directory[i] == 'snotflow':
 			return True
-		elif directory[i] == "production_testing":
+		elif directory[i] == 'production_testing':
 			return True
-		elif directory[i] == "production":
+		elif directory[i] == 'production':
 			return True
-		elif directory == "nearline":
+		elif directory == 'nearline':
 			return True
 		else:
 			print "here "
@@ -66,41 +79,48 @@ def BaseDirectory(directory):
 			return False
 		i+=1
 
-def MakeFolderPath(directory,path,griddir):
+def MakeFolderPath(griddir,directory,path):
 	i=0
 	for lines in path:
-		createfolder = griddir
+		createfolder = griddir+"/"+directory[i]
 		words = []
-		words.append(path[i].split("/"))
-		for column in words:
-			  createfolder += "/%s"%words[column]
-		    execute('lfc-mkdir', createfolder)
-		
-		
-		#create_path = numpy.fromstring(path[i],dtype=str,sep="/")
-		#print create_path
+		words.append(path[i].split('/'))
+		print words
+		words_array = numpy.array(words)
+		#print "the size is"
+		length = len(words_array.T)
+		for j in range (0, length):
+			path1 = words_array[:,j]
+			createfolder += '/%s'%path1[0]
+			print createfolder
+			os.system('lfc-mkdir '+ createfolder)
 		i+=1
 #      lfc_dir = "lfn:/grid/snoplus.snolab.ca/%s/%s/"%(directory[i],path[i])
 
 
 
-def GridFile(directory,path,filename):
+def GridFile(griddir,directory,path,filename,storage):
 	print "here"
 	i=0
 	for s in directory:
-		#	lfc_dir = "lfn:/grid/snoplus.snolab.ca/"
-		lfc_dir = "lfn:/grid/snoplus.snolab.ca/%s/%s/%s"%(directory[i],path[i],filename[i])
+		se_path = '%s/%s/%s'%(directory[i],path[i],filename[i])
+		print se_path
+		se_path.strip()
+		print se_path
+		lfc_path = 'lfn:%s/%s/%s/%s'%(griddir,directory[i],path[i],filename[i])
+		upfile = filename[i]
+		inputstring = 'lcg-cr --vo snoplus.snolab.ca --checksum -d sehn02.atlas.ualberta.ca -P %s -l %s %s'%(se_path,lfc_path,upfile)
+		os.system(inputstring)
 		i+=1
-		print lfc_dir
+		print inputstring
 
 
 if __name__ == '__main__':
 	Textfile = 'in_text.txt'
-	Griddir = '/grid/snoplus.snolab.ca/'
-	databasedir = ''
-	Directory, Path, Filename = ReadinFile(Textfile)
+	Griddir = '/grid/snoplus.snolab.ca'
+	Directory, Path, Filename, Storage = ReadinFile(Textfile)
 	if BaseDirectory(Directory) != True:
 		print "not valid base directory"
 		exit()
-	MakeFolderPath(Directory, Path, Griddir)
-	GridFile(Directory, Path, Filename)
+#	MakeFolderPath(Griddir, Directory, Path)
+	GridFile(Griddir, Directory, Path, Filename, Storage)
