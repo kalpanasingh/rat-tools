@@ -18,6 +18,7 @@ import sys
 import re
 import numpy
 import argparse
+
 sys.path.insert(0,'../GridGrabber')
 import grid
 #import database
@@ -30,7 +31,7 @@ def readin_file(textfile):
     directory = []
     file_path = []
     filename = []
-    i =0
+    i = 0
     words = []
     with open(textfile, 'r') as f:
         data = f.readlines()
@@ -38,16 +39,22 @@ def readin_file(textfile):
             words.append(line.rstrip('\n').split('\t'))
             i+=1
         words_array = numpy.array(words)
-        directory = words_array[:,0]
-        file_path = words_array[:,1]
-        filename = words_array[:,2]
         if words_array.shape[1] == 3:
             storage = 'sehn02.atlas.ualberta.ca'
         elif words_array.shape[1] == 4:
-						storage == words_array[:,3]
+            storage == words_array[:, 3]
         else:
-						print "Not correct number of inputs\n"
-						print "should be\n base directory \t path \t file \t and optional storage endpoint "
+            print "Not correct number of inputs"
+            print "should be:"
+            str1 = repr("<base directory> \t <path> \t <file> \t")
+            str2 = ("and optional <storage endpoint>)")
+            str3 = "%s %s" % (str1,str2)
+            print str3
+            sys.exit()
+            return 0
+        directory = words_array[:, 0]
+        file_path = words_array[:, 1]
+        filename = words_array[:, 2]
     return directory, file_path, filename, storage
 
 def base_directory(directory):
@@ -68,27 +75,24 @@ def base_directory(directory):
         else:
 	    print directory[i]
             return False
-        i+=1
+        i += 1
 
 def grid_file(griddir, directory, path, filename, storage):
-    i=0
+    i = 0
     command = 'lcg-cr'
     gridid = {}
     for s in directory:
-        se_path = '%s/%s/%s'%(directory[i],path[i],filename[i])
+        se_path = os.path.join(directory[i],path[i],filename[i])
         se_path.strip()
-				#lfc_path = 'lfn:%s/%s/%s/%s'%(griddir,directory[i],path[i],filename[i])
-        lfc_path = 'lfn:%s' % os.path.join(griddir,directory[i],path[i],filename[i])
+        print se_path
+        lfc_path = 'lfn:%s' % os.path.join(griddir,directory[i],path[i],
+                                           filename[i])
         print lfc_path
         upfile = filename[i]
-        inputstring = 'lcg-cr --vo snoplus.snolab.ca --checksum -d %s -P %s -l %s %s'%(storage,se_path,lfc_path,upfile)
-				#args = ['--vo', 'snoplus.snolab.ca', '--checksum', '-d', storage, '-P', se_path, '-l', lfc_path, upfile]
-				#rtc, out, err = grid.execute(command, args)
-        #rtc, out, err = execute(command, args)
-        # os.system(inputstring)
+        inputstring = 'lcg-cr --vo snoplus.snolab.ca --checksum -d %s \
+        -P %s -l %s %s'%(storage,se_path,lfc_path,upfile)
         gridid[i] = os.popen(inputstring).readlines()
-        i+=1
-        # print inputstring
+        i += 1
     return gridid
 
 def database_file(directory, path, filename, gridid):
@@ -100,21 +104,24 @@ def database_file(directory, path, filename, gridid):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("-l",dest="list", help="list of files to upload [in_text.txt",
-												default="in_text.txt")
+    parser.add_argument("-l",dest="list", help="list of files to upload\
+                        [in_text.txt",default="in_text.txt")
     args = parser.parse_args()
-    Griddir = '/grid/snoplus.snolab.ca'
     if not grid.proxy_time():
         print "Need to generate a grid proxy"
         if not grid.proxy_create():
             print "Proxy successfully created"
         else:
-             print "Unable to create proxy; try 'voms-proxy-init --voms snoplus.snolab.ca' in shell"
-             sys.exit()
+            str1 = "Unable to create proxy; try 'voms-proxy-init --voms"
+            str2 = "snoplus.snolab.ca' in shell"
+            str3 = "%s %s" % (str1,str2)
+            print str3
+            sys.exit()
     Directory, Path, Filename, Storage = readin_file(args.list)
     if base_directory(Directory) != True:
         print "not valid base directory"
         exit()
+    Griddir = '/grid/snoplus.snolab.ca'
     Gridid = grid_file(Griddir, Directory, Path, Filename, Storage)
     database_file(Directory, Path, Filename, Gridid)
     print Gridid
