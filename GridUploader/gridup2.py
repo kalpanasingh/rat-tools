@@ -17,6 +17,7 @@ import os
 import sys
 import re
 import numpy
+import argparse
 sys.path.insert(0,'../GridGrabber')
 import grid
 #import database
@@ -69,24 +70,28 @@ def base_directory(directory):
             return False
         i+=1
 
-def grid_file(griddir,directory,path,filename,storage):
+def grid_file(griddir, directory, path, filename, storage):
     i=0
     command = 'lcg-cr'
+    gridid = {}
     for s in directory:
         se_path = '%s/%s/%s'%(directory[i],path[i],filename[i])
         se_path.strip()
-        lfc_path = 'lfn:%s/%s/%s/%s'%(griddir,directory[i],path[i],filename[i])
+				#lfc_path = 'lfn:%s/%s/%s/%s'%(griddir,directory[i],path[i],filename[i])
+        lfc_path = 'lfn:%s' % os.path.join(griddir,directory[i],path[i],filename[i])
+        print lfc_path
         upfile = filename[i]
         inputstring = 'lcg-cr --vo snoplus.snolab.ca --checksum -d %s -P %s -l %s %s'%(storage,se_path,lfc_path,upfile)
-        args = ['--vo', 'snoplus.snolab.ca', '--checksum', '-d', storage, '-P', se_path, '-l', lfc_path, upfile]
+				#args = ['--vo', 'snoplus.snolab.ca', '--checksum', '-d', storage, '-P', se_path, '-l', lfc_path, upfile]
+				#rtc, out, err = grid.execute(command, args)
         #rtc, out, err = execute(command, args)
         # os.system(inputstring)
-        gridid = os.popen(inputstring).readlines()
+        gridid[i] = os.popen(inputstring).readlines()
         i+=1
         # print inputstring
     return gridid
 
-def database_file(directory,path,filename,gridid):
+def database_file(directory, path, filename, gridid):
     prod_data_doc = None
 		#    prod_data_doc = document.ProdDataDocument.new_doc(db=self.job_doc.db, module=self._name,pass_number=self._pass, run=self._run, rat_version=self.job_doc.get_rat_version())
 	#database.connect_db("couch.snopl.us", None, test)
@@ -94,7 +99,10 @@ def database_file(directory,path,filename,gridid):
 
 
 if __name__ == '__main__':
-    Textfile = 'in_text.txt'
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-l",dest="list", help="list of files to upload [in_text.txt",
+												default="in_text.txt")
+    args = parser.parse_args()
     Griddir = '/grid/snoplus.snolab.ca'
     if not grid.proxy_time():
         print "Need to generate a grid proxy"
@@ -103,10 +111,10 @@ if __name__ == '__main__':
         else:
              print "Unable to create proxy; try 'voms-proxy-init --voms snoplus.snolab.ca' in shell"
              sys.exit()
-    Directory, Path, Filename, Storage = readin_file(Textfile)
+    Directory, Path, Filename, Storage = readin_file(args.list)
     if base_directory(Directory) != True:
         print "not valid base directory"
         exit()
     Gridid = grid_file(Griddir, Directory, Path, Filename, Storage)
-    database_file(Directory,Path,Filename,Gridid)
+    database_file(Directory, Path, Filename, Gridid)
     print Gridid
