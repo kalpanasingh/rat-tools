@@ -17,11 +17,14 @@ import os
 import sys
 import re
 import numpy
-import argparse
-
+try:
+    import argparse
+except:
+    raise ImportError("argparse not availbel; python version needs to \
+                      be 2.7+")
 sys.path.insert(0,'../GridGrabber')
 import grid
-#import database
+import database
 
 #####################################
 #Code for uploading
@@ -52,10 +55,20 @@ def readin_file(textfile):
             print str3
             sys.exit()
             return 0
+        print (words_array)
         directory = words_array[:, 0]
         file_path = words_array[:, 1]
         filename = words_array[:, 2]
     return directory, file_path, filename, storage
+
+#def get_file_size(filename):
+#    size = []
+#    i = 0
+#    for line in filename:
+#        size = os.path.getsize(filename[i])
+#        print os.path.getsize(filename[i])
+#        i+=1
+#    return size
 
 def base_directory(directory):
     i=0
@@ -80,19 +93,27 @@ def base_directory(directory):
 def grid_file(griddir, directory, path, filename, storage):
     i = 0
     command = 'lcg-cr'
-    gridid = {}
-    for s in directory:
-        se_path = os.path.join(directory[i],path[i],filename[i])
-        se_path.strip()
-        print se_path
-        lfc_path = 'lfn:%s' % os.path.join(griddir,directory[i],path[i],
+    gridid = []
+    with open("Gridid.txt","w") as f:
+        for s in directory:
+            se_path = os.path.join(directory[i],path[i],filename[i])
+            se_path.strip()
+            print se_path
+            lfc_path = 'lfn:%s' % os.path.join(griddir,directory[i],path[i],
                                            filename[i])
-        print lfc_path
-        upfile = filename[i]
-        inputstring = 'lcg-cr --vo snoplus.snolab.ca --checksum -d %s \
-        -P %s -l %s %s'%(storage,se_path,lfc_path,upfile)
-        gridid[i] = os.popen(inputstring).readlines()
-        i += 1
+            print lfc_path
+            upfile = filename[i]
+            inputstring = 'lcg-cr --vo snoplus.snolab.ca --checksum -d %s \
+            -P %s -l %s %s'%(storage,se_path,lfc_path,upfile)
+            #gridid[i] = os.popen(inputstring).readlines()
+            gridid.append(os.popen(inputstring).readlines()[0])
+            str1 = str(filename[i])
+            # str2 = str(size[i])
+            str3 = str(gridid[i])
+            outline = "%s \t %s" % (str1,str3)
+            f.write(outline)
+            i += 1
+    f.close()
     return gridid
 
 def database_file(directory, path, filename, gridid):
@@ -101,6 +122,16 @@ def database_file(directory, path, filename, gridid):
 	#database.connect_db("couch.snopl.us", None, test)
     return 0
 
+def write_grid(filename, gridid):
+    i=0
+    with open("Gridid.txt","w") as f:
+        for line in gridid:
+            f.write(line)
+            print str(line.rstrip('\n'))
+            i+=1
+    f.close()
+    return 0
+                    
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -121,7 +152,11 @@ if __name__ == '__main__':
     if base_directory(Directory) != True:
         print "not valid base directory"
         exit()
+    #Size = get_file_size(Filename)
+    #print Size
     Griddir = '/grid/snoplus.snolab.ca'
     Gridid = grid_file(Griddir, Directory, Path, Filename, Storage)
     database_file(Directory, Path, Filename, Gridid)
     print Gridid
+#write_grid(Gridid)
+    
