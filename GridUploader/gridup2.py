@@ -55,7 +55,7 @@ def readin_file(textfile):
             print str3
             sys.exit()
             return 0
-        print (words_array)
+        #print (words_array)
         directory = words_array[:, 0]
         file_path = words_array[:, 1]
         filename = words_array[:, 2]
@@ -122,16 +122,6 @@ def database_file(directory, path, filename, gridid):
 	#database.connect_db("couch.snopl.us", None, test)
     return 0
 
-def write_grid(filename, gridid):
-    i=0
-    with open("Gridid.txt","w") as f:
-        for line in gridid:
-            f.write(line)
-            print str(line.rstrip('\n'))
-            i+=1
-    f.close()
-    return 0
-                    
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -158,5 +148,4 @@ if __name__ == '__main__':
     Gridid = grid_file(Griddir, Directory, Path, Filename, Storage)
     database_file(Directory, Path, Filename, Gridid)
     print Gridid
-#write_grid(Gridid)
     
