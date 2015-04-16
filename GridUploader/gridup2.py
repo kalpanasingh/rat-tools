@@ -122,11 +122,24 @@ def database_file(directory, path, filename, gridid):
 	#database.connect_db("couch.snopl.us", None, test)
     return 0
 
+def split_filename(filenamepath):
+    filename = []
+    words = []
+    for line in filenamepath:
+        words.append(line.rstrip('\n').split('/'))
+        print words
+    filename_array = numpy.array(words)
+    numberOfFiles = filename_array.shape[0]
+    for i in range(numberOfFiles):
+        filename.append(filename_array[i][-1])
+    print "here"
+    print filename
+    return filename
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-l",dest="list", help="list of files to upload\
-                        [in_text.txt",default="in_text.txt")
+                        [in_text.txt]",default="in_text.txt")
     args = parser.parse_args()
     if not grid.proxy_time():
         print "Need to generate a grid proxy"
@@ -138,7 +151,8 @@ if __name__ == '__main__':
             str3 = "%s %s" % (str1,str2)
             print str3
             sys.exit()
-    Directory, Path, Filename, Storage = readin_file(args.list)
+    Directory, Path, FilenamePath, Storage = readin_file(args.list)
+    Filename = split_filename(FilenamePath)
     if base_directory(Directory) != True:
         print "not valid base directory"
         exit()
