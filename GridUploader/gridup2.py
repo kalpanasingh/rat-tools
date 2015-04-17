@@ -54,7 +54,6 @@ def readin_file(textfile):
             print words_array.shape[1]
             sys.exit()
             return 0
-        #print (words_array)
         directory = words_array[:, 0]
         file_path = words_array[:, 1]
         filename = words_array[:, 2]
@@ -105,7 +104,6 @@ def grid_file(griddir, directory, path, filename, storage):
             upfile = filename[i]
             inputstring = 'lcg-cr --vo snoplus.snolab.ca --checksum -d %s \
                 -P %s -l %s %s'%(storage,se_path,lfc_path,upfile)
-            #gridid[i] = os.popen(inputstring).readlines()
             try:
                 gridid.append(os.popen(inputstring).readlines()[0])
             except:
