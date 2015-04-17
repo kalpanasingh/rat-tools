@@ -34,31 +34,38 @@ def readin_file(textfile):
     directory = []
     file_path = []
     filename = []
+    storage = []
     i = 0
     words = []
     with open(textfile, 'r') as f:
         data = f.readlines()
         for line in data:
-            words.append(line.rstrip('\n').split('\t'))
+            line = line.translate(None,'\n\t ')
+            words.append(line.split(','))
             i+=1
         words_array = numpy.array(words)
         if words_array.shape[1] == 3:
             storage = 'sehn02.atlas.ualberta.ca'
         elif words_array.shape[1] == 4:
-            storage == words_array[:, 3]
+            storage = words_array[:, 3]
         else:
             print "Not correct number of inputs"
             print "should be:"
-            str1 = repr("<base directory> \t <path> \t <file> \t")
-            str2 = ("and optional <storage endpoint>)")
+            str1 = repr("<base directory>,<path>,<file>")
+            str2 = ("and optional ,<storage endpoint>)")
             str3 = "%s %s" % (str1,str2)
             print str3
+            print "you have used"
+            for j in words_array:
+                print str(words_array[j])
             sys.exit()
             return 0
         #print (words_array)
         directory = words_array[:, 0]
         file_path = words_array[:, 1]
         filename = words_array[:, 2]
+    print "next line storage"
+    print storage
     return directory, file_path, filename, storage
 
 #def get_file_size(filename):
@@ -104,7 +111,7 @@ def grid_file(griddir, directory, path, filename, storage):
             print lfc_path
             upfile = filename[i]
             inputstring = 'lcg-cr --vo snoplus.snolab.ca --checksum -d %s \
-            -P %s -l %s %s'%(storage,se_path,lfc_path,upfile)
+            -P %s -l %s %s'%(storage[i],se_path,lfc_path,upfile)
             #gridid[i] = os.popen(inputstring).readlines()
             gridid.append(os.popen(inputstring).readlines()[0])
             str1 = str(filename[i])
@@ -132,7 +139,6 @@ def split_filename(filenamepath):
     numberOfFiles = filename_array.shape[0]
     for i in range(numberOfFiles):
         filename.append(filename_array[i][-1])
-    print "here"
     print filename
     return filename
 
