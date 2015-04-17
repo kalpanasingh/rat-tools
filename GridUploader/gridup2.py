@@ -31,6 +31,8 @@ import database
 #####################################
 
 def readin_file(textfile):
+    #read in the text file and split up the input into the correct
+    #varibles
     directory = []
     file_path = []
     filename = []
@@ -44,29 +46,19 @@ def readin_file(textfile):
             words.append(line.split(','))
             i+=1
         words_array = numpy.array(words)
-        if words_array.shape[1] == 3:
-            storage = 'sehn02.atlas.ualberta.ca'
-        elif words_array.shape[1] == 4:
-            storage = words_array[:, 3]
-        else:
+        if words_array.shape[1] != 3:
             print "Not correct number of inputs"
             print "should be:"
-            str1 = repr("<base directory>,<path>,<file>")
-            str2 = ("and optional ,<storage endpoint>)")
-            str3 = "%s %s" % (str1,str2)
-            print str3
-            print "you have used"
-            for j in words_array:
-                print str(words_array[j])
+            print repr("<base directory>,<remote path>,<local file>")
+            print "you have used inputs"
+            print words_array.shape[1]
             sys.exit()
             return 0
         #print (words_array)
         directory = words_array[:, 0]
         file_path = words_array[:, 1]
         filename = words_array[:, 2]
-    print "next line storage"
-    print storage
-    return directory, file_path, filename, storage
+    return directory, file_path, filename
 
 #def get_file_size(filename):
 #    size = []
@@ -78,6 +70,7 @@ def readin_file(textfile):
 #    return size
 
 def base_directory(directory):
+    #check that one of the offical base directories is used
     i=0
     for entry in directory:
         if directory[i] == 'user':
@@ -107,13 +100,18 @@ def grid_file(griddir, directory, path, filename, storage):
             se_path.strip()
             print se_path
             lfc_path = 'lfn:%s' % os.path.join(griddir,directory[i],path[i],
-                                           filename[i])
+                                               filename[i])
             print lfc_path
             upfile = filename[i]
             inputstring = 'lcg-cr --vo snoplus.snolab.ca --checksum -d %s \
-            -P %s -l %s %s'%(storage[i],se_path,lfc_path,upfile)
+                -P %s -l %s %s'%(storage,se_path,lfc_path,upfile)
             #gridid[i] = os.popen(inputstring).readlines()
-            gridid.append(os.popen(inputstring).readlines()[0])
+            try:
+                gridid.append(os.popen(inputstring).readlines()[0])
+            except:
+                print "file already exists"
+                print upfile
+                continue
             str1 = str(filename[i])
             # str2 = str(size[i])
             str3 = str(gridid[i])
@@ -130,6 +128,9 @@ def database_file(directory, path, filename, gridid):
     return 0
 
 def split_filename(filenamepath):
+    #if the local file isn't in the same directory as gridup2.py
+    #splits the filename away from the path and so can use different
+    #paths on grid but the same filename.
     filename = []
     words = []
     for line in filenamepath:
@@ -144,8 +145,11 @@ def split_filename(filenamepath):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("-l",dest="list", help="list of files to upload\
-                        [in_text.txt]",default="in_text.txt")
+    parser.add_argument("-l",dest='list', help="list of files to upload\
+                        [in_text.txt]",default='in_text.txt')
+    parser.add_argument("-d",dest='dest', help="storage element on grid\
+                                            'sehn02.atlas.ualberta.ca'",\
+                        default='sehn02.atlas.ualberta.ca')
     args = parser.parse_args()
     if not grid.proxy_time():
         print "Need to generate a grid proxy"
@@ -157,7 +161,8 @@ if __name__ == '__main__':
             str3 = "%s %s" % (str1,str2)
             print str3
             sys.exit()
-    Directory, Path, FilenamePath, Storage = readin_file(args.list)
+    Directory, Path, FilenamePath = readin_file(args.list)
+    Storage = args.dest
     Filename = split_filename(FilenamePath)
     if base_directory(Directory) != True:
         print "not valid base directory"
