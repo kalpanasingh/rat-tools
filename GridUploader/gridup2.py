@@ -26,6 +26,26 @@ sys.path.insert(0,'../GridGrabber')
 import grid
 import database
 
+###########################################
+# File utilities
+###########################################
+def adler32(filename):
+    '''Calculate and return Alder32 checksum of file.
+        '''
+    import zlib
+    block = 32 * 1024 * 1024
+    val = 1
+    f = open(filename, 'rb')
+    while True:
+        line = f.read(block)
+        if len(line) == 0:
+            break
+        val = zlib.adler32(line, val)
+        if val < 0:
+            val += 2**32
+    f.close()
+    return hex(val)[2:10].zfill(8).lower()
+
 #####################################
 #Code for uploading
 #####################################
@@ -89,11 +109,11 @@ def base_directory(directory):
             return False
         i += 1
 
-def grid_file(griddir, directory, path, filename, storage):
+def grid_file(griddir, directory, path, filename, storage, out_file):
     i = 0
     command = 'lcg-cr'
     gridid = []
-    with open("Gridid.txt","w") as f:
+    with open(out_file,"w") as f:
         for s in directory:
             se_path = os.path.join(directory[i],path[i],filename[i])
             se_path.strip()
@@ -111,9 +131,10 @@ def grid_file(griddir, directory, path, filename, storage):
                 print upfile
                 continue
             str1 = str(filename[i])
-            # str2 = str(size[i])
-            str3 = str(gridid[i])
-            outline = "%s \t %s" % (str1,str3)
+            str2 = str(os.stat(filename[i]).st_size)
+            str3 = str(gridid[i].rstrip('\n'))
+            str4 = str(adler32(filename[i]))
+            outline = "%s \t %s \t %s \t %s \n" % (str1,str2,str3,str4)
             f.write(outline)
             i += 1
     f.close()
@@ -145,6 +166,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-l",dest='list', help="list of files to upload\
                         [in_text.txt]",default='in_text.txt')
+    parser.add_argument("-o",dest='out', help="text file produce with \
+                        Grid information [Gridid.txt]",default=\
+                        'Gridid.txt')
     parser.add_argument("-d",dest='dest', help="storage element on grid\
                                             'sehn02.atlas.ualberta.ca'",\
                         default='sehn02.atlas.ualberta.ca')
@@ -165,10 +189,10 @@ if __name__ == '__main__':
     if base_directory(Directory) != True:
         print "not valid base directory"
         exit()
-    #Size = get_file_size(Filename)
-    #print Size
+    Out_text = args.out
     Griddir = '/grid/snoplus.snolab.ca'
-    Gridid = grid_file(Griddir, Directory, Path, Filename, Storage)
+    Gridid = grid_file(Griddir, Directory, Path, Filename, Storage, \
+                       Out_text)
     database_file(Directory, Path, Filename, Gridid)
     print Gridid
     
