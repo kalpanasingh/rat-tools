@@ -109,7 +109,13 @@ def base_directory(directory):
             return False
         i += 1
 
-def grid_file(griddir, directory, path, filename, storage, out_file):
+def delete_file(lfc_path):
+    input_string = 'lcg-del -a %s' % (lfc_path)
+    os.system(input_string)
+    return
+
+def grid_file(griddir, directory, path, filename, storage, out_file, \
+              remove):
     i = 0
     command = 'lcg-cr'
     gridid = []
@@ -122,14 +128,24 @@ def grid_file(griddir, directory, path, filename, storage, out_file):
                                                filename[i])
             print lfc_path
             upfile = filename[i]
-            inputstring = 'lcg-cr --vo snoplus.snolab.ca --checksum -d %s \
+            input_string = 'lcg-cr --vo snoplus.snolab.ca --checksum -d %s \
                 -P %s -l %s %s'%(storage,se_path,lfc_path,upfile)
             try:
-                gridid.append(os.popen(inputstring).readlines()[0])
+                gridid.append(os.popen(input_string).readlines()[0])
             except:
-                print "file already exists"
-                print upfile
-                continue
+                if remove:
+                    delete_file(lfc_path)
+                    try:
+                        gridid.append(os.popen(input_string).readlines()[0])
+                    except:
+                        print "Can not overwrite file"
+                        print upfile
+                        continue
+                    print "Deleted old GRID file and replaced with new file"
+                else:
+                    print "file already exists"
+                    print upfile
+                    continue
             str1 = str(filename[i])
             str2 = str(os.stat(filename[i]).st_size)
             str3 = str(gridid[i].rstrip('\n'))
@@ -154,24 +170,25 @@ def split_filename(filenamepath):
     words = []
     for line in filenamepath:
         words.append(line.rstrip('\n').split('/'))
-        print words
     filename_array = numpy.array(words)
     numberOfFiles = filename_array.shape[0]
     for i in range(numberOfFiles):
         filename.append(filename_array[i][-1])
-    print filename
     return filename
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("-l",dest='list', help="list of files to upload\
-                        [in_text.txt]",default='in_text.txt')
-    parser.add_argument("-o",dest='out', help="text file produce with \
-                        Grid information [Gridid.txt]",default=\
+    parser.add_argument("-l", dest = 'list', help = "list of files to\
+                        upload [in_text.txt]", default='in_text.txt')
+    parser.add_argument("-o", dest = 'out', help = "text file produce\
+                        with Grid information [Gridid.txt]", default = \
                         'Gridid.txt')
-    parser.add_argument("-d",dest='dest', help="storage element on grid\
-                                            'sehn02.atlas.ualberta.ca'",\
-                        default='sehn02.atlas.ualberta.ca')
+    parser.add_argument("-d", dest = 'dest', help = "storage element on\
+                        the GRID 'sehn02.atlas.ualberta.ca'", default =\
+                        'sehn02.atlas.ualberta.ca')
+    parser.add_argument("-r", dest = 'remove', help = "if the file\
+                        already exist should it be overwritten", default\
+                        = False)
     args = parser.parse_args()
     if not grid.proxy_time():
         print "Need to generate a grid proxy"
@@ -192,7 +209,7 @@ if __name__ == '__main__':
     Out_text = args.out
     Griddir = '/grid/snoplus.snolab.ca'
     Gridid = grid_file(Griddir, Directory, Path, Filename, Storage, \
-                       Out_text)
+                       Out_text,args.remove)
     database_file(Directory, Path, Filename, Gridid)
     print Gridid
     
