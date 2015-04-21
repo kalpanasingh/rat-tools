@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import string. ROOT, Utilities, os
+import string, ROOT, Utilities, os
 # Author I T Coulter - 09/11/2012 <icoulter@hep.upenn.edu>
 #        K Majumdar - 11/09/2014 - Cleanup of Coordinators for new DS
 

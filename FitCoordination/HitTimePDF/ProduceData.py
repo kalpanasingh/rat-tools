@@ -34,45 +34,44 @@ def ProduceRunMacros(options):
     energy = "3.0"
     if options.scintMaterial == "lightwater_sno":
         energy = "8.0"
-		
-    outfileName = options.scintMaterial + "_DataForPDF"
 
-    outText1 = rawText1.substitute(ExtraDB = extraDB,
-                                   GeoFile = options.geoFile,
-				                   ScintMaterial = options.scintMaterial,
-                                   FileName = outfileName + ".root",
-				                   Energy = energy)
-    outFile1 = open(outfileName + ".mac", "w")
-    outFile1.write(outText1)
-    outFile1.close()
-		
-    # Run the macros on a Batch system
-    if options.batch:
+    numberOfRuns = totalEvents / eventsPerFile
+    remainder = totalEvents % eventsPerFile
+    if remainder != 0:
+        numberOfRuns += 1
+    
+    for runNumber in range(numberOfRuns):
 
-        numberOfRuns = totalEvents / eventsPerFile
-        remainder = totalEvents % eventsPerFile
-        if remainder != 0:
-            numberOfRuns += 1
-		
-        for runNumber in range(numberOfRuns):
+        outfileName = options.scintMaterial + "_DataForPDF_part" + str(runNumber + 1)
+        
+        outText1 = rawText1.substitute(ExtraDB = extraDB,
+                                       GeoFile = options.geoFile,
+                                       ScintMaterial = options.scintMaterial,
+                                       FileName = outfileName + ".root",
+                                       Energy = energy)
+        outFile1 = open(outfileName + ".mac", "w")
+        outFile1.write(outText1)
+        outFile1.close()
 
-            partName = outfileName + "_part" + str(runNumber + 1)
-			
-            outText2 = rawText2.substitute(Preamble = "\n".join(s for s in batch_params['preamble']),
-                                           Ratenv = batch_params['ratenv'],
-                                           Cwd = os.environ['PWD'].replace("/.", "/"),
-                                           RunCommand = "rat -o " + partName + " -N " + eventsPerFile + " " + outfileName + ".mac")
-            outFile2 = open(partName + ".sh", "w")
-            outFile2.write(outText2)
-            outFile2.close()
-			
-            os.system( batch_params["submit"] + " " + partName +".sh" )        
+        EventsPerFile = str(int(eventsPerFile))
+        
+        outText2 = rawText2.substitute(Preamble = "\n".join(s for s in batch_params['preamble']),
+                                       Ratenv = batch_params['ratenv'],
+                                       Cwd = os.environ['PWD'].replace("/.", "/"),
+                                       RunCommand = "rat " + " -N " + EventsPerFile + " " + outfileName + ".mac")
+        outFile2 = open(outfileName + ".sh", "w")
+        outFile2.write(outText2)
+        outFile2.close()
+        
+        # Run the macro on a Batch system
+        if options.batch:
+            os.system( batch_params["submit"] + " " + outfileName +".sh" )        
 				
-    # Else run the macro locally on an interactive machine				
-    else:
-        os.system("rat -o " + partName + " -N " + eventsPerFile + " " + outfileName + ".mac")
-        # delete the macro when running is complete
-        os.remove(outfileName + ".mac")
+        # Else run the macro locally on an interactive machine				
+        else:
+            os.system("rat " + " -N " + eventsPerFile + " " + outfileName + ".mac")
+            # delete the macro when running is complete
+            os.remove(outfileName + ".mac")
 	
 	
 import optparse	
