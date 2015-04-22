@@ -42,7 +42,7 @@ def ProduceRunMacros(options):
                                        ScintMaterial = options.scintMaterial,
                                        Speed = speed,
                                        FileName = outfileName + ".root",
-                                       Particle = options.particle
+                                       Particle = options.particle,
                                        Energy = energy)
         outFile1 = open(outfileName + ".mac", "w")
         outFile1.write(outText1)

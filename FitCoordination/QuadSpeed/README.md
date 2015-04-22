@@ -50,5 +50,5 @@ The Utilities script contains the following function that can be used to get ext
 
 To run this function, first run the ProduceData script as described above, and then do the following:
 
-    python -c 'import Utilities.py; Utilities.DrawPlot()'
+    python -c 'import Utilities; Utilities.DrawPlot()'
 

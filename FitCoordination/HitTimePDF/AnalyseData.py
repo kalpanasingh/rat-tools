@@ -28,7 +28,7 @@ def AnalyseRootFiles(options):
         outText = rawText.substitute(Preamble = "\n".join(s for s in batch_params['preamble']),
                                      Ratenv = batch_params['ratenv'],
                                      Cwd = os.environ['PWD'].replace("/.", "/"),
-                                     RunCommand = "python -c 'import AnalyseData; AnalyseData.AnalysisFunction(\"" + options.scintMaterial + "\", " + numberOfRuns + ", " + options.velocity + ")'")
+                                     RunCommand = "python -c 'import AnalyseData; AnalyseData.AnalysisFunction(\"" + options.scintMaterial + "\", " + str(int(numberOfRuns)) + ")'")
         outFile = open("AnalyseData.sh", "w")
         outFile.write(outText)
         outFile.close()
@@ -37,17 +37,17 @@ def AnalyseRootFiles(options):
 		
     # Else run the macro locally on an interactive machine				
     else:
-        os.system("python -c 'import AnalyseData; AnalyseData.AnalysisFunction(\"" + options.scintMaterial + "\", " + numberOfRuns + ", " + options.velocity + ")'")
+        os.system("python -c 'import AnalyseData; AnalyseData.AnalysisFunction(\"" + options.scintMaterial + "\", " + str(int(numberOfRuns)) + ")'")
 
 
 # returns the Hit Times PDF in the chosen material
-def AnalysisFunction(material, velocity):
+def AnalysisFunction(material, numberOfRuns):
     ROOT.gROOT.ProcessLine(".L Coordinate.cpp+");
 	
     if material == "lightwater_sno":
         ROOT.GetWaterPDF(material);
     else:
-        ROOT.GetScintPDF(material, velocity);
+        ROOT.GetScintPDF(material, numberOfRuns);
 
     ROOT.gROOT.ProcessLine(".q");		
 
