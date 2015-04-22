@@ -15,24 +15,34 @@ ${ExtraDB}
 /rat/proc count
 /rat/procset update 50
 
-# This is the same position fitter that the scintFitter uses
-# Not using the full scintFitter itself to speed things up, even a little, since the scintFitter does other things that are not relevant here
+# These are the same position fitters that the waterFitter and scintFitter use
+# Not using the full waterFitter or scintFitter since they do other things that are not relevant here
+
 /rat/proc fitter
 /rat/procset method "quad"
+
 /rat/proc fitter
 /rat/procset method "positionTimeLikelihood"
 /rat/procset optimiser "powell"
 /rat/procset selector "null"
 /rat/procset pdf "et1d"
 /rat/procset seed "quad"
-/rat/procset name "positionFit"
+/rat/procset name "scintPositionFit"
+
+/rat/proc fitter
+/rat/procset method "positionTimeLikelihood"
+/rat/procset optimiser "metaDriveCorrectSeed-powell"
+/rat/procset selector "modeCut"
+/rat/procset pdf "gv1d"
+/rat/procset seed "quad"
+/rat/procset name "waterPositionFit"
 
 /rat/proc outroot
 /rat/procset file "${FileName}"
 
 /generator/add combo gun:${PositionType}:poisson
 /generator/vtx/set e- 0 0 0 ${Energy}
-/generator/pos/set ${PositionArg}
+${PositionArg}
 /generator/rate/set 1
 
 /rat/run/start 1000
