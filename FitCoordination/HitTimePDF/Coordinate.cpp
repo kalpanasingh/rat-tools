@@ -22,11 +22,11 @@
 #include <RAT/DS/PMT.hh>
 #include <RAT/DS/Entry.hh>
 
-void FillScintTimeResidualsPlot(std::string, TH1D*, double);
+void FillScintTimeResidualsPlot(std::string, TH1D*);
 void FillWaterTimeResidualsPlot(std::string, TH1D*);
 
 
-void GetScintPDF(std::string material, int numberOfRuns, double velocity)
+void GetScintPDF(std::string material, int numberOfRuns)
 {
   TH1D* histogram1 = new TH1D("histogram1", "", 400, -99.5, 300.5);
   TH1D* histogram2 = new TH1D("histogram2", "", 400, -99.5, 300.5);
@@ -35,7 +35,7 @@ void GetScintPDF(std::string material, int numberOfRuns, double velocity)
   {
     std::stringstream fileNameStream;
     fileNameStream << material + "_DataForPDF_part" << (i + 1) << ".root";
-    FillScintTimeResidualsPlot(fileNameStream.str(), histogram1, velocity);
+    FillScintTimeResidualsPlot(fileNameStream.str(), histogram1);
   }
 
   // Print coordinated values to screen in RATDB format
@@ -90,22 +90,13 @@ void GetScintPDF(std::string material, int numberOfRuns, double velocity)
 }
 
 // Update the Scintillator Time Residual distribution from a single rootfile
-void FillScintTimeResidualsPlot(std::string infile, TH1D* histogram, double velocity)
+void FillScintTimeResidualsPlot(std::string infile, TH1D* histogram)
 {
   RAT::DU::DSReader dsReader(infile);
   RAT::DU::LightPathCalculator lightPath = RAT::DU::Utility::Get()->GetLightPathCalculator();
   const RAT::DU::EffectiveVelocity& effectiveVelocity = RAT::DU::Utility::Get()->GetEffectiveVelocity();
   const RAT::DU::PMTInfo& pmtInfo = RAT::DU::Utility::Get()->GetPMTInfo();
-  /*
-  if (velocity > 0)
-  {
-    std::cout << "Attempting to update effective velocity from " << pmtds->GetEffectiveVelocityTime()->GetVg() << " to " << velocity << newline;
-    pmtds->GetEffectiveVelocityTime()->UpdateVg(velocity);
-    std::cout << "Now using effective velocity: " << pmtds->GetEffectiveVelocityTime()->GetVg() << std::endl;
-  }
-  else
-    std::cout << "Using default effective velocity: " << pmtds->GetEffectiveVelocityTime()->GetVg() << std::endl;
-  */
+ 
   for(size_t i = 0; i < dsReader.GetEntryCount(); i++) 
   {
     const RAT::DS::Entry& dsEntry = dsReader.GetEntry(i);

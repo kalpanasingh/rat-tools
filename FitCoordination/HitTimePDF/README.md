@@ -35,8 +35,7 @@ There already exists a basic "batch.config" file in the "FitCoordination" folder
 
     python AnalyseData.py [options]
 
-The only applicable options for this script are [-b] and [-s] as described above, as well as:
-- [-v]: An updated Effective Velocity for the material set by "-s", not applicable if the material is "lightwater_sno" (default = -999)
+The only applicable options for this script are [-b] and [-s] as described above.
 
 The coordination results are written to the Batch logfile - there will be a complete RATDB entry that should be placed in either the ET1D.ratdb or the GV1D.ratdb located in rat/data, replacing any existing entry with the same index.  
 
