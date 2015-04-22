@@ -22,7 +22,7 @@ def AnalyseRootFiles(options):
         outText = rawText.substitute(Preamble = "\n".join(s for s in batch_params['preamble']),
                                      Ratenv = batch_params['ratenv'],
                                      Cwd = os.environ['PWD'].replace("/.", "/"),
-                                     RunCommand = "python -c 'import AnalyseData; AnalyseData.AnalysisFunction(\"" + options.scintMaterial + ")'")
+                                     RunCommand = "python -c 'import AnalyseData; AnalyseData.AnalysisFunction(\"" + options.scintMaterial + "\")'")
         outFile = open("AnalyseData.sh", "w")
         outFile.write(outText)
         outFile.close()
@@ -31,12 +31,12 @@ def AnalyseRootFiles(options):
 		
     # Else run the macro locally on an interactive machine				
     else:
-        os.system("python -c 'import AnalyseData; AnalyseData.AnalysisFunction(\"" + options.scintMaterial + ")'")
+        os.system("python -c 'import AnalyseData; AnalyseData.AnalysisFunction(\"" + options.scintMaterial + "\")'")
 
 
 # returns the Direction PDF
 def AnalysisFunction(material):
-	ROOT.gROOT.ProcessLine(".L Coordinate.cpp+");
+    ROOT.gROOT.ProcessLine(".L Coordinate.cpp+");
     ROOT.GetDirectionPDF(material);
     ROOT.gROOT.ProcessLine(".q");
 
