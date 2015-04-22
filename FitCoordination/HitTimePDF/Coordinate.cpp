@@ -168,7 +168,7 @@ void GetWaterPDF(std::string material)
   std::cout << "time: [";
   for(int j = 0; j < 801; j++)
   {
-    std::cout << float(histogram1->GetBinCenter(j)) << ", ";
+    std::cout << std::fixed << std::setprecision(2)<< float(histogram1->GetBinCenter(j)) << ", ";
   }
   std::cout << "]," << std::endl;
   
