@@ -66,7 +66,6 @@ def base_directory(directory):
     # check that one of the offical base directories is used
     offical_base = []
     for i, entry in enumerate(directory):
-        print i
         if entry == 'user':
             offical_base.append(True)
         elif entry == 'sw':
@@ -102,24 +101,28 @@ def grid_file(griddir, directory, path, filename, storage, out_file,
                 se_path = os.path.join(directory[i], path[i], filename[i])
                 se_path.strip()
                 print se_path
-                lfc_path = 'lfn:%s' % os.path.join(griddir, directory[i], path[i],
-                                               filename[i])
+                lfc_path = 'lfn:%s' % os.path.join(griddir, directory[i],
+                                                   path[i], filename[i])
                 print lfc_path
                 upfile = filename[i]
                 input_string = 'lcg-cr --vo snoplus.snolab.ca --checksum -d %s \
                     -P %s -l %s %s' % (storage, se_path, lfc_path, upfile)
                 try:
-                    gridid.append(os.popen(input_string).readlines()[0])
+                    gridid.append(os.popen(input_string).readlines()[0]
+                                  )
                 except:
                     if remove:
                         delete_file(lfc_path)
                         try:
-                            gridid.append(os.popen(input_string).readlines()[0])
+                            gridid.append(os.popen(input_string).readlines()[0]
+                                          )
                         except:
                             print "Can not overwrite file"
                             print upfile
                             continue
-                        print "Deleted old GRID file and replaced with new file"
+                        str8 = "Deleted old GRID file "
+                        str9 = "and replaced with new file"
+                        print '\033[1m' + str8 + str9 + '\033[0m'
                 else:
                     print "file already exists"
                     print upfile
