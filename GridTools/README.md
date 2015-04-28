@@ -21,4 +21,4 @@ example of text file
 <base_directory>,<GRID_file_path>,<loacal_file_path>
 
 
-python gridup2.py
+./uploader

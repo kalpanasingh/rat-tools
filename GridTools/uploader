@@ -24,26 +24,8 @@ except:
                       be 2.7+")
 import grid
 import database
-
-###########################################
-# File utilities
-###########################################
-def adler32(filename):
-    '''Calculate and return Alder32 checksum of file.
-        '''
-    import zlib
-    block = 32 * 1024 * 1024
-    val = 1
-    f = open(filename, 'rb')
-    while True:
-        line = f.read(block)
-        if len(line) == 0:
-            break
-        val = zlib.adler32(line, val)
-        if val < 0:
-            val += 2**32
-    f.close()
-    return hex(val)[2:10].zfill(8).lower()
+sys.path.insert(0,'Utilities')
+import utilities
 
 #####################################
 #Code for uploading
@@ -78,35 +60,27 @@ def readin_file(textfile):
         filename = words_array[:, 2]
     return directory, file_path, filename
 
-#def get_file_size(filename):
-#    size = []
-#    i = 0
-#    for line in filename:
-#        size = os.path.getsize(filename[i])
-#        print os.path.getsize(filename[i])
-#        i+=1
-#    return size
 
 def base_directory(directory):
     #check that one of the offical base directories is used
-    i=0
-    for entry in directory:
-        if directory[i] == 'user':
-	    return True
-        elif directory[i] == 'sw':
+    
+    for i, entry in enumerate(directory):
+        if entry == 'user':
             return True
-        elif directory[i] == 'snotflow':
+        elif entry == 'sw':
             return True
-        elif directory[i] == 'production_testing':
+        elif entry == 'snotflow':
             return True
-	elif directory[i] == 'production':
+        elif entry == 'production_testing':
             return True
-        elif directory == 'nearline':
+        elif entry == 'production':
+            return True
+        elif entry == 'nearline':
             return True
         else:
-	    print directory[i]
+            print directory[i]
             return False
-        i += 1
+
 
 def delete_file(lfc_path):
     input_string = 'lcg-del -a %s' % (lfc_path)
@@ -148,18 +122,12 @@ def grid_file(griddir, directory, path, filename, storage, out_file, \
             str1 = str(filename[i])
             str2 = str(os.stat(filename[i]).st_size)
             str3 = str(gridid[i].rstrip('\n'))
-            str4 = str(adler32(filename[i]))
+            str4 = str(utilities.get_adler32(filename[i]))
             outline = "%s \t %s \t %s \t %s \n" % (str1,str2,str3,str4)
             f.write(outline)
             i += 1
     f.close()
     return gridid
-
-def database_file(directory, path, filename, gridid):
-    prod_data_doc = None
-		#    prod_data_doc = document.ProdDataDocument.new_doc(db=self.job_doc.db, module=self._name,pass_number=self._pass, run=self._run, rat_version=self.job_doc.get_rat_version())
-	#database.connect_db("couch.snopl.us", None, test)
-    return 0
 
 def split_filename(filenamepath):
     #if the local file isn't in the same directory as gridup2.py
@@ -209,6 +177,5 @@ if __name__ == '__main__':
     Griddir = '/grid/snoplus.snolab.ca'
     Gridid = grid_file(Griddir, Directory, Path, Filename, Storage, \
                        Out_text,args.remove)
-    database_file(Directory, Path, Filename, Gridid)
     print Gridid
     
