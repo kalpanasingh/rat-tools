@@ -123,9 +123,12 @@ def grid_file(griddir, directory, path, filename, storage, out_file,
                         str8 = "Deleted old GRID file "
                         str9 = "and replaced with new file"
                         print '\033[1m' + str8 + str9 + '\033[0m'
-                else:
-                    print "file already exists"
-                    print upfile
+                    else:
+                        print '\033[1m' + "file already exists" \
+                            + '\033[0m'
+                        print upfile
+                        i += 1
+                        continue
                 str1 = str(filename[i])
                 str2 = str(os.stat(filename[i]).st_size)
                 str3 = str(gridid[j].rstrip('\n'))
@@ -182,13 +185,12 @@ if __name__ == '__main__':
             str3 = "%s %s" % (str1, str2)
             print str3
             sys.exit()
-    Directory, Path, FilenamePath = readin_file(args.list)
-    Storage = args.dest
-    Filename = split_filename(FilenamePath)
-    True_base = base_directory(Directory)
-    print True_base
-    Out_text = args.out
-    Griddir = '/grid/snoplus.snolab.ca'
-    Gridid = grid_file(Griddir, Directory, Path, Filename, Storage,
-                       Out_text, args.remove, True_base)
-    print Gridid
+    directory, path, filenamepath = readin_file(args.list)
+    storage = args.dest
+    filename = split_filename(filenamepath)
+    true_base = base_directory(directory)
+    out_text = args.out
+    griddir = '/grid/snoplus.snolab.ca'
+    gridid = grid_file(griddir, directory, path, filename, storage,
+                       out_text, args.remove, true_base)
+    print gridid
