@@ -18,7 +18,6 @@ import time
 import multiprocessing
 
 import grid
-sys.path.insert(0,'Utilities')
 import utilities
 
 _kB = 1024.

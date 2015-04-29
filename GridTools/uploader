@@ -24,7 +24,6 @@ except:
                       be 2.7+")
 import grid
 import database
-sys.path.insert(0, 'Utilities')
 import utilities
 
 #####################################

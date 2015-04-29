@@ -8,7 +8,7 @@ Should be used in two phases:
  * Run ./production_list or ./raw_list to create list of files to grab
  * Run ./grabber to download files from the lists
 
-Script (gridup.py) to upload data to the GRID
+Script (uploader) to upload data to the GRID
 
 Requires a text file say what type of data it is or base directory
 (user,sw,snotflow,production_testing,production,nearline)
