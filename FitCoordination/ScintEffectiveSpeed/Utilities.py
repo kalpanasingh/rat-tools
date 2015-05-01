@@ -38,9 +38,9 @@ def MeanRadialBias(infileName):
 
         ev = ds.GetEV(0)
         
-        if not ev.FitResultExists("scintFitter"):
+        if not ev.FitResultExists("positionTimeFit"):
             continue
-        if not ev.GetFitResult("scintFitter").GetValid():
+        if not ev.GetFitResult("positionTimeFit").GetValid():
             continue
 
         try:
