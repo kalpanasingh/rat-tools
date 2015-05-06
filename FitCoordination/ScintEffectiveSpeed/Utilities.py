@@ -37,6 +37,12 @@ def MeanRadialBias(infileName):
         startPosition = ds.GetMC().GetMCParticle(0).GetPosition()
 
         ev = ds.GetEV(0)
+        
+        if not ev.FitResultExists("positionTimeFit"):
+            continue
+        if not ev.GetFitResult("positionTimeFit").GetValid():
+            continue
+
         try:
             fitPosition = ev.GetFitResult("positionTimeFit").GetVertex(0).GetPosition()
             radialBias = (fitPosition - startPosition).Dot(startPosition.Unit())

@@ -45,6 +45,14 @@ def ProduceTimeResAndEnergyPDF(infileName):
             mcTime = mcParticle.GetTime()
 			
             ev = ds.GetEV(0)
+
+            if not ev.FitResultExists("scintFitter"):
+                continue
+            if not ev.GetFitResult("scintFitter").GetValid():
+                continue
+            if not ev.GetFitResult("scintFitter").GetVertex(0).ContainsPosition():
+                continue
+
             fitVertex = ev.GetFitResult("scintFitter").GetVertex(0);
             vertPos = fitVertex.GetPosition()
             vertTime = fitVertex.GetTime()

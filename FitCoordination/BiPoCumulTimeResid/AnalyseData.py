@@ -77,8 +77,15 @@ def GetEnergyWindow():
         if ds.GetEVCount() == 0:
             continue
         ev = ds.GetEV(0)
-
+        
+        if not ev.FitResultExists("scintFitter"):
+            continue
+        if not ev.GetFitResult("scintFitter").GetValid():
+            continue
+        if not ev.GetFitResult("scintFitter").GetVertex(0).ContainsPosition():
+            continue
         vertPos = ev.GetFitResult("scintFitter").GetVertex(0).GetPosition()
+
         if (vertPos.Mag() < fidVolLow) or (vertPos.Mag() >= fidVolHigh):
             continue
         vertEnergy = ev.GetFitResult("scintFitter").GetVertex(0).GetEnergy()
@@ -129,10 +136,10 @@ def GetCDFVector(energyLow, energyHigh, numberOfBins):
             pmtTime = calibratedPMTs.GetPMT(j).GetTime()
 
             lightPath.CalcByPosition(vertPos, pmtPos)
-            distInScint = lightPath.GetDistInScint()
+            distInInnerAV = lightPath.GetDistInInnerAV()
             distInAV = lightPath.GetDistInAV()
             distInWater = lightPath.GetDistInWater()
-            flightTime = effectiveVelocity.CalcByDistance(distInScint, distInAV, distInWater)
+            flightTime = effectiveVelocity.CalcByDistance(distInInnerAV, distInAV, distInWater)
             timeResid = pmtTime - flightTime - vertTime
             timeResidsHist.Fill(timeResid)
 

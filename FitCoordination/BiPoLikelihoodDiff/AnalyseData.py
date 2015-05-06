@@ -1,5 +1,5 @@
 #!usr/bin/env python
-import ROOT, rat, string, math, os
+import ROOT, rat, string, math, os, sys
 # Author K Majumdar - 08/09/2014 <Krishanu.Majumdar@physics.ox.ac.uk>
 
 minTimeResid = -200.0
@@ -109,12 +109,22 @@ def GetTimeResidsVector(infileName, numberOfBins):
         for j in range(0, ds.GetEVCount()):
             ev = ds.GetEV(j)
 
+            if not ev.FitResultExists("scintFitter"):
+                continue
+            if not ev.GetFitResult("scintFitter").GetValid():
+                continue
+            if not ev.GetFitResult("scintFitter").GetVertex(0).ContainsPosition():
+                continue
             vertPos = ev.GetFitResult("scintFitter").GetVertex(0).GetPosition()
+            
+
             if (vertPos.Mag() < fidVolLow) or (vertPos.Mag() >= fidVolHigh):
                 continue
             vertTime = ev.GetFitResult("scintFitter").GetVertex(0).GetTime()
 		
             calibratedPMTs = ev.GetCalPMTs()
+            if (calibratedPMTs.GetCount() < 10):
+                continue
 
             timeResidsList = []
             for k in range(0, calibratedPMTs.GetCount()):
@@ -122,10 +132,10 @@ def GetTimeResidsVector(infileName, numberOfBins):
                 pmtTime = calibratedPMTs.GetPMT(k).GetTime()
 
                 lightPath.CalcByPosition(vertPos, pmtPos)
-                distInScint = lightPath.GetDistInScint()
+                distInInnerAV = lightPath.GetDistInInnerAV()
                 distInAV = lightPath.GetDistInAV()
                 distInWater = lightPath.GetDistInWater()
-                flightTime = effectiveVelocity.CalcByDistance(distInScint, distInAV, distInWater)
+                flightTime = effectiveVelocity.CalcByDistance(distInInnerAV, distInAV, distInWater)
                 timeResid = pmtTime - flightTime - vertTime
                 timeResidsList.append(timeResid)
 
