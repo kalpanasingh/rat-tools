@@ -18,29 +18,11 @@ import time
 import multiprocessing
 
 import grid
+import utilities
 
 _kB = 1024.
 _MB = 1024. * _kB
 _GB = 1024. * _MB
-
-adler32_block = 33554432
-pow2_32 = 4294967296
-
-def get_adler32(filename):
-    """Get the adler32sum of a file.
-    """
-    val = 1
-    f = open(filename, "rb")
-    while True:
-        line = f.read(adler32_block)
-        if len(line) == 0:
-            break
-        val = zlib.adler32(line, val)
-        if val < 0:
-            val += pow2_32
-    f.close()
-    return hex(val)[2:10].zfill(8).lower()
-
 
 def warn(message):
     """Pipe to stderr; less typing for me.
@@ -57,7 +39,7 @@ def download_file(directory, filename, guid, adler32, size):
     # Handle any files that have already been downloaded
     if os.path.exists(download_path):
         # Compare checksums
-        local_adler32 = get_adler32(download_path)
+        local_adler32 = utilities.get_adler32(download_path)
         if local_adler32!=adler32:
             warn("Checksum mismatch: %s; delete and re-download" % filename)
             os.unlink(download_path)
