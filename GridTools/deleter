@@ -27,13 +27,13 @@ def delete(griddir, directory, path, filename, del_folder):
     j = 0
     command = 'lcg-cr'
     folders = []
-    store_folder = "store"
+    store_folder = 'store'
     for s in directory:
         lfc_path = 'lfn:%s' % os.path.join(griddir, directory[i],
                                            path[i], filename[i])
         utilities.delete_file(lfc_path)
         if del_folder:
-            current_folder = 'lfn:%s' % os.path.join(griddir,directory[i],
+            current_folder = '%s' % os.path.join(griddir,directory[i],
                                               path[i])
             if store_folder != current_folder:
                 store_folder = current_folder

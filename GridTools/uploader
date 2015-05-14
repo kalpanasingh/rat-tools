@@ -67,13 +67,6 @@ def base_directory(directory):
             offical_base.append(False)
     return offical_base
 
-
-#def delete_file(lfc_path):
-#    input_string = 'lcg-del -a %s' % (lfc_path)
-#    os.system(input_string)
-#    return
-
-
 def grid_file(griddir, directory, path, filename, storage, out_file,
               remove, offical_base):
     i = 0

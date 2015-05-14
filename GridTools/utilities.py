@@ -65,6 +65,6 @@ def delete_file(lfc_path):
     return
 
 def delete_folder(lfc_path):
-    input_string = 'lcg-del -d %s' % (lfc_path)
+    input_string = 'lfc-rm -r %s' % (lfc_path)
     os.system(input_string)
     return
