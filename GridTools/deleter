@@ -1,0 +1,73 @@
+#!/usr/bin/env python
+#####################
+#
+# uploader
+#
+# For use to delete files on the grid
+#
+# For uploading files
+#
+# Author: David Auty
+#         <auty@ualberta.ca>
+#
+#####################
+
+import os
+import sys
+try:
+    import argparse
+except:
+    raise ImportError("argparse not availbel; python version needs to \
+                      be 2.7+")
+import grid
+import utilities
+
+def delete(griddir, directory, path, filename, del_folder):
+    i = 0
+    j = 0
+    command = 'lcg-cr'
+    folders = []
+    store_folder = "store"
+    for s in directory:
+        lfc_path = 'lfn:%s' % os.path.join(griddir, directory[i],
+                                           path[i], filename[i])
+        utilities.delete_file(lfc_path)
+        if del_folder:
+            current_folder = 'lfn:%s' % os.path.join(griddir,directory[i],
+                                              path[i])
+            if store_folder != current_folder:
+                store_folder = current_folder
+                folders.append(current_folder)
+                j+=1
+        i += 1
+    return folders
+
+def delete_folder(folders):
+    for line in folders:
+        utilities.delete_folder(line)
+        print "deleting folder: " + line
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-l", dest = 'list', help = "list of files to \
+                        upload [in_text.txt]", default='delete_files.txt')
+    parser.add_argument("-f", dest = 'del_folder', help = "delete the \
+                        folder as well as the files [False]", default
+                        = False )
+    args = parser.parse_args()
+    if not grid.proxy_time():
+        print "Need to generate a grid proxy"
+        if not grid.proxy_create():
+            print "Proxy successfully created"
+        else:
+            str1 = "Unable to create proxy; try 'voms-proxy-init --voms"
+            str2 = "snoplus.snolab.ca' in shell"
+            str3 = "%s %s" % (str1, str2)
+            print str3
+            sys.exit()
+    directory, path, filename = utilities.readin_file(args.list)
+    griddir = '/grid/snoplus.snolab.ca'
+    folders = delete(griddir, directory, path, filename, args.del_folder)
+    if(args.del_folder):
+        delete_folder(folders)
