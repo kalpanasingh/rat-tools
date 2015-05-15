@@ -5,7 +5,7 @@
 #
 # For use to delete files on the grid
 #
-# For uploading files
+# For deleting files
 #
 # Author: David Auty
 #         <auty@ualberta.ca>
@@ -22,9 +22,9 @@ except:
 import grid
 import utilities
 
+
 def delete(griddir, directory, path, filename, del_folder):
     i = 0
-    j = 0
     command = 'lcg-cr'
     folders = []
     store_folder = 'store'
@@ -33,14 +33,14 @@ def delete(griddir, directory, path, filename, del_folder):
                                            path[i], filename[i])
         utilities.delete_file(lfc_path)
         if del_folder:
-            current_folder = '%s' % os.path.join(griddir,directory[i],
-                                              path[i])
+            current_folder = '%s' % os.path.join(griddir, directory[i],
+                                                 path[i])
             if store_folder != current_folder:
                 store_folder = current_folder
                 folders.append(current_folder)
-                j+=1
         i += 1
     return folders
+
 
 def delete_folder(folders):
     for line in folders:
@@ -54,7 +54,7 @@ if __name__ == '__main__':
                         upload [in_text.txt]", default='delete_files.txt')
     parser.add_argument("-f", dest = 'del_folder', help = "delete the \
                         folder as well as the files [False]", default
-                        = False )
+                        = False)
     args = parser.parse_args()
     if not grid.proxy_time():
         print "Need to generate a grid proxy"

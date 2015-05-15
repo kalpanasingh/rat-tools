@@ -17,6 +17,7 @@ import numpy
 import os
 import zlib
 
+
 def get_adler32(filename):
     '''Calculate and return Alder32 checksum of file.
     '''
@@ -32,6 +33,7 @@ def get_adler32(filename):
             val += 2**32
     f.close()
     return hex(val)[2:10].zfill(8).lower()
+
 
 def readin_file(textfile):
     # read in the text file and split up the input into the correct
@@ -59,6 +61,7 @@ def readin_file(textfile):
         filename = words_array[:, 2]
     return directory, file_path, filename
 
+
 def split_filename(filenamepath):
     # if the local file isn't in GridTools
     # splits the filename away from the path and so can use different
@@ -78,6 +81,7 @@ def delete_file(lfc_path):
     input_string = 'lcg-del -a %s' % (lfc_path)
     os.system(input_string)
     return
+
 
 def delete_folder(lfc_path):
     input_string = 'lfc-rm -r %s' % (lfc_path)
