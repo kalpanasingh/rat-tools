@@ -59,6 +59,21 @@ def readin_file(textfile):
         filename = words_array[:, 2]
     return directory, file_path, filename
 
+def split_filename(filenamepath):
+    # if the local file isn't in GridTools
+    # splits the filename away from the path and so can use different
+    # paths on grid but the same filename.
+    filename = []
+    words = []
+    for line in filenamepath:
+        words.append(line.rstrip('\n').split('/'))
+    filename_array = numpy.array(words)
+    numberOfFiles = filename_array.shape[0]
+    for i in range(numberOfFiles):
+        filename.append(filename_array[i][-1])
+    return filename
+
+
 def delete_file(lfc_path):
     input_string = 'lcg-del -a %s' % (lfc_path)
     os.system(input_string)

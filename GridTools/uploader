@@ -125,21 +125,6 @@ def grid_file(griddir, directory, path, filename, storage, out_file,
     return gridid
 
 
-def split_filename(filenamepath):
-    # if the local file isn't in the same directory as uploader
-    # splits the filename away from the path and so can use different
-    # paths on grid but the same filename.
-    filename = []
-    words = []
-    for line in filenamepath:
-        words.append(line.rstrip('\n').split('/'))
-    filename_array = numpy.array(words)
-    numberOfFiles = filename_array.shape[0]
-    for i in range(numberOfFiles):
-        filename.append(filename_array[i][-1])
-    return filename
-
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-l", dest = 'list', help = "list of files to \
@@ -166,7 +151,7 @@ if __name__ == '__main__':
             sys.exit()
     directory, path, filenamepath = utilities.readin_file(args.list)
     storage = args.dest
-    filename = split_filename(filenamepath)
+    filename = utilities.split_filename(filenamepath)
     true_base = base_directory(directory)
     out_text = args.out
     griddir = '/grid/snoplus.snolab.ca'

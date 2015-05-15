@@ -9,7 +9,6 @@ Should be used in two phases:
  * Run ./grabber to download files from the lists
 
 Script (uploader) to upload data to the GRID
-
 Requires a text file say what type of data it is or base directory
 (user,sw,snotflow,production_testing,production,nearline)
 then the file path on the GRID and then the file path on your local
@@ -22,3 +21,7 @@ example of text file
 
 
 ./uploader
+
+Script (deleter) to delete files from the GRID
+It requires a text file in the same formate as the uploader. 
+The default name is delete_files.txt.
