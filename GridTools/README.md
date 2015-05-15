@@ -25,3 +25,5 @@ example of text file
 Script (deleter) to delete files from the GRID
 It requires a text file in the same formate as the uploader. 
 The default name is delete_files.txt.
+
+./deleter
