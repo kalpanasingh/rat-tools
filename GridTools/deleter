@@ -25,7 +25,6 @@ import utilities
 
 def delete(griddir, directory, path, filename, del_folder):
     i = 0
-    command = 'lcg-cr'
     folders = []
     store_folder = 'store'
     for s in directory:
