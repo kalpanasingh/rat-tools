@@ -35,7 +35,7 @@ There already exists a basic "batch.config" file in the "FitCoordination" folder
 
     python AnalyseData.py [options]
 
-The only applicable options for this script are [-b] and [-s] as described above.
+Available options for this script are [-b] and [-s] as described above.  Additionally, users may pass a "-v [velocity]" option when coordinating ET1D values, this allows to recoordinate a PDF with an updated effective velocity without requiring data be re-simulated (useful when iterating coordination of ET1D and ScintEffectiveSpeed).
 
 The coordination results are written to the Batch logfile - there will be a complete RATDB entry that should be placed in either the ET1D.ratdb or the GV1D.ratdb located in rat/data, replacing any existing entry with the same index.  
 

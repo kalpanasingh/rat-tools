@@ -28,7 +28,7 @@ def AnalyseRootFiles(options):
         outText = rawText.substitute(Preamble = "\n".join(s for s in batch_params['preamble']),
                                      Ratenv = batch_params['ratenv'],
                                      Cwd = os.environ['PWD'].replace("/.", "/"),
-                                     RunCommand = "python -c 'import AnalyseData; AnalyseData.AnalysisFunction(\"" + options.scintMaterial + "\", " + str(int(numberOfRuns)) + ")'")
+                                     RunCommand = "python -c 'import AnalyseData; AnalyseData.AnalysisFunction(\"" + options.scintMaterial + "\", " + str(int(numberOfRuns)) + ", " + str(options.velocity) + ")'")
         outFile = open("AnalyseData.sh", "w")
         outFile.write(outText)
         outFile.close()
@@ -37,17 +37,19 @@ def AnalyseRootFiles(options):
 		
     # Else run the macro locally on an interactive machine				
     else:
-        os.system("python -c 'import AnalyseData; AnalyseData.AnalysisFunction(\"" + options.scintMaterial + "\", " + str(int(numberOfRuns)) + ")'")
+        os.system("python -c 'import AnalyseData; AnalyseData.AnalysisFunction(\"" + options.scintMaterial + "\", " + str(int(numberOfRuns)) + ", " + str(options.velocity) + ")'")
 
 
 # returns the Hit Times PDF in the chosen material
-def AnalysisFunction(material, numberOfRuns):
+def AnalysisFunction(material, numberOfRuns, velocity):
     ROOT.gROOT.ProcessLine(".L Coordinate.cpp+");
 	
     if material == "lightwater_sno":
-        ROOT.GetWaterPDF(material);
+        if velocity > 0:
+            raise Exception("Cannot rerun GV1D with modified velocity")
+        ROOT.GetWaterPDF(material, velocity);
     else:
-        ROOT.GetScintPDF(material, numberOfRuns);
+        ROOT.GetScintPDF(material, numberOfRuns, velocity);
 
     ROOT.gROOT.ProcessLine(".q");		
 

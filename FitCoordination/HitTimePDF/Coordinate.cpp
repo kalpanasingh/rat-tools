@@ -22,20 +22,22 @@
 #include <RAT/DS/PMT.hh>
 #include <RAT/DS/Entry.hh>
 
-void FillScintTimeResidualsPlot(std::string, TH1D*);
-void FillWaterTimeResidualsPlot(std::string, TH1D*);
+void FillScintTimeResidualsPlot(std::string material, TH1D* histogram, double velocity=-999);
+void FillWaterTimeResidualsPlot(std::string material, TH1D* histogram);
 
 
-void GetScintPDF(std::string material, int numberOfRuns)
+void GetScintPDF(std::string material, int numberOfRuns, double velocity=-999)
 {
   TH1D* histogram1 = new TH1D("histogram1", "", 400, -99.5, 300.5);
   TH1D* histogram2 = new TH1D("histogram2", "", 400, -99.5, 300.5);
+
+  std::cout << "running with velocity " << velocity << endl;
 
   for(int i = 0; i < numberOfRuns; i++)
   {
     std::stringstream fileNameStream;
     fileNameStream << material + "_DataForPDF_part" << (i + 1) << ".root";
-    FillScintTimeResidualsPlot(fileNameStream.str(), histogram1);
+    FillScintTimeResidualsPlot(fileNameStream.str(), histogram1, velocity);
   }
 
   // Print coordinated values to screen in RATDB format
@@ -90,7 +92,7 @@ void GetScintPDF(std::string material, int numberOfRuns)
 }
 
 // Update the Scintillator Time Residual distribution from a single rootfile
-void FillScintTimeResidualsPlot(std::string infile, TH1D* histogram)
+void FillScintTimeResidualsPlot(std::string infile, TH1D* histogram, double velocity)
 {
   RAT::DU::DSReader dsReader(infile);
   RAT::DU::LightPathCalculator lightPath = RAT::DU::Utility::Get()->GetLightPathCalculator();
@@ -125,8 +127,12 @@ void FillScintTimeResidualsPlot(std::string infile, TH1D* histogram)
       double distInInnerAV = lightPath.GetDistInInnerAV();
       double distInAV = lightPath.GetDistInAV();
       double distInWater = lightPath.GetDistInWater();
-      const double transitTime = effectiveVelocity.CalcByDistance(distInInnerAV, distInAV, distInWater);
-
+      double transitTime = effectiveVelocity.CalcByDistance(distInInnerAV, distInAV, distInWater);
+      if(velocity>0)
+        // We are overriding the velocity in EffectiveVelocity for faster processing
+        transitTime = ( distInInnerAV / velocity + distInAV / effectiveVelocity.GetAVVelocity() +
+                        distInWater / effectiveVelocity.GetWaterVelocity() ) + effectiveVelocity.GetOffset();
+      
       double timeResid = pmtTime - transitTime - eventTime;
       histogram->Fill(timeResid);
     }
@@ -233,7 +239,7 @@ void FillWaterTimeResidualsPlot(std::string infile, TH1D* histogram)
       double distInInnerAV = lightPath.GetDistInInnerAV();
       double distInAV = lightPath.GetDistInAV();
       double distInWater = lightPath.GetDistInWater();
-      const double transitTime = groupVelocity.CalcByDistance(distInInnerAV, distInAV, distInWater);
+      double transitTime = groupVelocity.CalcByDistance(distInInnerAV, distInAV, distInWater);
 
       double timeResid = pmtTime - transitTime - eventTime;
 
