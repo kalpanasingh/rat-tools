@@ -20,7 +20,7 @@ import numpy
 try:
     import argparse
 except:
-    raise ImportError("argparse not availbel; python version needs to \
+    raise ImportError("argparse not available; python version needs to \
                       be 2.7+")
 import grid
 import database
@@ -50,35 +50,35 @@ def get_runs():
 
 
 def base_directory(directory):
-    # check that one of the offical base directories is used
-    offical_base = []
+    # check that one of the official base directories is used
+    official_base = []
     for i, entry in enumerate(directory):
         if entry == 'user':
-            offical_base.append(True)
+            official_base.append(True)
         elif entry == 'sw':
-            offical_base.append(True)
+            official_base.append(True)
         elif entry == 'snotflow':
-            offical_base.append(True)
+            official_base.append(True)
         elif entry == 'production_testing':
-            offical_base.append(True)
+            official_base.append(True)
         elif entry == 'production':
-            offical_base.append(True)
+            official_base.append(True)
         elif entry == 'nearline':
-            offical_base.append(True)
+            official_base.append(True)
         else:
-            offical_base.append(False)
-    return offical_base
+            official_base.append(False)
+    return official_base
 
 
 def grid_file(griddir, directory, path, filename, storage, out_file,
-              remove, offical_base):
+              remove, official_base):
     i = 0
     j = 0
     command = 'lcg-cr'
     gridid = []
     with open(out_file, "w") as f:
         for s in directory:
-            if offical_base[i] is True:
+            if official_base[i] is True:
                 se_path = os.path.join(directory[i], path[i], filename[i])
                 se_path.strip()
                 print se_path
@@ -120,7 +120,7 @@ def grid_file(griddir, directory, path, filename, storage, out_file,
                 j += 1
             else:
                 str5 = str(directory[i])
-                str6 = "is not an offical base directory"
+                str6 = "is not an official base directory"
                 str7 = "%s %s" % (str5, str6)
                 print '\033[1m' + str7 + '\033[0m'
             i += 1

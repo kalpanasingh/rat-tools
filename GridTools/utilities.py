@@ -14,7 +14,6 @@
 #####################
 
 import numpy
-import os
 import zlib
 
 
@@ -75,15 +74,3 @@ def split_filename(filenamepath):
     for i in range(numberOfFiles):
         filename.append(filename_array[i][-1])
     return filename
-
-
-def delete_file(lfc_path):
-    input_string = 'lcg-del -a %s' % (lfc_path)
-    os.system(input_string)
-    return
-
-
-def delete_folder(lfc_path):
-    input_string = 'lfc-rm -r %s' % (lfc_path)
-    os.system(input_string)
-    return
