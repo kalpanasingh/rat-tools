@@ -13,7 +13,6 @@
 #
 #####################
 
-import numpy
 import zlib
 
 
@@ -46,18 +45,7 @@ def readin_file(textfile):
         for line in data:
             line = line.translate(None, '\n\t ')
             words.append(line.split(','))
-        words_array = numpy.array(words)
-        if words_array.shape[1] != 3:
-            print "Not correct number of inputs"
-            print "should be:"
-            print repr("<base directory>,<remote path>,<local file>")
-            print "you have used inputs"
-            print words_array.shape[1]
-            sys.exit()
-            return 0
-        directory = words_array[:, 0]
-        file_path = words_array[:, 1]
-        filename = words_array[:, 2]
+        directory, file_path, filename = zip(*words)
     return directory, file_path, filename
 
 
@@ -67,10 +55,11 @@ def split_filename(filenamepath):
     # paths on grid but the same filename.
     filename = []
     words = []
+    word = []
     for line in filenamepath:
         words.append(line.rstrip('\n').split('/'))
-    filename_array = numpy.array(words)
-    numberOfFiles = filename_array.shape[0]
+    numberOfFiles = len(words)
+    print numberOfFiles
     for i in range(numberOfFiles):
-        filename.append(filename_array[i][-1])
+        filename.append(words[i][-1])
     return filename
