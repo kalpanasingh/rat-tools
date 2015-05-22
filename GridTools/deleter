@@ -30,7 +30,7 @@ def delete(griddir, directory, path, filename, del_folder):
     for s in directory:
         lfc_path = 'lfn:%s' % os.path.join(griddir, directory[i],
                                            path[i], filename[i])
-        utilities.delete_file(lfc_path)
+        grid.delete_file(lfc_path)
         if del_folder:
             current_folder = '%s' % os.path.join(griddir, directory[i],
                                                  path[i])
@@ -43,7 +43,7 @@ def delete(griddir, directory, path, filename, del_folder):
 
 def delete_folder(folders):
     for line in folders:
-        utilities.delete_folder(line)
+        grid.delete_folder(line)
         print "deleting folder: " + line
 
 

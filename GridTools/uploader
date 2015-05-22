@@ -93,7 +93,7 @@ def grid_file(griddir, directory, path, filename, storage, out_file,
                                   )
                 except:
                     if remove:
-                        utilities.delete_file(lfc_path)
+                        grid.delete_file(lfc_path)
                         try:
                             gridid.append(os.popen(input_string).readlines()[0]
                                           )
