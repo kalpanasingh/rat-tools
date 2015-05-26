@@ -57,8 +57,8 @@ def AnalysisFunction(index, material):
     diagFile.write("{ \n")
     diagFile.write("name: \"FIT_ENERGY_FUNCTIONAL\", \n")
     diagFile.write("index: \"" + index + "\", \n")
-    diagFile.write("valid_begin: [0, 0], \n")
-    diagFile.write("valid_end: [0, 0], \n")
+    diagFile.write("run_range: [0, 0], \n")
+    diagFile.write("pass : 0, \n")
     diagFile.write("\n")
 
     diagFile.write("energyCoeffs: ["),

@@ -62,8 +62,8 @@ void GetDirectionPDF(string material)
   std::cout << "{" << std::endl;
   std::cout << "name = \"FIT_DIR\"," << std::endl;
   std::cout << "index: \"" << material << "\"," << std::endl;
-  std::cout << "valid_begin : [0, 0]," << std::endl;
-  std::cout << "valid_end : [0, 0]," << std::endl;
+  std::cout << "run_range : [0, 0]," << std::endl;
+  std::cout << "pass : 0," << std::endl;
 	
   std::cout << "angle: [0.0, ";
   for(int j = 1; j < 101; j++)

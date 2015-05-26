@@ -73,8 +73,8 @@ with open('./PMT_DQXX0'+str(runnum)+'.ratdb','w') as f2:
 ////////////////////////////////////////////////////////////////////
 {
 name: "PMT_DQXX",
-valid_begin: [0,0],
-valid_end: [0,0],
+run_range: [0,0],
+pass : 0,
 
 cratestatus_n100: 0,
 cratestatus_n20: 0,

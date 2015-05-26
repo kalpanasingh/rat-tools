@@ -45,8 +45,8 @@ def AnalysisFunction(alphafile,betafile,index,timeFirst,timeLast,timeStep,retrig
 {
     name: "AB_PDF",
     index: "''' + index + '''",
-    valid_begin: [0, 0],
-    valid_end: [0, 0],
+    run_range: [0, 0],
+    pass : 0,
     retrig_cutoff: ''' + str(retrigcutoff) + ''',
     time_first: ''' + str(timeFirst) + ''',
     time_step: ''' + str(timeLast) + ''',

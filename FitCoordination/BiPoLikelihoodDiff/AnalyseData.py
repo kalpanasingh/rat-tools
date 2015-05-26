@@ -66,8 +66,8 @@ def AnalysisFunction(index, isotope):
     print "{"
     print "name: \"CLASSIFIER_BIPO_LIKELIHOODDIFF\","
     print "index: \"" + index + "\","
-    print "valid_begin: [0, 0],"
-    print "valid_end: [0, 0],"
+    print "run_range: [0, 0],"
+    print "pass : 0,"
     print "\n",
     print "times: [",
     for time in times:

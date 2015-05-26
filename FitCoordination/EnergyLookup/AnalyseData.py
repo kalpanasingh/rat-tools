@@ -52,8 +52,8 @@ def AnalysisFunction(index, material):
     print "{"
     print "name: \"FIT_ENERGY_LOOKUP\","
     print "index: \"" + index + "\","
-    print "valid_begin: [0, 0],"
-    print "valid_end: [0, 0],"
+    print "run_range: [0, 0],"
+    print "pass : 0,"
     print "\n",
     
     print "energies: [0.0,",

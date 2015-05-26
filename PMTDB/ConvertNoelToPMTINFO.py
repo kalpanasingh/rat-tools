@@ -92,8 +92,8 @@ panelInfoFile = open("PMTINFO.ratdb", "w")
 infoText = """{
 name: \"PMTINFO\",
 index: \"%s\",
-valid_begin : [0, 0],
-valid_end : [0, 0],
+run_range : [0, 0],
+pass : 0,
 """ % args[2]
 infoText += yaml.dump(new_data).replace("]", "],")
 infoText += """}

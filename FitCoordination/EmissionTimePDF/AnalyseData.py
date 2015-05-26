@@ -17,8 +17,8 @@ def AnalyseRootFiles(options):
     print "{"
     print "name: \"ET1D\","
     print "index: \"" + options.index + "\","
-    print "valid_begin: [0, 0],"
-    print "valid_end: [0, 0],"
+    print "run_range: [0, 0],"
+    print "pass : 0,"
     print "\n",
     print "time: [",
     for bin in range(startBin, endBin):

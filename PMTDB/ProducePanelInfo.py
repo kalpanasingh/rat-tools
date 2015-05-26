@@ -145,8 +145,8 @@ for number in newData["panel_number"]:
 panelInfoFile = open( "PANELINFO.ratdb", "w" )
 infoText = """{
 name: \"PANELINFO\",
-valid_begin : [0, 0],
-valid_end : [0, 0],
+run_range : [0, 0],
+pass : 0,
 """
 infoText += yaml.dump( newData ).replace( "]", "]," )
 infoText += """}

@@ -112,8 +112,8 @@ void Coordination(std::string index)
 	stream0 << "{" << std::endl;
 	stream0 << "name: \"FIT_NEAR_AV_ANGULAR\"," << std::endl;
 	stream0 << "index: \"" << index << "\"," << std::endl;
-	stream0 << "valid_begin : [0, 0]," << std::endl;
-	stream0 << "valid_end : [0, 0]," << std::endl;
+	stream0 << "run_range : [0, 0]," << std::endl;
+	stream0 << "pass : 0," << std::endl;
 	stream0 << "nhits_windows: [";
 	for (int w = 0; w < numberOfNhitsWindows; w++)
 	{

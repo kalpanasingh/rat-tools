@@ -55,7 +55,7 @@ if "gpca" in args.filename:
     outfilename="PMTCALIB_%i.ratdb" %int(runnumber)
     f = open(outfilename, 'w')
      # Now we have to loop over the table 8 times.. ugh
-    f.write('{\n name: "PMTCALIB",\n valid_begin: [0,0], \n valid_end: [0,0], \n')
+    f.write('{\n name: "PMTCALIB",\n run_range: [0,0], \n pass : 0, \n')
     f.write('\n mean_hhp : ')
     f.write(str(hhp_mean))
     f.write(',\n min_hhp : ')

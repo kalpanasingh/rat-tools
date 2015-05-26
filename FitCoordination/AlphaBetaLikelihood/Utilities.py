@@ -114,8 +114,8 @@ def OutputFileChunk(pdfList, energyRatioPDF, particle, material, description,f):
     f.write("{\n")
     f.write("name: \"LIKELIHOOD_Bi" + particle + "_" + description + "\",\n")
     f.write("index: \"" + material + "\",\n")
-    f.write("valid_begin: [0, 0],\n")
-    f.write("valid_end: [0, 0],\n")
+    f.write("run_range: [0, 0],\n")
+    f.write("pass: 0,\n")
     f.write("\n")
 	
     #OUTPUT EACH TIME RESIDIUAL DISTRIBUTION  

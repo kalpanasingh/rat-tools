@@ -55,8 +55,8 @@ def AnalysisFunction(index):
     print "{"
     print "name: \"FIT_SIMPLE_ENERGY\","
     print "index: \"" + index + "\","
-    print "valid_begin: [0, 0],"
-    print "valid_end: [0, 0],"
+    print "run_range: [0, 0],"
+    print "pass : 0,"
     print "\n",
 	print "nhit_per_mev: " + originFit.GetParameter(1) + ","
 	print "nhit_intercept: " + nearAVFit.GetParameter(0) + ","

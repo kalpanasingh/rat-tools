@@ -59,8 +59,8 @@ def AnalysisFunction(index):
     print "{"
     print "name: \"CLASSIFIER_ALPHA_UNSEEDED\","
     print "index: \"" + index + "\","
-    print "valid_begin: [0, 0],"
-    print "valid_end: [0, 0],"
+    print "run_range: [0, 0],"
+    print "pass : 0,"
     print "\n",
     print "tail_fraction: " + str(minFraction) + ","
     print "pmt_Min: " + str(Utilities.minTimeResid) + ","

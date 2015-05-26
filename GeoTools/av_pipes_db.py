@@ -56,8 +56,8 @@ def output_pipe(pipe):
     db = {"name" : '"SOLID"',
           "index" : '"av_pipe-%s"' % pipe["name"],
           "solid" : '"avPipe"',
-          "valid_begin" : "[0, 0]",
-          "valid_end" : "[0, 0]",
+          "run_range" : "[0, 0]",
+          ""pass" : 0,
           "r_min" : pipe["id"] * 25.4 / 2.0,
           "r_max" : pipe["od"] * 25.4 / 2.0}
     if "z" in pipe:
