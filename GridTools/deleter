@@ -17,7 +17,7 @@ import sys
 try:
     import argparse
 except:
-    raise ImportError("argparse not availbel; python version needs to \
+    raise ImportError("argparse not available; python version needs to \
                       be 2.7+")
 import grid
 import utilities
