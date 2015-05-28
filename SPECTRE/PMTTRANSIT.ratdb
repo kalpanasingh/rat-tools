@@ -4,6 +4,8 @@
 name: "PMTTRANSIT",
 run_range : [0, 0],
 pass: 0,
+comment: "",
+production : false,
 
 cable_delay: 0.0,
 

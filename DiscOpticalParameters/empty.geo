@@ -3,6 +3,8 @@ name: "GEO",
 index: "world",
 run_range: [0, 0],
 pass: 0,
+comment: "",
+production : false,
 enable: 1,
 invisible: 1, // omitted for visualization
 
@@ -22,6 +24,8 @@ name: "GEO",
 index: "h2o",
 run_range: [0, 0],
 pass: 0,
+comment: "",
+production : false,
 enable: 1,
 invisible: 1, // omitted for visualization
 
@@ -41,6 +45,8 @@ name: "GEO",
 index: "innerPMT",
 run_range: [0, 0],
 pass: 0,
+comment: "",
+production : false,
 enable: 1,
 
 mother: "h2o",

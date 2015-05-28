@@ -116,6 +116,8 @@ def OutputFileChunk(pdfList, energyRatioPDF, particle, material, description,f):
     f.write("index: \"" + material + "\",\n")
     f.write("run_range: [0, 0],\n")
     f.write("pass: 0,\n")
+    f.write("production: false,\n")
+    f.write("comment: \"\",\n")    
     f.write("\n")
 	
     #OUTPUT EACH TIME RESIDIUAL DISTRIBUTION  

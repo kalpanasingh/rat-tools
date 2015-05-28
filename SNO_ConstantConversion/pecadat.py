@@ -48,7 +48,7 @@ ncards=16
 outfilename="PDST_%i_0.ratdb" %int(runnumber)
 f = open(outfilename, 'w')
 # Now we have to loop over the table 8 times.. ugh
-f.write('{\n name: "ECA_PDST",\n run_range: [0,0], \n pass : 0, \n \n pdst_status: [ ')
+f.write('{\n name: "ECA_PDST",\n run_range: [0,0], \n pass : 0, \n production : false, \n comment : \"\",\n\n pdst_status: [ ')
 # For now, set all the statuswords to zero..
 # Need to translate SNO status words into SNO+ ones..
 for x in range(0,19):

@@ -3,6 +3,8 @@ name: "PMT_OPTICAL_PARAMETERS",
 index: "PMTOptics0_HQE",
 run_range : [0, 0],
 pass: 0,
+comment: "",
+production: false,
 
 stack_reflectivity: 0.4,
 collection_efficiency: 1.0,

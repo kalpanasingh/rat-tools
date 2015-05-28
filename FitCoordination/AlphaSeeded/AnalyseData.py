@@ -64,6 +64,8 @@ def AnalysisFunction(index):
     print "index: \"" + index + "\","
     print "run_range: [0, 0],"
     print "pass: 0,"
+    print "production: false,"
+    print "comment: \"\","
     print "\n",
     print "t1: " + str(mint1) + ","
     print "t2: " + str(mint2) + ","

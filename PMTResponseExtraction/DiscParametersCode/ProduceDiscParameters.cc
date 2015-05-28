@@ -169,7 +169,8 @@ ProduceRATDB(
 {
   ofstream resultDB( resultFile );
   resultDB << "{" << endl << "name: \"GREY_DISC_PARAMETERS\"," << endl << "index: \"" << paramsIndex << "\"," << endl;
-  resultDB << "run_range : [0, 0]," << endl << "pass : 0," << endl << "travel_time: 0.25d," << endl;
+  resultDB << "run_range : [0, 0]," << endl << "pass : 0," << endl << "production : false,"<< endl << "comment : \"\"," << endl;
+  resultDB << "travel_time: 0.25d," << endl;
   resultDB << "decay_constant: 0.25d," << endl << "bounce_spread: 0.10d," << endl << "disc_radius:" << FormatRatD( within ) << "," << endl;
   resultDB << "collection_efficiency: 1.0d," << endl;
 

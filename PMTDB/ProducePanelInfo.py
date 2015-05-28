@@ -147,6 +147,8 @@ infoText = """{
 name: \"PANELINFO\",
 run_range : [0, 0],
 pass : 0,
+production : false,
+comment : \"\",
 """
 infoText += yaml.dump( newData ).replace( "]", "]," )
 infoText += """}

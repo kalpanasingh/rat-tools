@@ -2,6 +2,8 @@
 name: "PMTINFO",
 run_range: [0, 0],
 pass: 0,
+comment: "",
+production: false,
 
 panelnumber: [-1, -1, -1, -1, -1, ],
 

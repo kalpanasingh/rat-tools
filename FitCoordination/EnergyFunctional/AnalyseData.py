@@ -59,6 +59,9 @@ def AnalysisFunction(index, material):
     diagFile.write("index: \"" + index + "\", \n")
     diagFile.write("run_range: [0, 0], \n")
     diagFile.write("pass : 0, \n")
+    diagFile.write("production : false, \n")
+    diagFile.write("comment : \"\", \n")
+
     diagFile.write("\n")
 
     diagFile.write("energyCoeffs: ["),

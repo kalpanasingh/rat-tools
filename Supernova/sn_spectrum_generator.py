@@ -61,7 +61,7 @@ neutrinoFlavourList = ['all','nu_e','anti_nu_e','nu_mu','anti_nu_mu','nu_tau','a
 counter = 0
 for member in neutrinoFlavourList:
 	print member, counter
-	f.write('{\nname:"pes_spectrum",\nindex: "SN_' + member + '",\nrun_range: [0, 0], \npass : 0, \nemin: 0.0, \nemax: ' + str(nu_energy_array[num_steps-1]) +  ', \nprobmin: ' + str(min(flux_array)[counter]) +', \nprobmax: '+ str(max(flux_array)[counter]) +', \nspec_energy:[')
+	f.write('{\nname:"pes_spectrum",\nindex: "SN_' + member + '",\nrun_range: [0, 0], \npass : 0,\n production: false,\ncomment : \"\",\nemin: 0.0, \nemax: ' + str(nu_energy_array[num_steps-1]) +  ', \nprobmin: ' + str(min(flux_array)[counter]) +', \nprobmax: '+ str(max(flux_array)[counter]) +', \nspec_energy:[')
 
 	## write the energy table
 	for loop in range(0,num_steps) :

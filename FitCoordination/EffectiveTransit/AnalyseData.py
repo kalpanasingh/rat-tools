@@ -53,6 +53,8 @@ def AnalysisFunction(index):
     print "index: \"" + index + "\","
     print "run_range: [0, 0],"
     print "pass : 0,"
+    print "production: false,"
+    print "comment: \"\","
     print "\n",
     print "Intercept: " + linearFit.GetParameter(0) + ","
     print "Speed: " + float(1.0 / linearFit.GetParameter(1)) + ","

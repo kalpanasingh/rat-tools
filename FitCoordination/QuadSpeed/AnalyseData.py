@@ -53,6 +53,8 @@ def AnalysisFunction(index):
     print "index: \"" + index + "\","
     print "run_range: [0, 0],"
     print "pass : 0,"
+    print "production : false,"
+    print "comment : \"\","
     print "\n",
     print "light_speed: " + str(linearFit.GetParameter(0)) + ",    // Effective overall speed of light"
     print "num_points: 4000,    // Maximum number of points generated in quad-cloud"

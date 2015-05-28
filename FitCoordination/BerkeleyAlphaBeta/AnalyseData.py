@@ -47,6 +47,8 @@ def AnalysisFunction(alphafile,betafile,index,timeFirst,timeLast,timeStep,retrig
     index: "''' + index + '''",
     run_range: [0, 0],
     pass : 0,
+    production: false,
+    comment: \"\",
     retrig_cutoff: ''' + str(retrigcutoff) + ''',
     time_first: ''' + str(timeFirst) + ''',
     time_step: ''' + str(timeLast) + ''',

@@ -94,6 +94,8 @@ name: \"PMTINFO\",
 index: \"%s\",
 run_range : [0, 0],
 pass : 0,
+production : false,
+comment : \"\",
 """ % args[2]
 infoText += yaml.dump(new_data).replace("]", "],")
 infoText += """}

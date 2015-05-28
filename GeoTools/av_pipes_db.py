@@ -57,7 +57,9 @@ def output_pipe(pipe):
           "index" : '"av_pipe-%s"' % pipe["name"],
           "solid" : '"avPipe"',
           "run_range" : "[0, 0]",
-          ""pass" : 0,
+          "pass" : 0,
+          "production" : "false",
+          "comment" : "",
           "r_min" : pipe["id"] * 25.4 / 2.0,
           "r_max" : pipe["od"] * 25.4 / 2.0}
     if "z" in pipe:

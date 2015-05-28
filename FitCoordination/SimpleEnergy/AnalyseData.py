@@ -57,10 +57,12 @@ def AnalysisFunction(index):
     print "index: \"" + index + "\","
     print "run_range: [0, 0],"
     print "pass : 0,"
-    print "\n",
-	print "nhit_per_mev: " + originFit.GetParameter(1) + ","
-	print "nhit_intercept: " + nearAVFit.GetParameter(0) + ","
-	print "nhit_gradient: " + nearAVFit.GetParameter(1) + ","
+    print "production: false,"
+    print "comment: \"\","
+    print "\n"
+    print "nhit_per_mev: " + originFit.GetParameter(1) + ","
+    print "nhit_intercept: " + nearAVFit.GetParameter(0) + ","
+    print "nhit_gradient: " + nearAVFit.GetParameter(1) + ","
     print "}"
     print "\n"
 

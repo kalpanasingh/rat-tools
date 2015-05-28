@@ -49,6 +49,8 @@ void GetScintPDF(std::string material, int numberOfRuns, double velocity=-999)
   std::cout << "index: \"" << material << "\"," << std::endl;
   std::cout << "run_range : [0, 0]," << std::endl;
   std::cout << "pass : 0," << std::endl;
+  std::cout << "production : false," << std::endl;
+  std::cout << "comment : \"\"," << std::endl;
 	
   std::cout << "time: [";
   for(int j = 0; j < 401; j++)
@@ -161,6 +163,8 @@ void GetWaterPDF(std::string material)
   std::cout << "index: \"" << material << "\"," << std::endl;
   std::cout << "run_range : [0, 0]," << std::endl;
   std::cout << "pass : 0," << std::endl;
+  std::cout << "production : false," << std::endl;
+  std::cout << "comment : \"\"," << std::endl;
 
   std::cout << "time: [";
   for(int j = 0; j < 801; j++)

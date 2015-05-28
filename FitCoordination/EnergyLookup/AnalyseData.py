@@ -54,6 +54,8 @@ def AnalysisFunction(index, material):
     print "index: \"" + index + "\","
     print "run_range: [0, 0],"
     print "pass : 0,"
+    print "production: false,"
+    print "comment: \"\","
     print "\n",
     
     print "energies: [0.0,",
