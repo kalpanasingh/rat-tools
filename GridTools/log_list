@@ -15,6 +15,7 @@ import sys
 import datetime
 import database
 import grid
+import utilities
 try:
     import argparse
 except:
@@ -100,20 +101,6 @@ def generate_list(view, min_key, max_key):
     return names, sizes, guids, adlers
 
 
-def write_output(output, names, sizes, guids, adlers):
-    """Write the output file.
-    """
-    if len(names)==0:
-       print "No files found!"
-       sys.exit()
-    list_file = open(output, "w")
-    list_file.write("%s\n" % copy_type)
-    for i, n in enumerate(names):
-        list_file.write("%s\t%s\t%s\t%s\n" % (n, sizes[i], guids[i], adlers[i]))
-    list_file.close()
-    print "Found %d files, listed in %s" % (len(names), output)
-
-
 if __name__=="__main__":
     parser = argparse.ArgumentParser(description="File list generator.")
     parser.add_argument("-d", dest="db_name", help="Data-flow database name [data-processing]",
@@ -173,5 +160,5 @@ if __name__=="__main__":
         raise ValueError("Unhandled log type %s" % args.logtype)
 
     # And write the output file
-    write_output(args.output, names, sizes, guids, adlers)
+    utilities.write_grabber_file(args.output, copy_type, names, sizes, guids, adlers)
     
