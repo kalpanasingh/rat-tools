@@ -30,7 +30,7 @@ server_list = []
 
 
 def get_runs():
-    """Get a list of all labels available
+    """Get a list of all runs available
     """
     rows = database.view("_design/dflow/_view/grid_ids", descending=True,
                          limit=1)
@@ -48,7 +48,7 @@ def get_runs():
 
 
 def generate_run_list(run_range, logfiles=False):
-    """Generate the file list by production labels
+    """Generate the file list by run range
     """
     names = []
     sizes = []

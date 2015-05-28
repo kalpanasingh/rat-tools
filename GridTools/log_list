@@ -1,0 +1,177 @@
+#!/usr/bin/env python
+#####################
+#
+# raw_list
+#
+# Generates lists of log files for download.
+#
+# Author: Matt Mottram
+#         <m.mottram@qmul.ac.uk>
+#
+#####################
+
+import os
+import sys
+import datetime
+import database
+import grid
+try:
+    import argparse
+except:
+    raise ImportError("argparse not available; python version needs to be 2.7+")
+try:
+    import json
+except:
+    raise ImportError("json not available; python version needs to be 2.7+")
+
+
+# Copy type will be set to SURL if lcg-utils or gfal are not available
+copy_type = "GUID"
+server_list = []
+
+log_types = ["orca_run", "orca_daily"]
+
+def get_run_range(log_type):
+    """Get a list of all runs available for a given log type
+    """
+    min_key, max_key = get_range("logs_run_by_number", log_type)
+    min_run = min_key[1]
+    max_run = max_key[1]
+    return min_run, max_run
+
+
+def get_date_range(log_type):
+    """Get a list of all dates available for a given log type
+    """
+    min_key, max_key = get_range("logs_daily_by_date", log_type)
+    min_date = datetime.datetime(min_key[1], min_key[2], min_key[3])
+    max_date = datetime.datetime(max_key[1], max_key[2], max_key[3])
+    return min_date, max_date
+
+
+def get_range(view, log_type):
+    
+    rows = database.view("_design/dflow/_view/"+view, descending=True,
+                         limit=1, startkey=[log_type, {}], endkey=[log_type])
+    for row in rows:
+        max_key = row["key"]
+    rows = database.view("_design/dflow/_view/"+view, descending=False,
+                         limit=1, startkey=[log_type], endkey=[log_type, {}])
+    for row in rows:
+        min_key = row["key"]
+    try:
+        return min_val, max_val
+    except NameError, e:
+        print "Problem finding min/max run range from database!"
+        raise
+
+
+def generate_run_list(log_type, min_run, max_run):
+    '''Generate the file list by run range
+    '''
+    min_key = [log_type, min_run]
+    max_key = [log_type, max_run]
+    return generate_list("logs_run_by_number", min_key, max_key)
+
+
+def generate_date_list(log_type, min_date, max_date):
+    '''Generate the file list by run range
+    '''
+    min_key = [log_type, min_date.year, min_date.month, min_date.day]
+    max_key = [log_type, max_date.year, max_date.month, max_date.day]
+    return generate_list("logs_daily_by_date", min_key, max_key)
+
+
+def generate_list(view, min_key, max_key):
+    """Generate the file list
+    """
+    names = []
+    sizes = []
+    guids = []
+    adlers = []
+    rows = database.view("_design/dflow/_view/"+view, startkey=min_key,
+                         endkey=max_key, include_docs=True)
+    for row in rows:
+        guids.append(row["doc"]["guid"])
+        names.append(row["doc"]["filename"])
+        adlers.append(row["doc"]["adler32"])
+        # no sizes stored
+        sizes.append(0)
+    return names, sizes, guids, adlers
+
+
+def write_output(output, names, sizes, guids, adlers):
+    """Write the output file.
+    """
+    if len(names)==0:
+       print "No files found!"
+       sys.exit()
+    list_file = open(output, "w")
+    list_file.write("%s\n" % copy_type)
+    for i, n in enumerate(names):
+        list_file.write("%s\t%s\t%s\t%s\n" % (n, sizes[i], guids[i], adlers[i]))
+    list_file.close()
+    print "Found %d files, listed in %s" % (len(names), output)
+
+
+if __name__=="__main__":
+    parser = argparse.ArgumentParser(description="File list generator.")
+    parser.add_argument("-d", dest="db_name", help="Data-flow database name [data-processing]",
+                        default="data-processing")
+    parser.add_argument("-s", dest="db_server",
+                        help="Data-flow database server [couch.snopl.us]",
+                        default="couch.snopl.us")
+    parser.add_argument("-p", dest="db_port",
+                        help="Data-flow database server port [None]", default=None, type=int)
+    parser.add_argument("-o", dest="output", help="Filename to write the list to [filelist.dat]",
+                        default="filelist.dat")
+    parser.add_argument("logtype", help="Type of log requested, options: [%s]" % (", ".join(log_types)))
+    parser.add_argument("minrange", help="Minimum date / run", type=str)
+    parser.add_argument("maxrange", help="Maximum date / run", type=str)
+    
+    args = parser.parse_args()
+
+    # Check the log type
+    if args.logtype not in log_types:
+        raise ValueError("Log type must be one of [%s]" % (", ".join(log_types)))
+
+    min_val = None
+    max_val = None
+    if args.logtype.rpartition("_")[-1] == "run":
+        try:
+            min_val = int(args.minrange)
+            max_val = int(args.maxrange)
+        except:
+            raise TypeError("Max & Min range must be ints for %s" % args.logtype)
+    elif args.logtype.rpartition("_")[-1] == "daily":
+        try:
+            [year, month, day] = args.minrange.split("/")
+            min_val = datetime.datetime(year, month, day)
+            [year, month, day] = args.maxrange.split("/")
+            max_val = datetime.datetime(year, month, day)
+        except:
+            raise TypeError("Max & Min range must be of form yyyy/mm/dd for %s" % args.logtype)
+    else:
+        raise ValueError("Unhandled log type %s" % args.logtype)
+
+    # Check that the output file is OK
+    if os.path.exists(args.output):
+        overwrite = raw_input("%s exists, overwrite [y/N]?: " % args.output)
+        if overwrite!="y" and overwrite!="Y":
+            print "Specify another filename"
+            sys.exit()
+
+    # Connect to the database
+    database.connect_db(args.db_server, args.db_port, args.db_name)
+
+    # Generate the list of guids for the run range requested
+    if args.logtype.rpartition("_")[-1] == "run":
+        names, sizes, guids, adlers = generate_run_list(args.logtype, min_val, max_val)
+    elif args.logtype.rpartition("_")[-1] == "daily":
+        names, sizes, guids, adlers = generate_date_list(args.logtype, min_val, max_val)
+    else:
+        raise ValueError("Unhandled log type %s" % args.logtype)
+
+    # And write the output file
+    write_output(args.output, names, sizes, guids, adlers)
+    
