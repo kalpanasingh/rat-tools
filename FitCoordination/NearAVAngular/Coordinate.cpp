@@ -114,8 +114,8 @@ void Coordination(std::string index)
 	stream0 << "index: \"" << index << "\"," << std::endl;
 	stream0 << "run_range : [0, 0]," << std::endl;
 	stream0 << "pass : 0," << std::endl;
-  stream0 << "production : false," << std::endl;
-  stream0 << "comment : \"\"," << std::endl;
+	stream0 << "production : false," << std::endl;
+	stream0 << "comment : \"\"," << std::endl;
 	stream0 << "nhits_windows: [";
 	for (int w = 0; w < numberOfNhitsWindows; w++)
 	{

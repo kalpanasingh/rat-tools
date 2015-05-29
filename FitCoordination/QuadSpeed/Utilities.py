@@ -50,7 +50,6 @@ def MeanRadialBias(infileName):
                 biasPlot.Fill(radialBias)
         except:
             pass
-production : false,
 
     biasPlot.Fit(biasFit)
     return biasFit.GetParameter(1)
