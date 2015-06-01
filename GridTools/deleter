@@ -50,7 +50,7 @@ def delete_folder(folders):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-l", dest = 'list', help = "list of files to \
-                        upload [in_text.txt]", default='delete_files.txt')
+                        upload [delete_files.txt]", default='delete_files.txt')
     parser.add_argument("-f", dest = 'del_folder', help = "delete the \
                         folder as well as the files [False]", default
                         = False)
