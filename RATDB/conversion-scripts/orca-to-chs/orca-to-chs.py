@@ -29,6 +29,10 @@ import chstools
 
 
 def file_check(filename):
+    """Function to check the PMT_DQXX info
+    :param: The name of the temporary file (string).
+    :returns: Nothing so far.
+    """
     # First make sure it is not empty
     b = os.path.getsize(filename)
     if b == 0:
@@ -48,7 +52,7 @@ def main():
                         type=str, required=True)
     parser.add_argument("-p", dest="orcadb_password",
                         help="ORCADB Password",
-                        type=str, required=True)       
+                        type=str, required=True)
     parser.add_argument('-s', dest='ratdb_server',
                         help='URL to CouchDB ratdb server',
                         default='http://localhost:5984/')
@@ -64,7 +68,7 @@ def main():
         dqcr, dqch, dqid = chstools.create_dqcr_dqch_dqid(args.runnumber,
                                                           data)
     except:
-        print "orca-to-chs: problem retrieving the ORCA configuration info for run " + str(args.runnumber)
+        print "orca-to-chs run" + str(args.runnumber) + ": problem retrieving the ORCA configuration info"
         return
     # Create a temporary file to hold the PMT_DQXX.ratdb content
     tempf = tempfile.NamedTemporaryFile(delete=False)
@@ -75,16 +79,16 @@ def main():
     try:
         file_check(tempf.name)
     except Exception, e:
-        print "orca-to-chs run " + str(args.runnumber) + ": %s" % e 
+        print "orca-to-chs run " + str(args.runnumber) + ": %s" % e
         return
     try:
         # Run the command to upload the table to the specified ratdb location
         command = "ratdb append -s %s -d %s %s %i " % (args.ratdb_server,
                                                        args.ratdb_name,
-                                                       tempf.name, 100)
+                                                       tempf.name, 1)
         os.system(command)
     except:
-        print "orca-to-chs: there was a problem uploading the file for run " + str(args.runnumber)
+        print "orca-to-chs run" + str(args.runnumber) + ": there was a problem uploading the file"
     # Get rid of the temporary file
     os.unlink(tempf.name)
 
