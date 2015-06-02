@@ -14,6 +14,7 @@
 
 import os
 import sys
+import logging
 try:
     import argparse
 except:
@@ -24,6 +25,7 @@ import utilities
 
 
 def delete(griddir, directory, path, filename, del_folder):
+    logging.info("In delete")
     i = 0
     folders = []
     store_folder = 'store'
@@ -38,10 +40,12 @@ def delete(griddir, directory, path, filename, del_folder):
                 store_folder = current_folder
                 folders.append(current_folder)
         i += 1
+    logging.info(folders)
     return folders
 
 
 def delete_folder(folders):
+    logging.info("In delete_folder")
     for line in folders:
         grid.delete_folder(line)
         print "deleting folder: " + line
@@ -54,7 +58,15 @@ if __name__ == '__main__':
     parser.add_argument("-f", dest = 'del_folder', help = "delete the \
                         folder as well as the files [False]", default
                         = False)
+    parser.add_argument("-log", dest = 'debug', help = "enable debug \
+                        logging", default = False)
+    parser.add_argument("-log-file", dest = 'log_file', help = "name of \
+                        the file to write log messages to [messages.log]",
+                        default = 'messages.log')
     args = parser.parse_args()
+    if args.debug:
+        logging.basicConfig(filename=args.log_file, filemode = 'w', level
+                            = logging.DEBUG)
     if not grid.proxy_time():
         print "Need to generate a grid proxy"
         if not grid.proxy_create():

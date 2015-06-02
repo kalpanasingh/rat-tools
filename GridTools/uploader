@@ -16,6 +16,7 @@
 import os
 import sys
 import re
+import logging
 try:
     import argparse
 except:
@@ -33,6 +34,7 @@ import utilities
 def base_directory(directory):
     # check that one of the official base directories is used
     official_base = []
+    logging.info("In base_directory")
     for i, entry in enumerate(directory):
         if entry == 'user':
             official_base.append(True)
@@ -48,11 +50,13 @@ def base_directory(directory):
             official_base.append(True)
         else:
             official_base.append(False)
+    logging.info(official_base)
     return official_base
 
 
-def grid_file(griddir, directory, path, filename, storage, out_file,
-              remove, official_base):
+def grid_file(griddir, directory, path, filenamepath, filename, storage,
+              out_file, remove, official_base):
+    logging.info("In grid_file")
     i = 0
     j = 0
     command = 'lcg-cr'
@@ -66,9 +70,10 @@ def grid_file(griddir, directory, path, filename, storage, out_file,
                 lfc_path = 'lfn:%s' % os.path.join(griddir, directory[i],
                                                    path[i], filename[i])
                 print lfc_path
-                upfile = filename[i]
+                upfile = filenamepath[i]
                 input_string = 'lcg-cr --vo snoplus.snolab.ca --checksum -d %s \
                     -P %s -l %s %s' % (storage, se_path, lfc_path, upfile)
+                logging.info("input_string = %s", input_string)
                 try:
                     gridid.append(os.popen(input_string).readlines()[0]
                                   )
@@ -91,12 +96,11 @@ def grid_file(griddir, directory, path, filename, storage, out_file,
                         print upfile
                         i += 1
                         continue
-                str1 = str(filename[i])
-                str2 = str(os.stat(filename[i]).st_size)
-                str3 = str(gridid[j].rstrip('\n'))
-                str4 = str(utilities.get_adler32(filename[i]))
-                str5 = str(lfc_path)
-                outline = "%s \t %s \t %s \t %s \n" % (str3, str2, str4, str5)
+                str1 = str(os.stat(filenamepath[i]).st_size)
+                str2 = str(gridid[j].rstrip('\n'))
+                str3 = str(utilities.get_adler32(filenamepath[i]))
+                str4 = str(lfc_path)
+                outline = "%s \t %s \t %s \t %s \n" % (str2, str1, str3, str4)
                 f.write(outline)
                 j += 1
             else:
@@ -122,7 +126,15 @@ if __name__ == '__main__':
     parser.add_argument("-r", dest = 'remove', help = "if the file\
                         already exist should it be overwritten", default
                         = False)
+    parser.add_argument("-log", dest = 'debug', help = "enable debug \
+                        logging", default = False)
+    parser.add_argument("-log-file", dest = 'log_file', help = "name of \
+                        the file to write log messages to [messages.log]",
+                        default = 'messages.log')
     args = parser.parse_args()
+    if args.debug:
+        logging.basicConfig(filename=args.log_file, filemode = 'w', level
+                            = logging.DEBUG)
     if not grid.proxy_time():
         print "Need to generate a grid proxy"
         if not grid.proxy_create():
@@ -139,5 +151,5 @@ if __name__ == '__main__':
     true_base = base_directory(directory)
     out_text = args.out
     griddir = '/grid/snoplus.snolab.ca'
-    gridid = grid_file(griddir, directory, path, filename, storage,
-                       out_text, args.remove, true_base)
+    gridid = grid_file(griddir, directory, path, filenamepath, filename,
+                       storage, out_text, args.remove, true_base)
