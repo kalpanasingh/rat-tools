@@ -44,5 +44,6 @@ if __name__ == "__main__":
             print "Not outputting DQXX file, have a nice day!!"
             print "You can enable the DQXX file output by specifying \'-o\'."
         else:
-            chstools.dqxx_write_to_file(dqcr, dqch, dqid, args.runnumber)
+            outfilename = "PMT_DQXX_%i.ratdb" % args.runnumber
+            chstools.dqxx_write_to_file(dqcr, dqch, dqid, args.runnumber, outfilename)
             print "DQXX file written, have a nice day!!"

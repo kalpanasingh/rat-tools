@@ -362,7 +362,7 @@ def create_dqcr_dqch_dqid(runnumber, data):
     return dqcr, dqch, dqid
 
 
-def dqxx_write_to_file(dqcr, dqch, dqid, runnumber):
+def dqxx_write_to_file(dqcr, dqch, dqid, runnumber, outfilename):
     """Function that writes out the SNO-style DQXX file.
     :param: dqcr: A list of 304 DQCR words (one per FEC card).
     :param: dqch: A list of 9728 DQCH words (one per channel).
@@ -372,13 +372,15 @@ def dqxx_write_to_file(dqcr, dqch, dqid, runnumber):
     """
     # RAT has an issue with reading in the dqch integer array,
     # therefore, we are manually writing out the file for now:
-    outfilename = "PMT_DQXX_%i.ratdb" % runnumber
     runrange = "run_range: [%i, 100000]," % (runnumber)
     f = open(outfilename, 'w')
     f.write(' {\n name: "PMT_DQXX",\n ')
     f.write( runrange )
+    f.write('\n pass: 0,\n')
+    f.write(' comment: "",\n')
+    f.write(' production: 1,\n')
     # The following variables are zero by default for now? (Freija)
-    f.write(' \n cratestatus_n100: 0,\n cratestatus_n20: 0, \n cratestatus_esumL: 0, ')
+    f.write(' cratestatus_n100: 0,\n cratestatus_n20: 0, \n cratestatus_esumL: 0, ')
     f.write(' \n cratestatus_esumH: 0,\n cratestatus_owlN: 0, \n cratestatus_owlEL: 0, ')
     f.write(' \n cratestatus_owlEH: 0,')
     f.write('\n\n dqid : [ ')

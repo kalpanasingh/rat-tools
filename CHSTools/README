@@ -60,7 +60,7 @@ Warning: no FEC info for crate/card 1/1
 3) Create a SNO-style DQXX file
 
 python createDQXX.py -n 8600 -u 'snoplus' -p 'definepasswordhere'
-output:
+example output:
 Assembling DQXX info for run 8600
 Warning: no FEC info for crate/card 1/1
 
@@ -81,5 +81,5 @@ get_run_configuration_from_db(runnumber, db_username, db_password):
     Function to retrieve the ORCA runconfiguration document
 create_dqcr_dqch_dqid(runnumber, data):
     Function that creates the dqcr, dqch and dqid words for runnumber.
-dqxx_write_to_file(dqcr, dqch, dqid, runnumber):
+dqxx_write_to_file(dqcr, dqch, dqid, runnumber, filename):
     Function that writes out the SNO-style DQXX file.

@@ -26,4 +26,5 @@ if __name__ == "__main__":
         print "Assembling DQXX info for run " + str(args.runnumber)
         data = chstools.get_run_configuration_from_db(args.runnumber, args.db_username, args.db_password)
         dqcr, dqch, dqid = chstools.create_dqcr_dqch_dqid(args.runnumber, data)
-        chstools.dqxx_write_to_file(dqcr, dqch, dqid, args.runnumber)
+        outfilename = "PMT_DQXX_%i.ratdb" % args.runnumber
+        chstools.dqxx_write_to_file(dqcr, dqch, dqid, args.runnumber, outfilename)
