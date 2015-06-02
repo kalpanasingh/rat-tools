@@ -46,9 +46,6 @@ def readin_file(textfile):
             line = line.translate(None, '\n\t ')
             words.append(line.split(','))
         directory, file_path, filename = zip(*words)
-    logging.info("directory = "+directory)
-    logging.info("file_path = "+file_path)
-    logging.info("filename = "+filename)
     return directory, file_path, filename
 
 
