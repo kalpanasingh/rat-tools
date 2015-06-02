@@ -16,8 +16,6 @@ import httplib
 import json
 import sys
 
-db_server = 'couch.snopl.us'
-
 # The SNO definition of DQXX. The 'in_use' flag denotes if we
 # are actually reading this info from the ORCA configuration
 # file at this time.
@@ -184,7 +182,7 @@ def form_dqxx_word(dqcr, dqch):
     return dqxx
 
 
-def get_run_configuration_from_db(runnumber, db_username, db_password):
+def get_run_configuration_from_db(runnumber, db_server, db_username, db_password):
     """Function to retrieve the ORCA runconfiguration document
     from the snoplus database.
     :param: The run-number (int).
