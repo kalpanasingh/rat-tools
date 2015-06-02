@@ -16,7 +16,6 @@
 import os
 import sys
 import re
-import numpy
 try:
     import argparse
 except:
@@ -29,24 +28,6 @@ import utilities
 #####################################
 # Code for uploading
 #####################################
-
-
-def get_runs():
-    """Get a list of all labels available
-        """
-    rows = database.view("_design/dflow/_view/grid_ids", descending=True,
-                         limit=1)
-    for row in rows:
-        max_run = row["key"][0]
-    rows = database.view("_design/dflow/_view/grid_ids", descending=False,
-                         limit=1)
-    for row in rows:
-        min_run = row["key"][0]
-    try:
-        return [min_run, max_run]
-    except NameError, e:
-        print "Problem finding min/max run range from database!"
-        raise
 
 
 def base_directory(directory):
