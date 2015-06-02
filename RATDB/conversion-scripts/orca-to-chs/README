@@ -1,6 +1,6 @@
 # ORCA to chs conversion by F. Descamps <fbdescamps@lbl.gov>
 
-Scripts that is designed to run near-line. It can be used to auromatically create and upload the 
+Scripts that is designed to run near-line. It can be used to automatically create and upload the 
 SNO-style DQXX information (PMT_DQXX_#runnumber.ratdb) to the ratdb at a specified location.
 Defaults to http://localhost:5984. 
 
