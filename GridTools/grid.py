@@ -179,6 +179,31 @@ def list_reps(guid):
         raise Exception('Cannot find replicas for %s' % (guid))
     return out
 
+
+def get_data_locality(surl):
+    '''Check the location of a file
+    
+    i.e. is the file online, nearline etc
+    '''
+    rtc, out, err = execute("lcg-ls", "-l", surl)
+    if rtc:
+        raise Exception('Cannot list this SURL %s' % surl)
+    # 6th column is nearline/online etc
+    try:
+        if type(surl) is str:
+            return out[0].split()[5], out[0].split()[6]
+        else:
+            # have a list?
+            ctr = 0
+            localities = []
+            while ctr < len(out):
+                localities.append((out[ctr].split()[5], out[ctr].split()[6]))
+                ctr += 3
+            return localities
+    except:
+        raise Exception('grid::get_data_locality::unable to split %s' % out)
+
+
 def check_copy_mode():
     if copy==lcg_copy:
         print "LCG-utils copy mode"
