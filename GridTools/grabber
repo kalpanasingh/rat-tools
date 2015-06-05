@@ -50,7 +50,6 @@ def download_file(directory, filename, guid, adler32, size):
     # Set a timeout based on the file size
     # For lack of anything better, use 10 second for every MB + 60s basic
     if size==0:
-        print "Warning: filesize 0 is probably not true..."
         size = _GB # This is usually the max
     timeout = 60 + 10 * int(size / _MB)
     # Ensure correct guid format (some are missing prefix)
@@ -98,45 +97,40 @@ def download_parallel(destination, files, guids, adlers, sizes, streams):
 
 
 if __name__=="__main__":
-   parser = argparse.ArgumentParser()   
-   parser.add_argument("-l", dest="list", help="list of files to grab [filelist.dat]",
-                       default="filelist.dat")
-   parser.add_argument("-d", dest="dest", help="Directory to download files to. [downloaded]",
-                       default="downloaded")
-   parser.add_argument("-p", dest="parallel", help="Parallel downloads", action="store_true")
-   parser.add_argument("--streams", dest="streams", help="Parallel streams [10]",
-                       type=int, default=10)
-   args = parser.parse_args()
-   # First, check for a proxy
-   if not grid.proxy_time():
-       print "Need to generate a grid proxy"
-       if not grid.proxy_create():
-           print "Proxy successfully created"
-       else:
-           print "Unable to create proxy; try 'voms-proxy-init --voms snoplus.snolab.ca' in shell"
-           sys.exit()
-   # Now, check the downloads
-   files = []
-   sizes = []
-   guids = []
-   adlers = []
-   fin = open(args.list, "r")
-   copy_type = fin.readline().strip()
-   if copy_type!="GUID" and copy_type!="SURL":
-       raise Exception("Unknown copy type")
-   for line in fin.readlines():
-       f, s, g, a = line.split()
-       files.append(f.strip())
-       sizes.append(int(s.strip()))
-       guids.append(g.strip())
-       adlers.append(a.strip())
-   response = raw_input("Will download %.1f GB, OK? [y/N]: " % (sum(sizes)/_GB))
-   if response!="y" and response!="Y":
-       print "OK, quit!"
-       sys.exit()
-   # Now, download files   
-   if args.parallel:
-       download_parallel(args.dest, files, guids, adlers, sizes, args.streams)
-   else:
-       download_sequence(args.dest, files, guids, adlers, sizes)
-   print "Downloads complete"
+    parser = argparse.ArgumentParser()   
+    parser.add_argument("-l", dest="list", help="list of files to grab [filelist.dat]",
+                        default="filelist.dat")
+    parser.add_argument("-d", dest="dest", help="Directory to download files to. [downloaded]",
+                        default="downloaded")
+    parser.add_argument("-p", dest="parallel", help="Parallel downloads", action="store_true")
+    parser.add_argument("--streams", dest="streams", help="Parallel streams [10]",
+                        type=int, default=10)
+    args = parser.parse_args()
+    # First, check for a proxy
+    if not grid.proxy_time():
+        print "Need to generate a grid proxy"
+        if not grid.proxy_create():
+            print "Proxy successfully created"
+        else:
+            print "Unable to create proxy; try 'voms-proxy-init --voms snoplus.snolab.ca' in shell"
+            sys.exit()
+    # Now, check the downloads
+    copy_type, files, sizes, guids, adlers = utilities.read_grabber_file(args.list)
+    # Warn IF this is going to download lots of data (> 10 GB) or >25% of free space
+    free_disk = os.statvfs(args.dest).f_frsize * os.statvfs(args.dest).f_bavail
+    total_download = sum(sizes)
+    if float(total_download) / free_disk > 1:
+        print "Download: %s; total disk: %s" % (total_download, free_disk)
+        sys.exit(1)
+    if float(total_download)/_GB > 10 or float(total_download) / free_disk > 0.25e-10:
+        response = raw_input("Will download %.1f GB, (free %s) OK? [y/N]: " % (total_download/_GB, 
+                                                                               free_disk))
+        if response!="y" and response!="Y":
+            print "OK, quit!"
+            sys.exit()
+    # Now, download files   
+    if args.parallel:
+        download_parallel(args.dest, files, guids, adlers, sizes, args.streams)
+    else:
+        download_sequence(args.dest, files, guids, adlers, sizes)
+    print "Downloads complete"
