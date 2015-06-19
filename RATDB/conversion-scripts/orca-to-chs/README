@@ -4,8 +4,10 @@ Scripts that is designed to run near-line. It can be used to automatically creat
 SNO-style DQXX information (PMT_DQXX_#runnumber.ratdb) to the ratdb at a specified location.
 Defaults to http://localhost:5984. 
 
-IMPORTANT: The user needs to define the path to rat-tools in settings.py
-IMPORTANT: Always supply the snoplus password between quotes.
+IMPORTANT: 
+- The user needs to define the path to rat-tools in settings.py
+- Always supply the snoplus password between quotes.
+- Make sure to set the RAT environment
 
 Arguments
 Required:
@@ -21,6 +23,8 @@ Optional:
     Where to grab the ORCA run configuration files from. Defaults to couch.snopl.us server with name orca
 -s RATDB_SERVER
     Where to upload the ratdb files to. Defaults to http://localhost:5984. 
+    IMPORTANT: please specify user:pass when using the snoplus servers. For example 
+    http://user:pass@couch.snopl.us
 -d RATDB_NAME
     The name of the ratdb data-base on RATDB_SERVER. Defaults to ratdb.
     This means that the default database URL is http://localhost:5984/ratdb/. 

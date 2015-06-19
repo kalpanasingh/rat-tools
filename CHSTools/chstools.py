@@ -10,8 +10,6 @@ Author: Freija Descamps
  Inspired by dqxx_view.js script by Andy Mastbaum
 """
 
-import getpass
-import argparse
 import httplib
 import json
 import sys
@@ -127,7 +125,7 @@ def form_dqxx_word(dqcr, dqch):
         # get the crate number
         crate = (lcn & 0x3e00) >> 9
         # get the card number
-        card = (lcn & 0x1e0 ) >> 5
+        card = (lcn & 0x1e0) >> 5
         dqcr_word = dqcr[crate * 16 + card]
         # get the channel number
         ch = lcn & 0x1f
@@ -201,12 +199,12 @@ def get_run_configuration_from_db(runnumber, db_server, db_username, db_password
     try:
         data = json.loads(connection.getresponse().read())
     except ValueError, e:
-        sys.stderr.write("Failed to contact database, try again\n")
+        sys.stderr.write("chstools: Failed to contact database, try again\n")
         sys.exit(1)
     rows = data['rows']
     # Check if there is data available for this run
     if len(rows) == 0:
-        sys.stderr.write("No ORCA data for this run\n")
+        sys.stderr.write("chstools: No ORCA data for this run\n")
         sys.exit(1)
     return data
 
@@ -240,7 +238,7 @@ def create_dqcr_dqch_dqid(runnumber, data):
                     dqid[(crate * 96) + (card * 6) + 2 + db] = hex(int(fecs[str(crate)][str(card)]['daughter_board'][str(db)]['daughter_board_id'], 16))
             else:
                 # The DQIDs will be zero in this case
-                print "Warning: no FEC info for crate/card " + str(crate) + "/" + str(card)
+                print "chstools: Warning: no FEC info for crate/card " + str(crate) + "/" + str(card)
             # Time for DQCR!
             # 0   CRATE        Crate present present(0), not present(1)
             # SNO+ : this is now replaced with: XL3 communicating.
@@ -360,7 +358,7 @@ def create_dqcr_dqch_dqid(runnumber, data):
     return dqcr, dqch, dqid
 
 
-def dqxx_write_to_file(dqcr, dqch, dqid, runnumber, outfilename):
+def dqxx_write_to_file(dqcr, dqch, dqid, runnumber, outfilename=None):
     """Function that writes out the SNO-style DQXX file.
     :param: dqcr: A list of 304 DQCR words (one per FEC card).
     :param: dqch: A list of 9728 DQCH words (one per channel).
@@ -368,9 +366,11 @@ def dqxx_write_to_file(dqcr, dqch, dqid, runnumber, outfilename):
     :param: The run-number.
     :returns: None.
     """
+    if outfilename is None:
+        outfilename = "PMT_DQXX_%i.ratdb" % (runnumber)
     # RAT has an issue with reading in the dqch integer array,
     # therefore, we are manually writing out the file for now:
-    runrange = "run_range: [%i, 100000]," % (runnumber)
+    runrange = "run_range: [%i, %i]," % (runnumber, runnumber)
     f = open(outfilename, 'w')
     f.write(' {\n name: "PMT_DQXX",\n ')
     f.write( runrange )
