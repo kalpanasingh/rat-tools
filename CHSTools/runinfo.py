@@ -19,7 +19,7 @@ if __name__ == "__main__":
                         help="Run number",
                         type=int,
                         required=True)
-    parser.add_argument('-c', '--orcadb_server', dest='orcadb_server',
+    parser.add_argument('-c', dest='orcadb_server',
                         help='URL to CouchDB orca server',
                         default='couch.snopl.us')
     parser.add_argument("-u", dest="orcadb_username",
@@ -28,7 +28,7 @@ if __name__ == "__main__":
     parser.add_argument("-p", dest="orcadb_password",
                         help="ORCADB Password",
                         type=str, required=True)
-    parser.add_argument("-o", "--output", action="store_true", 
+    parser.add_argument("-o", "--output", action="store_true",
                         help="Output the SNO-style dqxx file")
     args = parser.parse_args()
     if args.runnumber == "0":
@@ -38,7 +38,7 @@ if __name__ == "__main__":
         sys.exit(1)
     else:
         print "Assembling DQXX info for run " + str(args.runnumber)
-        data = chstools.get_run_configuration_from_db(args.runnumber, 
+        data = chstools.get_run_configuration_from_db(args.runnumber,
                                                       args.orcadb_server,
                                                       args.orcadb_username,
                                                       args.orcadb_password)

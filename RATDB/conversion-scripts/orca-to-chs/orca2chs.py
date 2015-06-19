@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""orca-to-chs.py
+"""orca2chs.py
 This is a script to run near-line,
 it will create and upload the
 PMT_DQXX file for the specified
@@ -44,7 +44,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-n", dest="runnumber", help="Run number",
                         type=int, required=True)
-    parser.add_argument('-c', '--orcadb_server', dest='orcadb_server',
+    parser.add_argument('-c', dest='orcadb_server',
                         help='URL to CouchDB orca server',
                         default='couch.snopl.us')
     parser.add_argument("-u", dest="orcadb_username",
@@ -70,7 +70,7 @@ def main():
                                                           data)
     # The following is too general. Meh.
     except Exception:
-        print ("orca-to-chs run {}: problem retrieving the ORCA configuration "
+        print ("orca2chs run {}: problem retrieving the ORCA configuration "
                "info").format(args.runnumber)
         return 1
     # Create a temporary file to hold the PMT_DQXX.ratdb content
@@ -83,10 +83,10 @@ def main():
         try:
             file_check(tempf.name)
         except RuntimeError, e:
-            print "orca-to-chs run {}: {}".format(args.runnumber, e)
+            print "orca2chs run {}: {}".format(args.runnumber, e)
             return 2
         except UnicodeDecodeError:
-            print ("orca-to-chs run {}: non-ASCII characters present "
+            print ("orca2chs run {}: non-ASCII characters present "
                    "in file").format(args.runnumber)
             return 3
         try:
@@ -96,7 +96,7 @@ def main():
                        args.ratdb_name, tempf.name]
             subprocess.check_call(command)
         except subprocess.CalledProcessError:
-            print ("orca-to-chs run {}: there was a problem uploading "
+            print ("orca2chs run {}: there was a problem uploading "
                    "the file").format(args.runnumber)
             return 4
     return 0  # Success!

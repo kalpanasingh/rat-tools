@@ -18,7 +18,7 @@ if __name__ == "__main__":
     parser.add_argument("-n", dest="runnumber",
                         help="Run number", type=int,
                         required=True)
-    parser.add_argument('-c', '--orcadb_server', dest='orcadb_server',
+    parser.add_argument('-c', dest='orcadb_server',
                         help='URL to CouchDB orca server',
                         default='couch.snopl.us')
     parser.add_argument("-u", dest="orcadb_username",
