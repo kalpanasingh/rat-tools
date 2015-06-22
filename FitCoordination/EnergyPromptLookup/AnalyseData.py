@@ -82,14 +82,15 @@ def AnalysisFunction(index, material):
     outFile.write("\n \n")
 
     outFile.write("// Values to map between adjusted prompt Nhits and corresponding MeV energy.\n")
+    outFile.write("// 0.26 MeV is the threshold for Cerenkov radiation for electrons in water.\n")
     outFile.write("\n")
-    outFile.write("mev_values: [0.0, 0.26, "),
+    outFile.write("mev_values: [0.26, "),
     for energy in energies:
         outFile.write(str('%.1f' % energy) + ", ")
     outFile.write("], \n")
     outFile.write("\n")
 
-    outFile.write("nhit_values: [0.0, 0.0, ")
+    outFile.write("nhit_values: [0.0, ")
     for nHits in nHitsTable:
         outFile.write(str('%.4f' % nHits) + ", ")
     outFile.write("], \n")
