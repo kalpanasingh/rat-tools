@@ -8,6 +8,7 @@
 #
 # Author P G Jones - 21/06/2013 <p.g.jones@qmul.ac.uk> : First revision
 # Author P G Jones - 2014-03-31 <p.g.jones@qmul.ac.uk> : Correct axis understanding.
+#        N Barros  - 2015-06-24 <nfbarros@hep.upenn.edu> : Generate tables with line breaks
 ####################################################################################################
 import math
 import yaml
@@ -47,4 +48,9 @@ for rotation in rotational_positions:
     db["roll"].append(float("%.2f" % ((roll))))
 
 print "Plates:"
-print  yaml.dump(db).replace("]", "],")
+#print  "{\n", yaml.dump(db).replace("]", "],"), "}\n"
+# Manual print
+print "{"
+for key,value in db.iteritems():
+    print key+": "+str(value)+","
+print "}"

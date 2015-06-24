@@ -5,26 +5,37 @@
 # Outputs each acrylic vessel tile in ratdb format, using the SNOMAN geometry.dat data.
 #
 # Author P G Jones - 2013-10-01 <p.g.jones@qmul.ac.uk> : First revision
+#        N Barros  - 2015-06-24 <nfbarros@hep.upenn.edu> : Added new DB fields
+#                                                          Generated tables with line breaks
 ####################################################################################################
 import math
 import yaml
+from collections import OrderedDict
 
 def output_band(band):
     for iTile in range(0, len(band["name"])):
-        db = {"name" : '"SOLID"',
-              "index" : '"%s"' % band["name"][iTile],
-              "solid" : '"sphere"',
-              "run_range" : "[0, 0]",
-              "pass" : 0,
-              "production" : "false",
-              "comment" : "",
-              "r_max" : "7000.0",#"6060.0",
-              "r_min" : "5000.0",#"6005.0",
-              "phi_start" : math.degrees(band["phi_small"][iTile]),
-              "phi_delta" : math.fabs(math.degrees(band["phi_large"][iTile]) - math.degrees(band["phi_small"][iTile])),
-              "theta_start" : 90.0 - math.degrees(math.atan(band["tan_up"])),
-              "theta_delta" : math.degrees(math.atan(band["tan_up"])) - math.degrees(math.atan(band["tan_low"]))}
-        print  yaml.dump(db).replace("]", "],")
+        db = OrderedDict([("type" , '"SOLID"'),
+                          ("version",1),
+                          ("index" , '"%s"' % band["name"][iTile]),
+                          ("solid" , '"sphere"'),
+                          ("run_range" , "[0, 0]"),
+                          ("pass" , 0),
+                          ("production" , "false"),
+                          ("timestamp",'""'),
+                          ("comment" , '""'),
+                          ("r_max" , "7000.0"),#"6060.0",
+                          ("r_min" , "5000.0"),#"6005.0",
+                          ("phi_start" , math.degrees(band["phi_small"][iTile])),
+                          ("phi_delta" , math.fabs(math.degrees(band["phi_large"][iTile]) - math.degrees(band["phi_small"][iTile]))),
+                          ("theta_start" , 90.0 - math.degrees(math.atan(band["tan_up"]))),
+                          ("theta_delta" , math.degrees(math.atan(band["tan_up"])) - math.degrees(math.atan(band["tan_low"])))])
+        #print  yaml.dump(db).replace("]", "],")
+        ## Do a manual print
+        print "{"
+        for key,value in db.iteritems():
+            print key+": "+str(value)+","
+        print "}"
+
 
 
 band1 = {"tan_up" : 5.806904460, # tan(theta)

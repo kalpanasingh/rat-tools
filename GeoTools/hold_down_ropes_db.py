@@ -6,6 +6,7 @@
 # Output is in ratdb format.
 #
 # Author P G Jones - 2014-02-21 <p.g.jones@qmul.ac.uk> : First revision
+#        N Barros  - 2015-06-24 <nfbarros@hep.upenn.edu> : Generate tables with line breaks
 ####################################################################################################
 import math
 import yaml
@@ -46,4 +47,9 @@ db["sling_position"].append(float("%.2f" % pos[1]))
 db["sling_position"].append(float("%.2f" % pos[2]))
 
 print "Ropes:"
-print  yaml.dump(db).replace("]", "],")
+#print  "{\n", yaml.dump(db).replace("]", "],"), "}\n"
+# Manual print
+print "{"
+for key,value in db.iteritems():
+    print key+": "+str(value)+","
+print "}"
