@@ -208,10 +208,12 @@ with open('./TSLP_'+str(runnum)+'.ratdb','w') as f2:
 ///
 ////////////////////////////////////////////////////////////////////
 {
-name: "ECA_TSLP",
+type: "ECA_TSLP",
+version: 1,
 run_range : [0, 0],
 pass : 0,
 production : false,
+timestamp: "",
 comment : "",
 """)
 

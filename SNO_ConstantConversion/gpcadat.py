@@ -55,7 +55,7 @@ if "gpca" in args.filename:
     outfilename="PMTCALIB_%i.ratdb" %int(runnumber)
     f = open(outfilename, 'w')
      # Now we have to loop over the table 8 times.. ugh
-    f.write('{\n name: "PMTCALIB",\n run_range: [0,0], \n pass : 0, \n production : false, \n comment : \"\", \n')
+    f.write('{\n type: "PMTCALIB",\n version: 1,\n run_range: [0,0], \n pass : 0, \n production : false, \n timestamp: \"\",\n comment : \"\", \n')
     f.write('\n mean_hhp : ')
     f.write(str(hhp_mean))
     f.write(',\n min_hhp : ')
@@ -163,7 +163,7 @@ elif "wpca2" in args.filename:
     f = open(outfilename, 'w')
      # Write, write, write!
      # Now we have to loop over the table.. ugh
-    f.write('{\n name: "PCA_TW",\n run_range: [0,0],\n pass: 0,\n production: false,\n comment: \"\",\n tw_npoints : 10, \n is_sno : 1, \n \n twinter : [ ')
+    f.write('{\n type: "PCA_TW",\n version: 1,\n run_range: [0,0],\n pass: 0,\n production: false,\n timestamp: \"\",\n comment: \"\",\n tw_npoints : 10, \n is_sno : 1, \n \n twinter : [ ')
     for x in range(0,19):
         for y in range(0,16):
             for z in range(0,32):
