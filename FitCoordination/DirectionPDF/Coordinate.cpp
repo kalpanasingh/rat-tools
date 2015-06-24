@@ -60,13 +60,15 @@ void GetDirectionPDF(string material)
   std::cout << "Please place the text below into the database file: FIT_DIR.ratdb located in rat/data, replacing any existing entry with the same index." << std::endl;
   std::cout << std::endl;
   std::cout << "{" << std::endl;
-  std::cout << "name = \"FIT_DIR\"," << std::endl;
+  std::cout << "type: \"FIT_DIR\"," << std::endl;
+  std::cout << "version: 1," << std::endl;
   std::cout << "index: \"" << material << "\"," << std::endl;
-  std::cout << "run_range : [0, 0]," << std::endl;
-  std::cout << "pass : 0," << std::endl;
-  std::cout << "production : false," << std::endl;
-  std::cout << "comment : \"\"," << std::endl;
-	
+  std::cout << "run_range: [0, 0]," << std::endl;
+  std::cout << "pass: 0," << std::endl;
+  std::cout << "production: false," << std::endl;
+  std::cout << "timestamp: \"\"," << std::endl;
+  std::cout << "comment: \"\"," << std::endl;
+
   std::cout << "angle: [0.0, ";
   for(int j = 1; j < 101; j++)
   {

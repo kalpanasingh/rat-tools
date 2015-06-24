@@ -1,8 +1,10 @@
 {
-name: "SURFACES",
+type: "SURFACES",
+version: 1,
 index: "photocathode-HQE",
 run_range : [0, 0],
 pass: 0,
+timestamp: "",
 comment: "",
 production: false,
 

@@ -15,11 +15,13 @@ def AnalyseRootFiles(options):
     print "Please place the text below into the database file: ET1D.ratdb located in rat/data, replacing any existing entry with the same index."
     print "\n"
     print "{"
-    print "name: \"ET1D\","
+    print "type: \"ET1D\","
+    print "version: 1,"
     print "index: \"" + options.index + "\","
     print "run_range: [0, 0],"
     print "pass : 0,"
     print "production: false,"
+    print "timestamp: \"\","
     print "comment: \"\","
     print "\n",
     print "time: [",

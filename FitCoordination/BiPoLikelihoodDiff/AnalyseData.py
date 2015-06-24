@@ -64,11 +64,13 @@ def AnalysisFunction(index, isotope):
     print "Please place the text below into the database file: CLASSIFIER_BIPO_LIKELIHOODDIFF.ratdb located in rat/data, replacing any existing entry with the same index."
     print "\n"
     print "{"
-    print "name: \"CLASSIFIER_BIPO_LIKELIHOODDIFF\","
+    print "type: \"CLASSIFIER_BIPO_LIKELIHOODDIFF\","
+    print "version: 1,"
     print "index: \"" + index + "\","
     print "run_range: [0, 0],"
     print "pass : 0,"
     print "production: false,"
+    print "timestamp: \"\","
     print "comment: \"\","
     print "\n",
     print "times: [",

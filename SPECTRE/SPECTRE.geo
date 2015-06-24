@@ -1,10 +1,12 @@
 // This geometry is for SPECTRE with the Y90 capillary. 
 
 {
-name: "GEO",
+type: "GEO",
+version: 1,
 index: "world",
 run_range: [0, 0],
 pass: 0,
+timestamp: "",
 comment: "",
 production: false,
 mother: "",
@@ -20,10 +22,12 @@ material: "air",
 }
 
 {
-name: "GEO",
+type: "GEO",
+version: 1,
 index: "acrylic",
 run_range: [0, 0],
 pass: 0,
+timestamp: "",
 comment: "",
 production: false,
 mother: "world",
@@ -39,10 +43,12 @@ material: "acrylic_uva_McMaster",
 }
 
 {
-name: "GEO",
+type: "GEO",
+version: 1,
 index: "scint",
 run_range: [0, 0],
 pass: 0,
+timestamp: "",
 comment: "",
 production: false,
 mother: "acrylic",
@@ -57,10 +63,12 @@ material: "labppo_scintillator",
 }
 
 {
-name: "GEO",
+type: "GEO",
+version: 1,
 index: "aluminum_disc",
 run_range: [0, 0],
 pass: 0,
+timestamp: "",
 comment: "",
 production: false,
 mother: "scint",
@@ -79,10 +87,12 @@ material: "aluminum",
 
 
 {
-name: "GEO",
+type: "GEO",
+version: 1,
 index: "source_leg_1",
 run_range: [0, 0],
 pass: 0,
+timestamp: "",
 comment: "",
 production: false,
 mother: "scint",
@@ -99,10 +109,12 @@ material: "ABSplastic",
 }
 
 {
-name: "GEO",
+type: "GEO",
+version: 1,
 index: "source_leg_2",
 run_range: [0, 0],
 pass: 0,
+timestamp: "",
 comment: "",
 production: false,
 mother: "scint",
@@ -119,10 +131,12 @@ material: "ABSplastic",
 }
 
 {
-name: "GEO",
+type: "GEO",
+version: 1,
 index: "source_leg_3",
 run_range: [0, 0],
 pass: 0,
+timestamp: "",
 comment: "",
 production: false,
 mother: "scint",
@@ -139,10 +153,12 @@ material: "ABSplastic",
 }
 
 {
-name: "GEO",
+type: "GEO",
+version: 1,
 index: "acrylic_center_disc",
 run_range: [0, 0],
 pass: 0,
+timestamp: "",
 comment: "",
 production: false,
 mother: "scint",
@@ -159,10 +175,12 @@ material: "acrylic_uva_McMaster",
 }
 
 {
-name: "GEO",
+type: "GEO",
+version: 1,
 index: "acrylic_capholder_disc",
 run_range: [0, 0],
 pass: 0,
+timestamp: "",
 comment: "",
 production: false,
 mother: "scint",
@@ -179,10 +197,12 @@ material: "acrylic_uva_McMaster",
 }
 
 {
-name: "GEO",
+type: "GEO",
+version: 1,
 index: "acrylic_capholder_disc_lower",
 run_range: [0, 0],
 pass: 0,
+timestamp: "",
 comment: "",
 production: false,
 mother: "scint",
@@ -199,10 +219,12 @@ material: "acrylic_uva_McMaster",
 }
 
 {
-name: "GEO",
+type: "GEO",
+version: 1,
 index: "capillary",
 run_range: [0, 0],
 pass: 0,
+timestamp: "",
 comment: "",
 production: false,
 mother: "scint",
@@ -219,10 +241,12 @@ material: "glass",
 }
 
 {
-name: "GEO",
+type: "GEO",
+version: 1,
 index: "capillary_airgap",
 run_range: [0, 0],
 pass: 0,
+timestamp: "",
 comment: "",
 production: false,
 mother: "capillary",
@@ -239,10 +263,12 @@ material: "air",
 }
 
 {
-name: "GEO",
+type: "GEO",
+version: 1,
 index: "source_droplet",
 run_range: [0, 0],
 pass: 0,
+timestamp: "",
 comment: "",
 production: false,
 mother: "capillary_airgap",
@@ -259,10 +285,12 @@ material: "lightwater_sno",
 }
 
 {
-name: "GEO",
+type: "GEO",
+version: 1,
 index: "triggerPMT",
 run_range: [0, 0],
 pass: 0,
+timestamp: "",
 comment: "",
 production: false,
 mother: "world",
@@ -292,10 +320,12 @@ vis_invisible: 0,
 }
 
 {
-name: "GEO",
+type: "GEO",
+version: 1,
 index: "innerPMT",
 run_range: [0, 0],
 pass: 0,
+timestamp: "",
 comment: "",
 production: false,
 mother: "world",

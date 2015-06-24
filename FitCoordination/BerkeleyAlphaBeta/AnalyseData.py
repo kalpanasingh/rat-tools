@@ -46,11 +46,13 @@ def AnalysisFunction(alphafiles,betafiles,index,timeFirst,timeLast,timeStep,retr
     
     ratdb  = '''
 {
-    name: "AB_PDF",
+    type: "AB_PDF",
+    version: 1,
     index: "''' + index + '''",
     run_range: [0, 0],
     pass : 0,
     production: false,
+    timestamp: \"\",
     comment: \"\",
     retrig_cutoff: ''' + str(retrigcutoff) + ''',
     time_first: ''' + str(timeFirst) + ''',

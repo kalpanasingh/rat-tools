@@ -55,12 +55,14 @@ def AnalysisFunction(index, material):
     diagFile.write("Please place the text below into the database file: FIT_ENERGY_FUNCTIONAL.ratdb located in rat/data, replacing any existing entry with the same index.")
     diagFile.write("\n \n")
     diagFile.write("{ \n")
-    diagFile.write("name: \"FIT_ENERGY_FUNCTIONAL\", \n")
+    diagFile.write("type: \"FIT_ENERGY_FUNCTIONAL\", \n")
+    diagFile.write("version: 1,\n")
     diagFile.write("index: \"" + index + "\", \n")
     diagFile.write("run_range: [0, 0], \n")
-    diagFile.write("pass : 0, \n")
-    diagFile.write("production : false, \n")
-    diagFile.write("comment : \"\", \n")
+    diagFile.write("pass: 0, \n")
+    diagFile.write("production: false, \n")
+    diagFile.write("timestamp: \"\", \n")
+    diagFile.write("comment: \"\", \n")
 
     diagFile.write("\n")
 

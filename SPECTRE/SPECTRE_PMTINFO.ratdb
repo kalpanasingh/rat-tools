@@ -1,13 +1,15 @@
 {
-name: "PMTINFO",
+type: "PMTINFO",
+version: 1,
 run_range: [0, 0],
 pass: 0,
+timestamp: "",
 comment: "",
 production: false,
 
 panelnumber: [-1, -1, -1, -1, -1, ],
 
-type: [-1, 2, 1, 1, 1, ],
+pmt_type: [-1, 2, 1, 1, 1, ],
 
 u: [-99999.9, 0.7071, -0.7071, -0.7071, 0.7071, ],
 v: [-99999.9, 0.7071, 0.7071, -0.70710, -0.7071, ],

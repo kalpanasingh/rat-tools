@@ -45,12 +45,14 @@ void GetScintPDF(std::string material, int numberOfRuns, double velocity=-999)
   std::cout << "Please place the text below into the database file: ET1D.ratdb located in rat/data, replacing any existing entry with the same index." << std::endl;
   std::cout << std::endl;
   std::cout << "{" << std::endl;
-  std::cout << "name : \"ET1D\"," << std::endl;
+  std::cout << "type : \"ET1D\"," << std::endl;
+  std::cout << "version: 1," << std::endl;
   std::cout << "index: \"" << material << "\"," << std::endl;
-  std::cout << "run_range : [0, 0]," << std::endl;
-  std::cout << "pass : 0," << std::endl;
-  std::cout << "production : false," << std::endl;
-  std::cout << "comment : \"\"," << std::endl;
+  std::cout << "run_range: [0, 0]," << std::endl;
+  std::cout << "pass: 0," << std::endl;
+  std::cout << "production: false," << std::endl;
+  std::cout << "timestamp: \"\"," << std::endl;
+  std::cout << "comment: \"\"," << std::endl;
 	
   std::cout << "time: [";
   for(int j = 0; j < 401; j++)
@@ -159,12 +161,14 @@ void GetWaterPDF(std::string material)
   std::cout << "Please place the text below into the database file: GV1D.ratdb located in rat/data, replacing any existing entry with the same index." << std::endl;
   std::cout << std::endl;
   std::cout << "{" << std::endl;
-  std::cout << "name = \"GV1D\"," << std::endl;
+  std::cout << "type: \"GV1D\"," << std::endl;
+  std::cout << "version: 1," << std::endl;
   std::cout << "index: \"" << material << "\"," << std::endl;
-  std::cout << "run_range : [0, 0]," << std::endl;
-  std::cout << "pass : 0," << std::endl;
-  std::cout << "production : false," << std::endl;
-  std::cout << "comment : \"\"," << std::endl;
+  std::cout << "run_range: [0, 0]," << std::endl;
+  std::cout << "pass: 0," << std::endl;
+  std::cout << "production: false," << std::endl;
+  std::cout << "timestamp: \"\"," << std::endl;
+  std::cout << "comment: \"\"," << std::endl;
 
   std::cout << "time: [";
   for(int j = 0; j < 801; j++)

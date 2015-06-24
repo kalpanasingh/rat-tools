@@ -1,8 +1,10 @@
 {
-name: "PMT_OPTICAL_PARAMETERS",
+type: "PMT_OPTICAL_PARAMETERS",
+version: 1,
 index: "PMTOptics0_HQE",
 run_range : [0, 0],
 pass: 0,
+timestamp: "",
 comment: "",
 production: false,
 

@@ -1,9 +1,11 @@
 // This contains the transit time CDF for the 12'' Hamamatsu HQE tubes.
 
 {
-name: "PMTTRANSIT",
+type: "PMTTRANSIT",
+version: 1,
 run_range : [0, 0],
 pass: 0,
+timestamp: "",
 comment: "",
 production : false,
 

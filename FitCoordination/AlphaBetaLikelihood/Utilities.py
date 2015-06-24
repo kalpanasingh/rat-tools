@@ -112,11 +112,13 @@ def OutputFileChunk(pdfList, energyRatioPDF, particle, material, description,f):
     pdfNames = ["beta_probability", "alpha_probability", "two_beta_probability"]
 
     f.write("{\n")
-    f.write("name: \"LIKELIHOOD_Bi" + particle + "_" + description + "\",\n")
+    f.write("type: \"LIKELIHOOD_Bi" + particle + "_" + description + "\",\n")
+    f.write("version: 1\n")
     f.write("index: \"" + material + "\",\n")
     f.write("run_range: [0, 0],\n")
     f.write("pass: 0,\n")
     f.write("production: false,\n")
+    f.write("timestamp: \"\",\n")    
     f.write("comment: \"\",\n")    
     f.write("\n")
 	

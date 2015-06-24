@@ -110,12 +110,14 @@ void Coordination(std::string index)
 	stream0 << "Please place the text below into the database file: FIT_NEAR_AV_ANGULAR.ratdb located in rat/data, replacing any existing entry with the same index." << std::endl;
 	stream0 << std::endl;
 	stream0 << "{" << std::endl;
-	stream0 << "name: \"FIT_NEAR_AV_ANGULAR\"," << std::endl;
+	stream0 << "type: \"FIT_NEAR_AV_ANGULAR\"," << std::endl;
+	stream0 << "version: 1," << std::endl;
 	stream0 << "index: \"" << index << "\"," << std::endl;
 	stream0 << "run_range : [0, 0]," << std::endl;
 	stream0 << "pass : 0," << std::endl;
 	stream0 << "production : false," << std::endl;
-	stream0 << "comment : \"\"," << std::endl;
+	stream0 << "timestamp : \"\"," << std::endl;
+	stream0 << "comment: \"\"," << std::endl;
 	stream0 << "nhits_windows: [";
 	for (int w = 0; w < numberOfNhitsWindows; w++)
 	{

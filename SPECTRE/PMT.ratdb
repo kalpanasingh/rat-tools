@@ -1,8 +1,10 @@
 { //HQE
-name: "PMT",
+type: "PMT",
+version: 1,
 index: "r11780-HQE",
 run_range: [0,0],
 pass: 0,
+timestamp: "",
 comment: "",
 production: false,
 
@@ -30,10 +32,12 @@ z_origin: [-84.00d,  0.00d,   0.00d,   0.00d,  84.00d, -127.5d, -285.0d],
 }
 
 {
-name: "PMT",
+type: "PMT",
+version: 1,
 index: "r7081",
 run_range: [0,0],
 pass: 0,
+timestamp: "",
 comment: "",
 production : false,
 

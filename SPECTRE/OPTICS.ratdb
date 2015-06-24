@@ -1,8 +1,10 @@
 {
-name: "OPTICS", 
+type: "OPTICS",
+version: 1, 
 index: "acrylic_uva_McMaster", // EUV wavelength shifter, Data from USD group.
 run_range: [0, 0],
 pass: 0,
+timestamp: "",
 comment: "",
 production: false,
 
