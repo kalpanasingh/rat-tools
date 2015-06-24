@@ -14,6 +14,7 @@ import os
 import sys
 import database
 import grid
+import utilities
 try:
     import argparse
 except:
@@ -30,7 +31,7 @@ server_list = []
 
 
 def get_runs():
-    """Get a list of all labels available
+    """Get a list of all runs available
     """
     rows = database.view("_design/dflow/_view/grid_ids", descending=True,
                          limit=1)
@@ -48,7 +49,7 @@ def get_runs():
 
 
 def generate_run_list(run_range, logfiles=False):
-    """Generate the file list by production labels
+    """Generate the file list by run range
     """
     names = []
     sizes = []
@@ -76,20 +77,6 @@ def generate_run_list(run_range, logfiles=False):
             adlers.append(row["value"][2])
             sizes.append(row["value"][3])
     return names, sizes, guids, adlers
-
-
-def write_output(output, names, sizes, guids, adlers):
-    """Write the output file.
-    """
-    if len(names)==0:
-       print "No files found!"
-       sys.exit()
-    list_file = open(output, "w")
-    list_file.write("%s\n" % copy_type)
-    for i, n in enumerate(names):
-        list_file.write("%s\t%s\t%s\t%s\n" % (n, sizes[i], guids[i], adlers[i]))
-    list_file.close()
-    print "Found %d files, listed in %s" % (len(names), output)
 
 
 if __name__=="__main__":
@@ -145,5 +132,5 @@ if __name__=="__main__":
     names, sizes, guids, adlers = generate_run_list(args.run_range, args.builder_logs)
 
     # And write the output file
-    write_output(args.output, names, sizes, guids, adlers)
+    utilities.write_grabber_file(args.output, copy_type, names, sizes, guids, adlers)
     
