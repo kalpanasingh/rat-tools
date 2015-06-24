@@ -1,7 +1,9 @@
 {
-name: "PANELINFO",
+type: "PANELINFO",
+version: 1,
 run_range : [0, 0],
 pass: 0,
+timestamp: "",
 comment: "",
 production: false,
 panel_number: [280, 283, 284, 285, 282, 239, 241, 240, 286, 289, 288, 287, 292, 290,

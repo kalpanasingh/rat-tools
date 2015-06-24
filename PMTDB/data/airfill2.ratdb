@@ -22,9 +22,11 @@
 ///
 ////////////////////////////////////////////////////////////////////
 {
-name: "PMTINFO",
+type: "PMTINFO",
+version: 1,
 run_range : [0, 0],
 pass: 0,
+timestamp: "",
 comment: "",
 production: false,
 panelnumber: [-1, 280, 280, 280, 280, 292, 280, 280, 280, 280, 280, 280, 280, 280,

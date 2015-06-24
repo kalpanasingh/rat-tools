@@ -27,10 +27,12 @@
 //* specify the information for each SNOPLUS PMT
 
 {
-name: "PMTINFO",
+type: "PMTINFO",
+version: 1,
 index: "sno+",
 run_range : [0, 0],
 pass: 0,
+timestamp: "",
 comment: "",
 production : false,
 

@@ -58,7 +58,7 @@ new_data["u"] = [-9999.0]
 new_data["v"] = [-9999.0]
 new_data["w"] = [-9999.0]
 new_data["panelnumber"] = [-1]
-new_data["type"] = [10]
+new_data["pmt_type"] = [10]
 #new_data["pmtid"] = []
 noel_file.next() # Ignore the first line
 for pmt in noel_file:
@@ -69,7 +69,7 @@ for pmt in noel_file:
     if panel_number == 0:
         panel_number = -1
     #new_data["pmtid"].append(pmt[4]) # Queens PMT ID?
-    new_data["type"].append(noel_type_to_rat_type(pmt[9]))
+    new_data["pmt_type"].append(noel_type_to_rat_type(pmt[9]))
     new_data["x"].append(float(pmt[10]) * 10.0) # Convert cm to mm
     new_data["y"].append(float(pmt[11]) * 10.0)
     new_data["z"].append(float(pmt[12]) * 10.0)
@@ -90,15 +90,20 @@ for pmt in noel_file:
 # Now have a complete dict, write to a file
 panelInfoFile = open("PMTINFO.ratdb", "w")
 infoText = """{
-name: \"PMTINFO\",
+type: \"PMTINFO\",
+version: 1,
 index: \"%s\",
-run_range : [0, 0],
-pass : 0,
-production : false,
-comment : \"\",
+run_range: [0, 0],
+pass: 0,
+production: false,
+timestamp: \"\",
+comment: \"\",
 """ % args[2]
-infoText += yaml.dump(new_data).replace("]", "],")
-infoText += """}
+for key,value in new_data.iteritems():
+    infoText += key+": "+str(value)+","
+#infoText += yaml.dump(new_data).replace("]", "],")
+infoText += """
+}
 """
 panelInfoFile.write(infoText)
 panelInfoFile.close()
