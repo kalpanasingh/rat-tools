@@ -1,8 +1,10 @@
 {
-name: "GEO",
+type: "GEO",
+version: 1,
 index: "world",
 run_range: [0, 0],
 pass: 0,
+timestamp: "",
 comment: "",
 production : false,
 enable: 1,
@@ -20,10 +22,12 @@ color: [0.67, 0.29, 0.0],
 }
 
 {
-name: "GEO",
+type: "GEO",
+version: 1,
 index: "h2o",
 run_range: [0, 0],
 pass: 0,
+timestamp: "",
 comment: "",
 production : false,
 enable: 1,
@@ -41,10 +45,12 @@ color: [0.67, 0.29, 0.0],
 }
 
 {
-name: "GEO",
+type: "GEO",
+version: 1,
 index: "innerPMT",
 run_range: [0, 0],
 pass: 0,
+timestamp: "",
 comment: "",
 production : false,
 enable: 1,

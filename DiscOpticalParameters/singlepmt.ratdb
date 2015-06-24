@@ -1,7 +1,9 @@
 {
-name: "PMTINFO",
+type: "PMTINFO",
+version: 1,
 run_range : [0, 0],
 pass: 0,
+timestamp: "",
 comment: "",
 production : false,
 
@@ -19,6 +21,6 @@ w: [ -1.0, ],
   
 panelnumber: [ -1, ], 
  
-type: [ 1, ], 
+pmt_type: [ 1, ], 
  
 }
