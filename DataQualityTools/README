@@ -1,4 +1,5 @@
-# data-quality low-level tools by G. Prior <gersende@lip.pt>
+# data-quality low-level tools
+# Contact: G. Prior <gersende@lip.pt>
 
 Scripts to produce the DQ LL database tables for each run.
 To produce the tables needs:
@@ -26,3 +27,4 @@ Will output a ratdb format compliant file with name run_xxxx_dqll.ratdb
 > python makehtml.py -f run_xxxx_dqll.json
 Provide a more friendly way to read the DQ LL information and hightlight in red problems
 Goal is to upload such page on snopl.us DQ tab (tbc)
+

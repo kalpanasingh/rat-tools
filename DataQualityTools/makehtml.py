@@ -1,4 +1,9 @@
-# Produce a html page from the DQ LL JSON table
+"""makehtml.py
+Produce a html page from the DQ LL JSON table
+Author: Gersende Prior
+        <gersende@lip.pt>
+
+"""
 
 import argparse
 import array
@@ -69,17 +74,17 @@ if __name__ == "__main__":
     #Hold up ropes
     numberofholdupropes = 10
     
-    holdupropesid = (1,2,3,4,5,6,7,8,9,10)
+    holdupropesid = array.array('i',(i+1 for i in range(numberofholdupropes)))
     
     #Hold down ropes
     numberofholddownropes = 20
-    
-    holddownropesid = (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)
+
+    holddownropesid = array.array('i',(i+1 for i in range(numberofholddownropes)))
     
     #Equator monitors
     numberofequatormonitors = 4
     
-    equatormonitorsid = (1,2,3,4)
+    equatormonitorsid = array.array('i',(i+1 for i in range(numberofequatormonitors)))
 
     # Retrieve crate HV status power-supply A
     cratestatusa = jsondata["crate_hv_status_a"]

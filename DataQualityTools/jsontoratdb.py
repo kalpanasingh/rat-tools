@@ -1,4 +1,10 @@
-# Convert the DQ LL table in JSON format to a DQ LL table in ratdb format
+"""jsontoratdb.py
+This code converts the DQ LL table in JSON format to a DQ LL table in ratdb format
+
+Author: Gersende Prior
+        <gersende@lip.pt>
+
+"""
 
 import argparse
 import array

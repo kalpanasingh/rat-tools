@@ -72,26 +72,7 @@ if __name__ == "__main__":
         
         hv_status_a = dataqualitytools.create_hv_status_a(configurationdata)
 
-        # Seems to be willing to dump the [u''..] format if trying to pass the array not index by index
-        crate_hv_status_a = "\"crate_hv_status_a\": [{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18}],\n".format(hv_status_a[0],
-                                                                                                                                                     hv_status_a[1],
-                                                                                                                                                     hv_status_a[2],
-                                                                                                                                                     hv_status_a[3],
-                                                                                                                                                     hv_status_a[4],
-                                                                                                                                                     hv_status_a[5],
-                                                                                                                                                     hv_status_a[6],
-                                                                                                                                                     hv_status_a[7],
-                                                                                                                                                     hv_status_a[8],
-                                                                                                                                                     hv_status_a[9],
-                                                                                                                                                     hv_status_a[10],
-                                                                                                                                                     hv_status_a[11],
-                                                                                                                                                     hv_status_a[12],
-                                                                                                                                                     hv_status_a[13],
-                                                                                                                                                     hv_status_a[14],
-                                                                                                                                                     hv_status_a[15],
-                                                                                                                                                     hv_status_a[16],
-                                                                                                                                                     hv_status_a[17],
-                                                                                                                                                     hv_status_a[18])
+        crate_hv_status_a = "\"crate_hv_status_a\": [%s],\n" % ", ".join(hv_status_a)
 
         dbtable.write(crate_hv_status_a)
 
