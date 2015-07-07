@@ -101,7 +101,6 @@ comment: \"\",
 """ % args[2]
 for key,value in new_data.iteritems():
     infoText += key+": "+str(value)+","
-#infoText += yaml.dump(new_data).replace("]", "],")
 infoText += """
 }
 """

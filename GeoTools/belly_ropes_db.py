@@ -48,7 +48,6 @@ for rotation in rotational_positions:
     db["roll"].append(float("%.2f" % ((roll))))
 
 print "Plates:"
-#print  "{\n", yaml.dump(db).replace("]", "],"), "}\n"
 # Manual print
 print "{"
 for key,value in db.iteritems():

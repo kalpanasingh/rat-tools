@@ -84,7 +84,6 @@ def output_pipe(pipe):
             db["x"] = x
             db["y"] = y
             db["z"] = z
-            #print  "{\n", yaml.dump(db).replace("]", "],"), "}\n"
             # Manual print
             print "{"
             for key,value in db.iteritems():

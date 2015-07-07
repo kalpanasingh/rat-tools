@@ -154,7 +154,6 @@ comment : \"\",
 """
 for key,value in newData.iteritems():
     infoText += key+": "+str(value)+","
-#infoText += yaml.dump( newData ).replace( "]", "]," )
 infoText += """
 }
 """

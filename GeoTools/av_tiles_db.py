@@ -29,7 +29,6 @@ def output_band(band):
                           ("phi_delta" , math.fabs(math.degrees(band["phi_large"][iTile]) - math.degrees(band["phi_small"][iTile]))),
                           ("theta_start" , 90.0 - math.degrees(math.atan(band["tan_up"]))),
                           ("theta_delta" , math.degrees(math.atan(band["tan_up"])) - math.degrees(math.atan(band["tan_low"])))])
-        #print  yaml.dump(db).replace("]", "],")
         ## Do a manual print
         print "{"
         for key,value in db.iteritems():
