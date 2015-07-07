@@ -52,12 +52,16 @@ def AnalysisFunction(index, material):
     outFile.write("\n \n")
     outFile.write("Please place the text below into the database file: FIT_ENERGY_PROMPT_LOOKUP.ratdb located in rat/data, replacing any existing entry with the same index.")
     outFile.write("\n \n")
-    outFile.write("{ \n")
-    outFile.write("name: \"FIT_ENERGY_PROMPT_LOOKUP\", \n")
-    outFile.write("index: \"" + index + "\", \n")
-    outFile.write("valid_begin: [0, 0], \n")
-    outFile.write("valid_end: [0, 0], \n")
+    outFile.write("{\n")
+    outFile.write("type: \"FIT_ENERGY_PROMPT_LOOKUP\",\n")
+    outFile.write("version: 1,\n")
+    outFile.write("index: \"" + index + "\",\n")
+    outFile.write("run_range: [0, 0],\n")
+    outFile.write("pass: 0,\n")
+    outFile.write("timestamp: \"\",\n")
+    outFile.write("comment: \"\",\n")
     outFile.write("\n")
+
     outFile.write("// Values for position and direction scaling. Scaling coefficient adjusts\n")
     outFile.write("// the prompt Nhits of an event according to the radial position of the\n")
     outFile.write("// event and the costheta angle of the direction from the position vector.\n")
@@ -100,6 +104,8 @@ def AnalysisFunction(index, material):
     outFile.write("\n")
 
     outFile.close()
+
+    print "The coordination results have been written to \"AnalyseData_Output.txt\""
 
 
 import optparse
