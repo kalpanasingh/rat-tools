@@ -215,6 +215,18 @@ def check_copy_mode():
         print "No copy mode defined"
 
 
+def delete_file(lfc_path):
+    input_string = 'lcg-del -a %s' % (lfc_path)
+    os.system(input_string)
+    return
+
+
+def delete_folder(lfc_path):
+    input_string = 'lfc-rm -r %s' % (lfc_path)
+    os.system(input_string)
+    return
+
+
 ##############################################################
 # Functions for SURL mode
 

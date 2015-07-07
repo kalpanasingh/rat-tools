@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #####################
 #
-# gridup2.py
+# uploader
 #
 # For use to upload to the grid with
 # correct file naming
@@ -16,11 +16,11 @@
 import os
 import sys
 import re
-import numpy
+import logging
 try:
     import argparse
 except:
-    raise ImportError("argparse not availbel; python version needs to \
+    raise ImportError("argparse not available; python version needs to \
                       be 2.7+")
 import grid
 import database
@@ -31,87 +31,55 @@ import utilities
 #####################################
 
 
-def readin_file(textfile):
-    # read in the text file and split up the input into the correct
-    # varibles
-    directory = []
-    file_path = []
-    filename = []
-    storage = []
-    i = 0
-    words = []
-    with open(textfile, 'r') as f:
-        data = f.readlines()
-        for line in data:
-            line = line.translate(None, '\n\t ')
-            words.append(line.split(','))
-            i += 1
-        words_array = numpy.array(words)
-        if words_array.shape[1] != 3:
-            print "Not correct number of inputs"
-            print "should be:"
-            print repr("<base directory>,<remote path>,<local file>")
-            print "you have used inputs"
-            print words_array.shape[1]
-            sys.exit()
-            return 0
-        directory = words_array[:, 0]
-        file_path = words_array[:, 1]
-        filename = words_array[:, 2]
-    return directory, file_path, filename
-
-
 def base_directory(directory):
-    # check that one of the offical base directories is used
-    offical_base = []
+    # check that one of the official base directories is used
+    official_base = []
+    logging.info("In base_directory")
     for i, entry in enumerate(directory):
         if entry == 'user':
-            offical_base.append(True)
+            official_base.append(True)
         elif entry == 'sw':
-            offical_base.append(True)
+            official_base.append(True)
         elif entry == 'snotflow':
-            offical_base.append(True)
+            official_base.append(True)
         elif entry == 'production_testing':
-            offical_base.append(True)
+            official_base.append(True)
         elif entry == 'production':
-            offical_base.append(True)
+            official_base.append(True)
         elif entry == 'nearline':
-            offical_base.append(True)
+            official_base.append(True)
         else:
-            offical_base.append(False)
-    return offical_base
+            official_base.append(False)
+    logging.info(official_base)
+    return official_base
 
 
-def delete_file(lfc_path):
-    input_string = 'lcg-del -a %s' % (lfc_path)
-    os.system(input_string)
-    return
-
-
-def grid_file(griddir, directory, path, filename, storage, out_file,
-              remove, offical_base):
+def grid_file(griddir, directory, path, filenamepath, filename, storage,
+              out_file, remove, official_base):
+    logging.info("In grid_file")
     i = 0
     j = 0
     command = 'lcg-cr'
     gridid = []
     with open(out_file, "w") as f:
         for s in directory:
-            if offical_base[i] is True:
+            if official_base[i] is True:
                 se_path = os.path.join(directory[i], path[i], filename[i])
                 se_path.strip()
                 print se_path
                 lfc_path = 'lfn:%s' % os.path.join(griddir, directory[i],
                                                    path[i], filename[i])
                 print lfc_path
-                upfile = filename[i]
+                upfile = filenamepath[i]
                 input_string = 'lcg-cr --vo snoplus.snolab.ca --checksum -d %s \
                     -P %s -l %s %s' % (storage, se_path, lfc_path, upfile)
+                logging.info("input_string = %s", input_string)
                 try:
                     gridid.append(os.popen(input_string).readlines()[0]
                                   )
                 except:
                     if remove:
-                        delete_file(lfc_path)
+                        grid.delete_file(lfc_path)
                         try:
                             gridid.append(os.popen(input_string).readlines()[0]
                                           )
@@ -128,36 +96,21 @@ def grid_file(griddir, directory, path, filename, storage, out_file,
                         print upfile
                         i += 1
                         continue
-                str1 = str(filename[i])
-                str2 = str(os.stat(filename[i]).st_size)
-                str3 = str(gridid[j].rstrip('\n'))
-                str4 = str(utilities.get_adler32(filename[i]))
-                outline = "%s \t %s \t %s \t %s \n" % (str1, str2, str3, str4)
+                str1 = str(os.stat(filenamepath[i]).st_size)
+                str2 = str(gridid[j].rstrip('\n'))
+                str3 = str(utilities.get_adler32(filenamepath[i]))
+                str4 = str(lfc_path)
+                outline = "%s \t %s \t %s \t %s \n" % (str2, str1, str3, str4)
                 f.write(outline)
                 j += 1
             else:
                 str5 = str(directory[i])
-                str6 = "is not an offical base directory"
+                str6 = "is not an official base directory"
                 str7 = "%s %s" % (str5, str6)
                 print '\033[1m' + str7 + '\033[0m'
             i += 1
     f.close()
     return gridid
-
-
-def split_filename(filenamepath):
-    # if the local file isn't in the same directory as uploader
-    # splits the filename away from the path and so can use different
-    # paths on grid but the same filename.
-    filename = []
-    words = []
-    for line in filenamepath:
-        words.append(line.rstrip('\n').split('/'))
-    filename_array = numpy.array(words)
-    numberOfFiles = filename_array.shape[0]
-    for i in range(numberOfFiles):
-        filename.append(filename_array[i][-1])
-    return filename
 
 
 if __name__ == '__main__':
@@ -173,7 +126,15 @@ if __name__ == '__main__':
     parser.add_argument("-r", dest = 'remove', help = "if the file\
                         already exist should it be overwritten", default
                         = False)
+    parser.add_argument("-log", dest = 'debug', help = "enable debug \
+                        logging", default = False)
+    parser.add_argument("-log-file", dest = 'log_file', help = "name of \
+                        the file to write log messages to [messages.log]",
+                        default = 'messages.log')
     args = parser.parse_args()
+    if args.debug:
+        logging.basicConfig(filename=args.log_file, filemode = 'w', level
+                            = logging.DEBUG)
     if not grid.proxy_time():
         print "Need to generate a grid proxy"
         if not grid.proxy_create():
@@ -184,12 +145,11 @@ if __name__ == '__main__':
             str3 = "%s %s" % (str1, str2)
             print str3
             sys.exit()
-    directory, path, filenamepath = readin_file(args.list)
+    directory, path, filenamepath = utilities.readin_file(args.list)
     storage = args.dest
-    filename = split_filename(filenamepath)
+    filename = utilities.split_filename(filenamepath)
     true_base = base_directory(directory)
     out_text = args.out
     griddir = '/grid/snoplus.snolab.ca'
-    gridid = grid_file(griddir, directory, path, filename, storage,
-                       out_text, args.remove, true_base)
-    print gridid
+    gridid = grid_file(griddir, directory, path, filenamepath, filename,
+                       storage, out_text, args.remove, true_base)

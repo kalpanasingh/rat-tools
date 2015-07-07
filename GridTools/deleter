@@ -1,0 +1,86 @@
+#!/usr/bin/env python
+#####################
+#
+# deleter
+#
+# For use to delete files on the grid
+#
+# For deleting files
+#
+# Author: David Auty
+#         <auty@ualberta.ca>
+#
+#####################
+
+import os
+import sys
+import logging
+try:
+    import argparse
+except:
+    raise ImportError("argparse not available; python version needs to \
+                      be 2.7+")
+import grid
+import utilities
+
+
+def delete(griddir, directory, path, filename, del_folder):
+    logging.info("In delete")
+    i = 0
+    folders = []
+    store_folder = 'store'
+    for s in directory:
+        lfc_path = 'lfn:%s' % os.path.join(griddir, directory[i],
+                                           path[i], filename[i])
+        grid.delete_file(lfc_path)
+        if del_folder:
+            current_folder = '%s' % os.path.join(griddir, directory[i],
+                                                 path[i])
+            if store_folder != current_folder:
+                store_folder = current_folder
+                folders.append(current_folder)
+        i += 1
+    logging.info(folders)
+    return folders
+
+
+def delete_folder(folders):
+    logging.info("In delete_folder")
+    for line in folders:
+        grid.delete_folder(line)
+        print "deleting folder: " + line
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-l", dest = 'list', help = "list of files to \
+                        upload [delete_files.txt]", default='delete_files.txt')
+    parser.add_argument("-f", dest = 'del_folder', help = "delete the \
+                        folder as well as the files [False]", default
+                        = False)
+    parser.add_argument("-log", dest = 'debug', help = "enable debug \
+                        logging", default = False)
+    parser.add_argument("-log-file", dest = 'log_file', help = "name of \
+                        the file to write log messages to [messages.log]",
+                        default = 'messages.log')
+    args = parser.parse_args()
+    if args.debug:
+        logging.basicConfig(filename=args.log_file, filemode = 'w', level
+                            = logging.DEBUG)
+    if not grid.proxy_time():
+        print "Need to generate a grid proxy"
+        if not grid.proxy_create():
+            print "Proxy successfully created"
+        else:
+            str1 = "Unable to create proxy; try 'voms-proxy-init --voms"
+            str2 = "snoplus.snolab.ca' in shell"
+            str3 = "%s %s" % (str1, str2)
+            print str3
+            sys.exit()
+
+    directory, path, filenamepath = utilities.readin_file(args.list)
+    filename = utilities.split_filename(filenamepath)
+    griddir = '/grid/snoplus.snolab.ca'
+    folders = delete(griddir, directory, path, filename, args.del_folder)
+    if(args.del_folder):
+        delete_folder(folders)
