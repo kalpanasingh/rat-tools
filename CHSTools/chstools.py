@@ -10,13 +10,9 @@ Author: Freija Descamps
  Inspired by dqxx_view.js script by Andy Mastbaum
 """
 
-import getpass
-import argparse
 import httplib
 import json
 import sys
-
-db_server = 'couch.snopl.us'
 
 # The SNO definition of DQXX. The 'in_use' flag denotes if we
 # are actually reading this info from the ORCA configuration
@@ -129,7 +125,7 @@ def form_dqxx_word(dqcr, dqch):
         # get the crate number
         crate = (lcn & 0x3e00) >> 9
         # get the card number
-        card = (lcn & 0x1e0 ) >> 5
+        card = (lcn & 0x1e0) >> 5
         dqcr_word = dqcr[crate * 16 + card]
         # get the channel number
         ch = lcn & 0x1f
@@ -184,7 +180,7 @@ def form_dqxx_word(dqcr, dqch):
     return dqxx
 
 
-def get_run_configuration_from_db(runnumber, db_username, db_password):
+def get_run_configuration_from_db(runnumber, db_server, db_username, db_password):
     """Function to retrieve the ORCA runconfiguration document
     from the snoplus database.
     :param: The run-number (int).
@@ -203,12 +199,12 @@ def get_run_configuration_from_db(runnumber, db_username, db_password):
     try:
         data = json.loads(connection.getresponse().read())
     except ValueError, e:
-        sys.stderr.write("Failed to contact database, try again\n")
+        sys.stderr.write("chstools: Failed to contact database, try again\n")
         sys.exit(1)
     rows = data['rows']
     # Check if there is data available for this run
     if len(rows) == 0:
-        sys.stderr.write("No ORCA data for this run\n")
+        sys.stderr.write("chstools: No ORCA data for this run\n")
         sys.exit(1)
     return data
 
@@ -242,7 +238,7 @@ def create_dqcr_dqch_dqid(runnumber, data):
                     dqid[(crate * 96) + (card * 6) + 2 + db] = hex(int(fecs[str(crate)][str(card)]['daughter_board'][str(db)]['daughter_board_id'], 16))
             else:
                 # The DQIDs will be zero in this case
-                print "Warning: no FEC info for crate/card " + str(crate) + "/" + str(card)
+                print "chstools: Warning: no FEC info for crate/card " + str(crate) + "/" + str(card)
             # Time for DQCR!
             # 0   CRATE        Crate present present(0), not present(1)
             # SNO+ : this is now replaced with: XL3 communicating.
@@ -362,7 +358,7 @@ def create_dqcr_dqch_dqid(runnumber, data):
     return dqcr, dqch, dqid
 
 
-def dqxx_write_to_file(dqcr, dqch, dqid, runnumber):
+def dqxx_write_to_file(dqcr, dqch, dqid, runnumber, outfilename=None):
     """Function that writes out the SNO-style DQXX file.
     :param: dqcr: A list of 304 DQCR words (one per FEC card).
     :param: dqch: A list of 9728 DQCH words (one per channel).
@@ -370,10 +366,11 @@ def dqxx_write_to_file(dqcr, dqch, dqid, runnumber):
     :param: The run-number.
     :returns: None.
     """
+    if outfilename is None:
+        outfilename = "PMT_DQXX_%i.ratdb" % (runnumber)
     # RAT has an issue with reading in the dqch integer array,
     # therefore, we are manually writing out the file for now:
-    outfilename = "PMT_DQXX_%i.ratdb" % runnumber
-    runrange = "run_range: [%i, 100000]," % (runnumber)
+    runrange = "run_range: [%i, %i]," % (runnumber, runnumber)
     f = open(outfilename, 'w')
     f.write(' {\n type: "PMT_DQXX",\n ')
     f.write('version: 1,\n')
@@ -382,8 +379,9 @@ def dqxx_write_to_file(dqcr, dqch, dqid, runnumber):
     f.write('pass: 0,\n')
     f.write('timestamp: \"\",\n')
     f.write('comment: \"\",\n')
+    f.write(' production: true,\n')
     # The following variables are zero by default for now? (Freija)
-    f.write(' \n cratestatus_n100: 0,\n cratestatus_n20: 0, \n cratestatus_esumL: 0, ')
+    f.write(' cratestatus_n100: 0,\n cratestatus_n20: 0, \n cratestatus_esumL: 0, ')
     f.write(' \n cratestatus_esumH: 0,\n cratestatus_owlN: 0, \n cratestatus_owlEL: 0, ')
     f.write(' \n cratestatus_owlEH: 0,')
     f.write('\n\n dqid : [ ')
