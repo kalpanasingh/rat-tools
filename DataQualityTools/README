@@ -1,0 +1,30 @@
+# data-quality low-level tools
+# Contact: G. Prior <gersende@lip.pt>
+
+Scripts to produce the DQ LL database tables for each run.
+To produce the tables needs:
+   - the ORCA configuration document
+   - the ORCA run document
+
+Does not fill the XL3 Error and Screwed messages arrays.
+Need to grep the log files by hand (check done at the table validation)
+
+IMPORTANT: always supply the snoplus password between quotes.
+
+DETAILS:
+    o Produce a JSON DQ LL table for a given run xxxx (run_xxxx_dqll.json)
+> python CreateDQLL.py -n xxxx -u 'username' -p 'password'
+Where 'username' and 'password' are the couchdb access credentials
+
+    o Check that the file is JSON compliant 
+> python -m json.tool run_xxxx_dqll.json
+
+   o convert JSON format tables to ratdb format tables (as per document DOCDB 3154-v1)
+> python jsontoratdb.py -f run_xxxx_dqll.json
+Will output a ratdb format compliant file with name run_xxxx_dqll.ratdb
+
+  o create a html page with the DQ LL information
+> python makehtml.py -f run_xxxx_dqll.json
+Provide a more friendly way to read the DQ LL information and hightlight in red problems
+Goal is to upload such page on snopl.us DQ tab (tbc)
+
