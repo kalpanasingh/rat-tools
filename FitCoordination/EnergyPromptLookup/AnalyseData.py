@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import string, ROOT, Utilities, sys, os
 # Author J Walker - 23/04/2015 <john.walker@liverpool.ac.uk>
+# Revision history: 2015-07-08 J. Walker: Removing EOL spaces from output file
 
 
 def AnalyseRootFiles(options):
@@ -49,9 +50,9 @@ def AnalysisFunction(index, material):
     outFileName = "AnalyseData_Output.txt"
     outFile = open(outFileName, "w")
 
-    outFile.write("\n \n")
+    outFile.write("\n\n")
     outFile.write("Please place the text below into the database file: FIT_ENERGY_PROMPT_LOOKUP.ratdb located in rat/data, replacing any existing entry with the same index.")
-    outFile.write("\n \n")
+    outFile.write("\n\n")
     outFile.write("{\n")
     outFile.write("type: \"FIT_ENERGY_PROMPT_LOOKUP\",\n")
     outFile.write("version: 1,\n")
@@ -75,15 +76,15 @@ def AnalysisFunction(index, material):
     outFile.write("r_max: " + str('%.1f' % Utilities.Positions[-1]) + ",\n")
     outFile.write("\n")
 
-    outFile.write("// Scaling factor corresponding to radius and costheta value. \n")
-    outFile.write("scaling_factor: [ \n"),
+    outFile.write("// Scaling factor corresponding to radius and costheta value.\n")
+    outFile.write("scaling_factor: [\n"),
     for uDotrBin in range(0,Utilities.uDotrBins):
         outFile.write("// Coefficients for " + str('%.2f' % Utilities.uDotrLimitValues[uDotrBin]) + " < CosTheta < " + str('%.2f' % Utilities.uDotrLimitValues[uDotrBin+1]) + "\n")
         for positionIndex, position in enumerate(Utilities.Positions):
             outFile.write(str('%.4f' % scaleFactor[uDotrBin][positionIndex]) + ", ")
         outFile.write("\n")
-    outFile.write("], \n")
-    outFile.write("\n \n")
+    outFile.write("],\n")
+    outFile.write("\n\n")
 
     outFile.write("// Values to map between adjusted prompt Nhits and corresponding MeV energy.\n")
     outFile.write("// 0.26 MeV is the threshold for Cerenkov radiation for electrons in water.\n")
@@ -91,16 +92,16 @@ def AnalysisFunction(index, material):
     outFile.write("mev_values: [0.26, "),
     for energy in energies:
         outFile.write(str('%.1f' % energy) + ", ")
-    outFile.write("], \n")
+    outFile.write("],\n")
     outFile.write("\n")
 
     outFile.write("nhit_values: [0.0, ")
     for nHits in nHitsTable:
         outFile.write(str('%.4f' % nHits) + ", ")
-    outFile.write("], \n")
+    outFile.write("],\n")
     outFile.write("\n")
 
-    outFile.write("} \n")
+    outFile.write("}\n")
     outFile.write("\n")
 
     outFile.close()

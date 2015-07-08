@@ -4,6 +4,7 @@ from array import array
 import math
 # Secondary functions and user-defined values for the EnergyPromptLookup Coordinator
 # Author J Walker - 22/05/2015 <john.walker@liverpool.ac.uk>
+# Revision history: 2015-07-08 J. Walker: Increasing width of prompt hits histogram
 
 Positions = [0.0, 200.0, 400.0, 600.0, 800.0, 1000.0, 1200.0, 1400.0, 1600.0, 1800.0, 2000.0, 2200.0, 2400.0, 2600.0, 2800.0, 3000.0, 3200.0, 3400.0, 3600.0, 3800.0, 4000.0, 4200.0, 4400.0, 4600.0, 4800.0, 5000.0, 5200.0, 5400.0, 5600.0, 5800.0, 6000.0, 6200.0, 6400.0, 6600.0, 6800.0, 7000.0, 7200.0, 7400.0, 7600.0, 7800.0, 8000.0]
 ScintEnergies = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 8.0, 10.0] # Use these energies if using a scintillator-filled detector
@@ -34,7 +35,7 @@ def PromptNhitsVsEnergy(material):
 
         infileName = material + "_P=" + str(int(0.0)) + "mm_E=" + str(int(energy * 1000)) + "keV.root"
         print infileName
-        hNhits = ROOT.TH1D(infileName, "Prompt Nhits", 150, 0.0, 150.0)
+        hNhits = ROOT.TH1D(infileName, "Prompt Nhits", 150, 0.0, 300.0)
 
         for ds, run in rat.dsreader(infileName):
             light_path = rat.utility().GetLightPathCalculator()
@@ -241,7 +242,7 @@ def PlotPromptNhitsPerEnergy(material):
 
         infileName = material + "_P=" + str(int(0.0)) + "mm_E=" + str(int(energy * 1000)) + "keV.root"
         print infileName
-        hNhits = ROOT.TH1D(infileName, "Nphotons - " + str(energy) + "MeV", 150, 0.0, 150.0)
+        hNhits = ROOT.TH1D(infileName, "Nphotons - " + str(energy) + "MeV", 150, 0.0, 300.0)
 
         for ds, run in rat.dsreader(infileName):
             light_path = rat.utility().GetLightPathCalculator()
