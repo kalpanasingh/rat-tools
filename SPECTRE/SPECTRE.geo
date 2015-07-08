@@ -1,10 +1,14 @@
 // This geometry is for SPECTRE with the Y90 capillary. 
 
 {
-name: "GEO",
+type: "GEO",
+version: 1,
 index: "world",
-valid_begin: [0, 0],
-valid_end: [0, 0],
+run_range: [0, 0],
+pass: 0,
+timestamp: "",
+comment: "",
+production: false,
 mother: "",
 enable: 1,
 
@@ -18,10 +22,14 @@ material: "air",
 }
 
 {
-name: "GEO",
+type: "GEO",
+version: 1,
 index: "acrylic",
-valid_begin: [0, 0],
-valid_end: [0, 0],
+run_range: [0, 0],
+pass: 0,
+timestamp: "",
+comment: "",
+production: false,
 mother: "world",
 enable: 1,
 
@@ -35,10 +43,14 @@ material: "acrylic_uva_McMaster",
 }
 
 {
-name: "GEO",
+type: "GEO",
+version: 1,
 index: "scint",
-valid_begin: [0, 0],
-valid_end: [0, 0],
+run_range: [0, 0],
+pass: 0,
+timestamp: "",
+comment: "",
+production: false,
 mother: "acrylic",
 enable: 1,
 
@@ -51,10 +63,14 @@ material: "labppo_scintillator",
 }
 
 {
-name: "GEO",
+type: "GEO",
+version: 1,
 index: "aluminum_disc",
-valid_begin: [0, 0],
-valid_end: [0, 0],
+run_range: [0, 0],
+pass: 0,
+timestamp: "",
+comment: "",
+production: false,
 mother: "scint",
 enable: 1,
 
@@ -71,10 +87,14 @@ material: "aluminum",
 
 
 {
-name: "GEO",
+type: "GEO",
+version: 1,
 index: "source_leg_1",
-valid_begin: [0, 0],
-valid_end: [0, 0],
+run_range: [0, 0],
+pass: 0,
+timestamp: "",
+comment: "",
+production: false,
 mother: "scint",
 enable: 1,
 
@@ -89,10 +109,14 @@ material: "ABSplastic",
 }
 
 {
-name: "GEO",
+type: "GEO",
+version: 1,
 index: "source_leg_2",
-valid_begin: [0, 0],
-valid_end: [0, 0],
+run_range: [0, 0],
+pass: 0,
+timestamp: "",
+comment: "",
+production: false,
 mother: "scint",
 enable: 1,
 
@@ -107,10 +131,14 @@ material: "ABSplastic",
 }
 
 {
-name: "GEO",
+type: "GEO",
+version: 1,
 index: "source_leg_3",
-valid_begin: [0, 0],
-valid_end: [0, 0],
+run_range: [0, 0],
+pass: 0,
+timestamp: "",
+comment: "",
+production: false,
 mother: "scint",
 enable: 1,
 
@@ -125,10 +153,14 @@ material: "ABSplastic",
 }
 
 {
-name: "GEO",
+type: "GEO",
+version: 1,
 index: "acrylic_center_disc",
-valid_begin: [0, 0],
-valid_end: [0, 0],
+run_range: [0, 0],
+pass: 0,
+timestamp: "",
+comment: "",
+production: false,
 mother: "scint",
 enable: 1,
 
@@ -143,10 +175,14 @@ material: "acrylic_uva_McMaster",
 }
 
 {
-name: "GEO",
+type: "GEO",
+version: 1,
 index: "acrylic_capholder_disc",
-valid_begin: [0, 0],
-valid_end: [0, 0],
+run_range: [0, 0],
+pass: 0,
+timestamp: "",
+comment: "",
+production: false,
 mother: "scint",
 enable: 1,
 
@@ -161,10 +197,14 @@ material: "acrylic_uva_McMaster",
 }
 
 {
-name: "GEO",
+type: "GEO",
+version: 1,
 index: "acrylic_capholder_disc_lower",
-valid_begin: [0, 0],
-valid_end: [0, 0],
+run_range: [0, 0],
+pass: 0,
+timestamp: "",
+comment: "",
+production: false,
 mother: "scint",
 enable: 1,
 
@@ -179,10 +219,14 @@ material: "acrylic_uva_McMaster",
 }
 
 {
-name: "GEO",
+type: "GEO",
+version: 1,
 index: "capillary",
-valid_begin: [0, 0],
-valid_end: [0, 0],
+run_range: [0, 0],
+pass: 0,
+timestamp: "",
+comment: "",
+production: false,
 mother: "scint",
 enable: 1,
 
@@ -197,10 +241,14 @@ material: "glass",
 }
 
 {
-name: "GEO",
+type: "GEO",
+version: 1,
 index: "capillary_airgap",
-valid_begin: [0, 0],
-valid_end: [0, 0],
+run_range: [0, 0],
+pass: 0,
+timestamp: "",
+comment: "",
+production: false,
 mother: "capillary",
 enable: 1,
 
@@ -215,10 +263,14 @@ material: "air",
 }
 
 {
-name: "GEO",
+type: "GEO",
+version: 1,
 index: "source_droplet",
-valid_begin: [0, 0],
-valid_end: [0, 0],
+run_range: [0, 0],
+pass: 0,
+timestamp: "",
+comment: "",
+production: false,
 mother: "capillary_airgap",
 enable: 1,
 
@@ -233,10 +285,14 @@ material: "lightwater_sno",
 }
 
 {
-name: "GEO",
+type: "GEO",
+version: 1,
 index: "triggerPMT",
-valid_begin: [0, 0],
-valid_end: [0, 0],
+run_range: [0, 0],
+pass: 0,
+timestamp: "",
+comment: "",
+production: false,
 mother: "world",
 enable: 1,
 
@@ -264,10 +320,14 @@ vis_invisible: 0,
 }
 
 {
-name: "GEO",
+type: "GEO",
+version: 1,
 index: "innerPMT",
-valid_begin: [0, 0],
-valid_end: [0, 0],
+run_range: [0, 0],
+pass: 0,
+timestamp: "",
+comment: "",
+production: false,
 mother: "world",
 enable: 1,
 

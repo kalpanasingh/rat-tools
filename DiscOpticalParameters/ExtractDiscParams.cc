@@ -8,6 +8,7 @@
 ///
 /// REVISION HISTORY:\n
 ///     2014-06-02: P. Jones - First Revision.\n
+///     2015-06-24: N. Barros - Updated table format.\n
 ///
 /// \detail A file called DISC_PARAMETERS.ratdb will be created.
 ///
@@ -94,7 +95,7 @@ void ExtractDiscParams( const string& fileName )
 
   // Now to write out the arrays
   ofstream discParams("DISC_PARAMETERS.ratdb");
-  discParams << "{\nname: \"GREY_DISC_PARAMETERS\",\nindex: \"DiscOptics0_New\",\ntravel_time: 0.25d,\ndecay_constant: 0.25d,\nbounce_spread: 0.10d,\ndisc_radius: 137.7d,\ncollection_efficiency: 1.0d,\nabsorption_probability: [";
+  discParams << "{\ntype: \"GREY_DISC_PARAMETERS\",\nversion: 1,\nindex: \"DiscOptics0_New\",\nrun_range: [0,0],\npass: 0,\ntimestamp: \"\",\ncomment: \"\",\ntravel_time: 0.25d,\ndecay_constant: 0.25d,\nbounce_spread: 0.10d,\ndisc_radius: 137.7d,\ncollection_efficiency: 1.0d,\nabsorption_probability: [";
   for( int iLambda = 0; iLambda < lambdaBins; iLambda++ )
     {
       for( int iTheta = 0; iTheta < thetaBins; iTheta++ )

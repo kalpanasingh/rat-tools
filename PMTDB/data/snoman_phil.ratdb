@@ -1,8 +1,12 @@
 {
-name: "PMTINFO",
+type: "PMTINFO",
+version: 1,
 index: "snoman",
-valid_begin : [0, 0],
-valid_end : [0, 0],
+run_range : [0, 0],
+pass: 0,
+timestamp: "",
+comment: "",
+production: false,
 
 panelnumber: [-9999, 280, 280, 280, 280, 280, 280, 280, 280, 280, 280, 280, 280, 280, 280, 283, 
 283, 283, 283, 283, 283, 283, 283, 283, 283, 283, 283, 283, 283, 284, 284, 

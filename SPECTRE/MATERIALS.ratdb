@@ -1,8 +1,12 @@
 {
-name: "MATERIAL",
+type: "MATERIAL",
+version: 1,
 index: "acrylic_uva_McMaster",
-valid_begin: [0, 0],
-valid_end: [0, 0],
+run_range: [0, 0],
+pass: 0,
+timestamp: "",
+comment: "",
+production : false,
 
 density: 1.14,
 nelements: 3,
@@ -12,10 +16,14 @@ elemprop: [0.0703, 0.558, 0.3717],
 }
 
 {
-name: "MATERIAL",
+type: "MATERIAL",
+version: 1,
 index: "photocathode-HQE",
-valid_begin : [0, 0],
-valid_end : [0, 0],
+run_range : [0, 0],
+pass: 0,
+timestamp: "",
+comment: "",
+production: false,
 
 density: 5.0,
 nelements: 1,

@@ -372,10 +372,13 @@ def dqxx_write_to_file(dqcr, dqch, dqid, runnumber, outfilename=None):
     # therefore, we are manually writing out the file for now:
     runrange = "run_range: [%i, %i]," % (runnumber, runnumber)
     f = open(outfilename, 'w')
-    f.write(' {\n name: "PMT_DQXX",\n ')
-    f.write(runrange)
-    f.write('\n pass: 0,\n')
-    f.write(' comment: "",\n')
+    f.write(' {\n type: "PMT_DQXX",\n ')
+    f.write('version: 1,\n')
+    f.write( runrange )
+    # These variables are taking only default values for now
+    f.write('pass: 0,\n')
+    f.write('timestamp: \"\",\n')
+    f.write('comment: \"\",\n')
     f.write(' production: true,\n')
     # The following variables are zero by default for now? (Freija)
     f.write(' cratestatus_n100: 0,\n cratestatus_n20: 0, \n cratestatus_esumL: 0, ')

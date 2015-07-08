@@ -208,9 +208,13 @@ with open('./TSLP_'+str(runnum)+'.ratdb','w') as f2:
 ///
 ////////////////////////////////////////////////////////////////////
 {
-name: "ECA_TSLP",
-valid_begin : [0, 0],
-valid_end : [0, 0],
+type: "ECA_TSLP",
+version: 1,
+run_range : [0, 0],
+pass : 0,
+production : false,
+timestamp: "",
+comment : "",
 """)
 
     f2.write("\n\n\n tslp_status: "+str(validationlist)+",")

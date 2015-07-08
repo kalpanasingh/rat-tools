@@ -1,8 +1,12 @@
 {
-name: "GEO",
+type: "GEO",
+version: 1,
 index: "world",
-valid_begin: [0, 0],
-valid_end: [0, 0],
+run_range: [0, 0],
+pass: 0,
+timestamp: "",
+comment: "",
+production : false,
 enable: 1,
 invisible: 1, // omitted for visualization
 
@@ -18,10 +22,14 @@ color: [0.67, 0.29, 0.0],
 }
 
 {
-name: "GEO",
+type: "GEO",
+version: 1,
 index: "h2o",
-valid_begin: [0, 0],
-valid_end: [0, 0],
+run_range: [0, 0],
+pass: 0,
+timestamp: "",
+comment: "",
+production : false,
 enable: 1,
 invisible: 1, // omitted for visualization
 
@@ -37,10 +45,14 @@ color: [0.67, 0.29, 0.0],
 }
 
 {
-name: "GEO",
+type: "GEO",
+version: 1,
 index: "innerPMT",
-valid_begin: [0, 0],
-valid_end: [0, 0],
+run_range: [0, 0],
+pass: 0,
+timestamp: "",
+comment: "",
+production : false,
 enable: 1,
 
 mother: "h2o",

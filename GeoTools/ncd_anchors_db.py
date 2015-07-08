@@ -5,6 +5,7 @@
 # Outputs NCD positions and directions from the csv file in ratdb format.
 #
 # Author P G Jones - 21/06/2013 <p.g.jones@qmul.ac.uk> : First revision
+#        N Barros  - 2015-06-24 <nfbarros@hep.upenn.edu> : Generate tables with line breaks
 ####################################################################################################
 import csv
 import numpy
@@ -55,4 +56,9 @@ for ncd in ncd_file:
     ncd_db["v"].append(float("%.2f" % dir[1]))
     ncd_db["w"].append(float("%.2f" % dir[2]))
 
-print  yaml.dump(ncd_db).replace("]", "],")
+#print  yaml.dump(ncd_db).replace("]", "],")
+# Manual print
+print "{"
+for key,value in ncd_db.iteritems():
+    print key+": "+str(value)+","
+print "}"

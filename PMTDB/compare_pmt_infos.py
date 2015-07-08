@@ -21,7 +21,7 @@ with open("data/airfill3.ratdb", "r") as airfill3_file:
     airfill3 = yaml.load(json_minify(airfill3_file.read(), False))
 
 # Correct snoman cm to mm
-for lcn in range(0, len(snoman["type"])):
+for lcn in range(0, len(snoman["pmt_type"])):
     snoman["x"][lcn] = snoman["x"][lcn] * 10.0
     snoman["y"][lcn] = snoman["y"][lcn] * 10.0
     snoman["z"][lcn] = snoman["z"][lcn] * 10.0
@@ -29,7 +29,7 @@ for lcn in range(0, len(snoman["type"])):
 
 def compare(info1, info2):
     
-    for lcn in range(0, len(info1["type"])):
+    for lcn in range(0, len(info1["pmt_type"])):
         differs = False
         if info2["type"][lcn] != info1["type"][lcn]:
             differs = True

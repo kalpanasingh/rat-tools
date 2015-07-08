@@ -144,12 +144,18 @@ for number in newData["panel_number"]:
 # Now have a complete dict, write to a file
 panelInfoFile = open( "PANELINFO.ratdb", "w" )
 infoText = """{
-name: \"PANELINFO\",
-valid_begin : [0, 0],
-valid_end : [0, 0],
+type: \"PANELINFO\",
+version: 1,
+run_range : [0, 0],
+pass : 0,
+production : false,
+timestamp: \"\",
+comment : \"\",
 """
-infoText += yaml.dump( newData ).replace( "]", "]," )
-infoText += """}
+for key,value in newData.iteritems():
+    infoText += key+": "+str(value)+","
+infoText += """
+}
 """
 panelInfoFile.write( infoText )
 panelInfoFile.close()

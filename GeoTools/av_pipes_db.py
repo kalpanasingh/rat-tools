@@ -5,9 +5,12 @@
 # Outputs each acrylic pipe in ratdb format.
 #
 # Author P G Jones - 2013-11-27 <p.g.jones@qmul.ac.uk> : First revision
+#        N Barros  - 2015-06-24 <nfbarros@hep.upenn.edu> : Added new DB fields
+#                                                          Generate tables with line breaks
 ####################################################################################################
 import math
 import yaml
+from collections import OrderedDict
 
 start_z = 12705.00
 neck_r = 25.5 * 25.4 # Inches to mm
@@ -53,13 +56,17 @@ pipe7 =  {"name" : "labr",
 
 def output_pipe(pipe):
     global start_z, neck_r, av_r, boss_z, gap
-    db = {"name" : '"SOLID"',
-          "index" : '"av_pipe-%s"' % pipe["name"],
-          "solid" : '"avPipe"',
-          "valid_begin" : "[0, 0]",
-          "valid_end" : "[0, 0]",
-          "r_min" : pipe["id"] * 25.4 / 2.0,
-          "r_max" : pipe["od"] * 25.4 / 2.0}
+    db = OrderedDict([("type" , '"SOLID"'),
+                      ("index" , '"av_pipe-%s"' % pipe["name"]),
+                      ("version", 1),
+                      ("solid" , '"avPipe"'),
+                      ("run_range" , "[0, 0]"),
+                      ("pass" , 0),
+                      ("production" , "false"),
+                      ("timestamp",'""'),
+                      ("comment" , '""'),
+                      ("r_min" , pipe["id"] * 25.4 / 2.0),
+                      ("r_max" , pipe["od"] * 25.4 / 2.0)])
     if "z" in pipe:
         x = [math.sin(math.radians(pipe["theta"])) * neck_r] * 2
         y = [math.cos(math.radians(pipe["theta"])) * neck_r] * 2
@@ -74,10 +81,14 @@ def output_pipe(pipe):
             x.append(math.sin(math.radians(pipe["theta"])) * math.sin(math.radians(phi)) * (av_r - pipe["od"] * 25.4 - gap))
             y.append(math.cos(math.radians(pipe["theta"])) * math.sin(math.radians(phi)) * (av_r - pipe["od"] * 25.4 - gap))
             z.append(math.cos(math.radians(phi)) * (av_r - pipe["od"] * 25.4 - gap))
-    db["x"] = x
-    db["y"] = y
-    db["z"] = z
-    print  "{\n", yaml.dump(db).replace("]", "],"), "}\n"
+            db["x"] = x
+            db["y"] = y
+            db["z"] = z
+            # Manual print
+            print "{"
+            for key,value in db.iteritems():
+                print key+": "+str(value)+","
+            print "}"
 
 output_pipe(pipe1)
 output_pipe(pipe2)

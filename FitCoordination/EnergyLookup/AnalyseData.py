@@ -50,10 +50,15 @@ def AnalysisFunction(index, material):
     print "Please place the text below into the database file: FIT_ENERGY_LOOKUP.ratdb located in rat/data, replacing any existing entry with the same index."
     print "\n"
     print "{"
-    print "name: \"FIT_ENERGY_LOOKUP\","
+    print "type: \"FIT_ENERGY_LOOKUP\","
+    print "version: 1,"
     print "index: \"" + index + "\","
-    print "valid_begin: [0, 0],"
-    print "valid_end: [0, 0],"
+    print "run_range: [0, 0],"
+    print "pass : 0,"
+    print "production: false,"
+    print "timestamp: \"\","
+    print "comment: \"\","    
+
     print "\n",
     
     print "energies: [0.0,",
