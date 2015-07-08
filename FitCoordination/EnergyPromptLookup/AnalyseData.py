@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import string, ROOT, Utilities, sys, os
 # Author J Walker - 23/04/2015 <john.walker@liverpool.ac.uk>
-# Revision history: 2015-07-08 J. Walker: Removing EOL spaces from output file
+# Revision history: 2015-07-08 J. Walker: Removing EOL spaces from output file and switching comment/timestamp
 
 
 def AnalyseRootFiles(options):
@@ -59,8 +59,8 @@ def AnalysisFunction(index, material):
     outFile.write("index: \"" + index + "\",\n")
     outFile.write("run_range: [0, 0],\n")
     outFile.write("pass: 0,\n")
-    outFile.write("timestamp: \"\",\n")
     outFile.write("comment: \"\",\n")
+    outFile.write("timestamp: \"\",\n")
     outFile.write("\n")
 
     outFile.write("// Values for position and direction scaling. Scaling coefficient adjusts\n")
