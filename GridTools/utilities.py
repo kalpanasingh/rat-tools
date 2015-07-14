@@ -15,6 +15,7 @@
 
 import zlib
 import logging
+import sys
 
 
 def get_adler32(filename):

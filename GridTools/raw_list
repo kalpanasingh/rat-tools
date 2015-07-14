@@ -30,35 +30,37 @@ copy_type = "GUID"
 server_list = []
 
 
-def get_runs():
+def get_runs(filetype):
     """Get a list of all runs available
     """
-    rows = database.view("_design/dflow/_view/grid_ids", descending=True,
+    rows = database.view("_design/dflow/_view/grid_ids", startkey=[filetype, {}],
+                         endkey=[filetype], descending=True,
                          limit=1)
     for row in rows:
-        max_run = row["key"][0]
-    rows = database.view("_design/dflow/_view/grid_ids", descending=False,
+        max_run = row["key"][1]
+    rows = database.view("_design/dflow/_view/grid_ids", startkey=[filetype], 
+                         endkey=[filetype, {}], descending=False,
                          limit=1)
     for row in rows:
-        min_run = row["key"][0]
+        min_run = row["key"][1]
     try:
         return [min_run, max_run]
-    except NameError, e:
+    except (NameError, UnboundLocalError) as e:
         print "Problem finding min/max run range from database!"
         raise
 
 
-def generate_run_list(run_range, logfiles=False):
+def generate_run_list(filetype, run_range, logfiles=False):
     """Generate the file list by run range
     """
     names = []
     sizes = []
     guids = []
     adlers = []
-    rows = database.view("_design/dflow/_view/grid_ids", startkey=[run_range[0]],
-                         endkey=[run_range[1]])
+    rows = database.view("_design/dflow/_view/grid_ids", startkey=[filetype, run_range[0]],
+                         endkey=[filetype, run_range[1]])
     for row in rows:
-        if logfiles is True and row["key"][1]=="log":
+        if logfiles is True and row["key"][2]=="log":
             guid = row["value"][0]
             if guid==0:
                 print row["value"][1], "missing GUID"
@@ -67,7 +69,7 @@ def generate_run_list(run_range, logfiles=False):
             names.append(row['value'][1])
             adlers.append(row["value"][2])
             sizes.append(row["value"][3])
-        elif logfiles is False and row["key"][1]!="log":
+        elif logfiles is False and row["key"][2]!="log":
             guid = row["value"][0]
             if guid==0:
                 print row["value"][1], "missing GUID"
@@ -93,16 +95,18 @@ if __name__=="__main__":
     parser.add_argument("-l", dest="builder_logs", help="Get builder logs instead of data.",
                         action="store_true")
     
-    parser.add_argument("-r", dest="run_range", help="Requested run range, format -r low high (blank for all)", type=int, nargs='+')
+    parser.add_argument("-r", dest="run_range", help="Requested run range, format -r low high (blank for all)", type=int, nargs=2)
     
     parser.add_argument("--runs", dest="list_runs", help="Show possible run range", action="store_true")
+
+    parser.add_argument("type", type=str, help="File type (e.g. L1, L2)")
     
     args = parser.parse_args()
 
     # First, check that no help commands are requested
     if args.list_runs:
         database.connect_db(args.db_server, args.db_port, args.db_name)
-        runs = get_runs()
+        runs = get_runs(args.type)
         print "Min run available:", runs[0]
         print "Max run available:", runs[1]
         sys.exit()
@@ -129,7 +133,7 @@ if __name__=="__main__":
     database.connect_db(args.db_server, args.db_port, args.db_name)
 
     # Generate the list of guids for the run range requested
-    names, sizes, guids, adlers = generate_run_list(args.run_range, args.builder_logs)
+    names, sizes, guids, adlers = generate_run_list(args.type, args.run_range, args.builder_logs)
 
     # And write the output file
     utilities.write_grabber_file(args.output, copy_type, names, sizes, guids, adlers)
