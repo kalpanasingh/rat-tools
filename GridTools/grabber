@@ -40,7 +40,10 @@ def download_file(directory, filename, guid, adler32, size):
     if os.path.exists(download_path):
         # Compare checksums
         local_adler32 = utilities.get_adler32(download_path)
-        if local_adler32!=adler32:
+        # Adler32 values in rebuilt DB on snopl were set to -99999
+        # by script that rebuilt DB (as obtaining the values was too time
+        # consuming for data that was migrated to tape)
+        if adler32!="-99999" and local_adler32!=adler32:
             warn("Checksum mismatch: %s; delete and re-download" % filename)
             os.unlink(download_path)
         else:
@@ -117,6 +120,8 @@ if __name__=="__main__":
     # Now, check the downloads
     copy_type, files, sizes, guids, adlers = utilities.read_grabber_file(args.list)
     # Warn IF this is going to download lots of data (> 10 GB) or >25% of free space
+    if not os.path.exists(args.dest):
+        os.makedirs(args.dest)
     free_disk = os.statvfs(args.dest).f_frsize * os.statvfs(args.dest).f_bavail
     total_download = sum(sizes)
     if float(total_download) / free_disk > 1:

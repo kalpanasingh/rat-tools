@@ -268,13 +268,13 @@ def generate_list_by_version(version, data_type, module, run_range):
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser(description="File list generator.  Users MUST specify either a label (-l, recommended) or rat version (-v).")
-    parser.add_argument("-d", dest="db_name", help="Data-flow database name [production]",
-                        default="production")
+    parser.add_argument("-d", dest="db_name", help="Data-flow database name [data-production]",
+                        default="data-production")
     parser.add_argument("-s", dest="db_server",
-                        help="Data-flow database server [snoplus.westgrid.ca]",
-                        default="snoplus.cpp.ualberta.ca")
+                        help="Data-flow database server [couch.snopl.us]",
+                        default="couch.snopl.us")
     parser.add_argument("-p", dest="db_port",
-                        help="Data-flow database server port [5984]", default=5984, type=int)
+                        help="Data-flow database server port [None]", default=None, type=int)
     parser.add_argument("-f", dest="full_data", help="[Ntuple] or full datasets (set option for full)",
                         action="store_true")
     parser.add_argument("-o", dest="output", help="Filename to write the list to [filelist.dat]",
