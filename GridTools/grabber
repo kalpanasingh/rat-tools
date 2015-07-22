@@ -40,6 +40,9 @@ def download_file(directory, filename, guid, adler32, size):
     if os.path.exists(download_path):
         # Compare checksums
         local_adler32 = utilities.get_adler32(download_path)
+        # Adler32 values in rebuilt DB on snopl were set to -99999
+        # by script that rebuilt DB (as obtaining the values was too time
+        # consuming for data that was migrated to tape)
         if adler32!="-99999" and local_adler32!=adler32:
             warn("Checksum mismatch: %s; delete and re-download" % filename)
             os.unlink(download_path)
