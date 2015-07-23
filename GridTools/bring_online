@@ -29,6 +29,9 @@ def get_replicas(guid):
 
 def test_locality(url):
     rtc, out, err = grid.execute('lcg-ls', '-l', url)
+    # First line of output (for a file at an SURL) should be of format (see lcg-ls man page):
+    # [permissions/mode] [#-links] [user-id] [group-id] [size] [locality] [filename]
+    # Hence 7 space separated groups, with the 6th element being the locality
     if rtc!=0:
         raise Exception("test_locality: unable to get status %s" % '\n'.join(e for e in err))
     if len(out)<1 or len(out[0].split())!=7:
