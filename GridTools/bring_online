@@ -1,0 +1,107 @@
+#!/usr/bin/env python
+#######################
+#
+# bring_online
+#
+# Script to bring data on tape to disk
+#
+# Author: Matt Mottram
+#         <m.mottram@qmul.ac.uk>
+#
+#######################
+
+import os
+import sys
+import argparse
+import time
+import multiprocessing
+
+import grid
+import utilities
+
+
+def get_replicas(guid):
+    rtc, out, err = grid.execute('lcg-lr', guid)
+    if rtc!=0:
+        raise Exception("get_replicas: cannot get replica for %s: %s" % (guid, '\n'.join(e for e in err)))
+    return out
+
+
+def test_locality(url):
+    rtc, out, err = grid.execute('lcg-ls', '-l', url)
+    # First line of output (for a file at an SURL) should be of format (see lcg-ls man page):
+    # [permissions/mode] [#-links] [user-id] [group-id] [size] [locality] [filename]
+    # Hence 7 space separated groups, with the 6th element being the locality
+    if rtc!=0:
+        raise Exception("test_locality: unable to get status %s" % '\n'.join(e for e in err))
+    if len(out)<1 or len(out[0].split())!=7:
+        raise Exception("test_locality: unable to get status %s" % '\n'.join(o for o in out))
+    return out[0].split()[5]
+
+
+def bring_online(url):
+    rtc, out, err = grid.execute('lcg-bringonline', url)
+    if rtc != 1:
+        # Because who'd want 0 as a success signifier!
+        raise Exception("bring_online: command failed: %s" % ('\n'.join(e for e in err)))
+
+
+def bring_nearline_online(guid):
+    replicas = get_replicas(guid)
+    if len(replicas) != 1:
+        raise Exception("bring_nearline_online: Multiple replicas for %s" % guid)
+    locality = test_locality(replicas[0])
+    if locality == "NEARLINE":
+        print "Bringing %s online (%s)" % (guid, locality)
+        bring_online(replicas[0])
+    elif locality != "ONLINE" and locality != "ONLINE_AND_NEARLINE":
+        raise Exception("bring_nearline_online: Unhandled file status %s" % locality)
+
+
+def run_parallel(guids, streams):
+    pool = multiprocessing.Pool(processes = streams)
+    result = []
+    for i, guid in enumerate(guids):
+        result.append(pool.apply_async(bring_nearline_online, args=(guid,)))
+    # Add in a hack for keyboard interrupts
+    pool.close()
+    complete = False
+    while complete is False:
+        # Downloads still running, wait for a bit.
+        try:
+            complete = True
+            for i, r in enumerate(result):
+                if r.ready() is False:
+                    complete = False
+            if complete is True:
+                break
+            time.sleep(0.1)            
+        except KeyboardInterrupt:
+            # Kill all the daughters and exit
+            pool.terminate()
+            print "Keyboard interrupt caught; terminating processes"
+            complete = False
+            break
+    if complete is True:
+        pool.join()
+
+
+if __name__=="__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-l", dest="list", help="list of files to grab [filelist.dat]",
+                        default="filelist.dat")
+    parser.add_argument("--streams", dest="streams", help="Parallel streams [10]",
+                        type=int, default=10)
+    args = parser.parse_args()
+    # First, check for a proxy
+    if not grid.proxy_time():
+        print "Need to generate a grid proxy"
+        if not grid.proxy_create():
+            print "Proxy successfully created"
+        else:
+            print "Unable to create proxy; try 'voms-proxy-init --voms snoplus.snolab.ca' in shell"
+            sys.exit()
+    # Now, check the downloads
+    copy_type, files, sizes, guids, adlers = utilities.read_grabber_file(args.list)
+
+    run_parallel(guids, args.streams)
