@@ -145,7 +145,8 @@ def lcg_copy(url, local, timeout=None):
     if timeout is None:
         rtc, out, err = execute('lcg-cp', url, local)
     else:
-        rtc, out, err = execute('lcg-cp', '--sendreceive-timeout', str(timeout), url, local)
+        rtc, out, err = execute('lcg-cp', '--sendreceive-timeout', str(timeout),
+                                '--srm-timeout', str(timeout), url, local)
     if rtc:
         raise Exception('Unable to copy %s to %s\nError: %s' % (url, local, err))
 
