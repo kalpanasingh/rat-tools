@@ -30,7 +30,7 @@ def warn(message):
     sys.stderr.write("WARNING: %s\n" % message)
 
 
-def download_file(directory, filename, guid, adler32, size):
+def download_file(directory, filename, guid, adler32, size, timeout):
     """Download a file to the given directory.
     """
     if not os.path.exists(directory):
@@ -54,7 +54,8 @@ def download_file(directory, filename, guid, adler32, size):
     # For lack of anything better, use 10 second for every MB + 60s basic
     if size==0:
         size = _GB # This is usually the max
-    timeout = 60 + 10 * int(size / _MB)
+    if not timeout:
+        timeout = 60 + 10 * int(size / _MB)
     # Ensure correct guid format (some are missing prefix)
     if copy_type=="GUID" and not guid.startswith("guid:"):
         guid = "guid:" + guid
@@ -64,20 +65,20 @@ def download_file(directory, filename, guid, adler32, size):
         warn("Download of %s failed: %s" % (filename, e))
 
 
-def download_sequence(destination, files, guids, adlers, sizes):
+def download_sequence(destination, files, guids, adlers, sizes, timeout):
     """Download the files in sequence mode; i.e. single threaded.
     """
     for i, f in enumerate(files):
-        download_file(destination, f, guids[i], adlers[i], sizes[i])
+        download_file(destination, f, guids[i], adlers[i], sizes[i], timeout)
 
 
-def download_parallel(destination, files, guids, adlers, sizes, streams):
+def download_parallel(destination, files, guids, adlers, sizes, streams, timeout):
     """Download the files in parallel mode; i.e. (kinda) multi threaded.
     """
     pool = multiprocessing.Pool(processes=streams)
     result = []
     for i, f in enumerate(files):
-        result.append(pool.apply_async(download_file, args=(destination, f, guids[i], adlers[i], sizes[i])))
+        result.append(pool.apply_async(download_file, args=(destination, f, guids[i], adlers[i], sizes[i], timeout)))
     # Add in a hack for keyboard interrupts
     pool.close()
     complete = False
@@ -108,6 +109,8 @@ if __name__=="__main__":
     parser.add_argument("-p", dest="parallel", help="Parallel downloads", action="store_true")
     parser.add_argument("--streams", dest="streams", help="Parallel streams [10]",
                         type=int, default=10)
+    parser.add_argument("--timeout", dest="timeout", help="Override default timeout",
+                        type=int)
     args = parser.parse_args()
     # First, check for a proxy
     if not grid.proxy_time():
@@ -135,7 +138,7 @@ if __name__=="__main__":
             sys.exit()
     # Now, download files   
     if args.parallel:
-        download_parallel(args.dest, files, guids, adlers, sizes, args.streams)
+        download_parallel(args.dest, files, guids, adlers, sizes, args.streams, args.timeout)
     else:
-        download_sequence(args.dest, files, guids, adlers, sizes)
+        download_sequence(args.dest, files, guids, adlers, sizes, args.timeout)
     print "Downloads complete"
