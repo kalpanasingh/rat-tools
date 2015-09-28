@@ -2,9 +2,10 @@
 /rat/physics_list/OmitMuonicProcesses true
 /rat/physics_list/OmitHadronicProcesses true
 ${ExtraDB}
-/rat/db/set MC thin_factor 3.5
 /rat/db/set DETECTOR geo_file "${GeoFile}"
 /rat/db/set GEO[inner_av] material "${InnerAVMaterial}"
+/rat/tracking/omit ${Particle}
+/rat/tracking/store condensed
 
 /run/initialize
 
@@ -14,7 +15,6 @@ ${ExtraDB}
 /rat/proc calibratePMT
 /rat/proc count
 /rat/procset update 100
-/rat/proc ${Fitter}
 
 /rat/proc outroot
 /rat/procset file "${FileName}"
