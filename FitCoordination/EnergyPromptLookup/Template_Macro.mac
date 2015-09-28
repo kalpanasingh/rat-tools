@@ -22,5 +22,5 @@ ${ExtraDB}
 ${Generator}
 /generator/rate/set 1
 
-/rat/run/start 1000
+/rat/run/start 20000
 exit
