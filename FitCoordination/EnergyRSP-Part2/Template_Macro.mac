@@ -1,0 +1,20 @@
+
+/rat/inroot/load ${InFileName}
+
+/run/initialize
+
+/rat/proc count
+/rat/procset update 100
+
+/rat/proc waterFitter
+
+/rat/proc fitter
+/rat/procset method "energyRSP"
+/rat/procset seed "waterFitter"
+
+/rat/proc outroot
+/rat/procset file "${FileName}"
+
+/rat/inroot/read
+
+exit
