@@ -30,26 +30,30 @@ except:
 # Copy type will be set to SURL if lcg-utils or gfal are not available
 copy_type = "GUID"
 server_list = []
+# The first allowed type will ALWAYS be the default
+allowed_file_types = ["ntuple", "ratds", "soc"]
 
 
 def get_module_list_version(data_type, rat_version=None):
     """Get a list of available modules.
     """
-    rows = database.view("_design/proddata/_view/%s_by_mod_pass_sr" % (data_type),
-                    reduce=True, group=True, group_level=2)
+    rows = database.view("_design/proddata/_view/data_by_mod_pass_sr",
+                         reduce=True, group=True, group_level=3,
+                         startkey=[data_type], endkey=[data_type,{}])
     module_list = []
     for row in rows:
-        if rat_version and row["key"][1]!=unicode(rat_version):
+        if rat_version and row["key"][2] != unicode(rat_version):
             continue
-        module_list.append(row["key"][0])
+        module_list.append(row["key"][1])
     return module_list
 
 
 def get_module_list_label(data_type, label=None):
     """Get a list of available modules.                                                                                                            
     """
-    rows = database.view("_design/proddata/_view/%s_by_label" % (data_type),
-                   reduce=True, group=True, group_level=2)
+    rows = database.view("_design/proddata/_view/data_by_label",
+                         reduce=True, group=True, group_level=3,
+                         startkey=[data_type], endkey=[data_type,{}])
     module_list = []
     for row in rows:
         if label and row["key"][0]!=unicode(label):
@@ -65,9 +69,9 @@ def get_list_by_module_version(data_type, module, rat_version, run_range):
     sizes = []
     guids = []
     adlers = []
-    rows = database.view("_design/proddata/_view/%s_by_mod_pass_sr" % (data_type),
-                   startkey = [module, rat_version],
-                   endkey = [module, rat_version+"_"],
+    rows = database.view("_design/proddata/_view/data_by_mod_pass_sr",
+                   startkey = [data_type, module, rat_version],
+                   endkey = [data_type, module, rat_version+"_"],
                    reduce=False)
     for row in rows:
         if copy_type=="GUID":
@@ -80,7 +84,7 @@ def get_list_by_module_version(data_type, module, rat_version, run_range):
                 continue
         # Run range is after pass in the key, have to filter here rather than on server
         if run_range:
-            if row["key"][3] < run_range[0] or row["key"][3] > run_range[1]:
+            if row["key"][4] < run_range[0] or row["key"][4] > run_range[1]:
                 continue
         names.append(row["value"][0])
         sizes.append(row["value"][1])
@@ -104,9 +108,9 @@ def get_list_by_label_module(data_type, label, module, run_range):
     startkey = [label, module]
     endkey = [label, module+"_"]
     if run_range:        
-        startkey = [label, module, run_range[0]]
-        endkey = [label, module, run_range[1]+1] # range inclusive    
-    rows = database.view("_design/proddata/_view/%s_by_label" % (data_type),
+        startkey = [data_type, label, module, run_range[0]]
+        endkey = [data_type, label, module, run_range[1]+1] # range inclusive    
+    rows = database.view("_design/proddata/_view/data_by_label",
                    startkey=startkey, endkey=endkey, reduce=False)
     for row in rows:
         if copy_type=="GUID":
@@ -134,16 +138,20 @@ def get_labels(data_type, module=None):
     """
     labels = set()
     if module is None:
-        rows = database.view("_design/proddata/_view/%s_by_label" % (data_type),
-                             reduce=True, group_level=1)
+        # List any labels
+        rows = database.view("_design/proddata/_view/data_by_label",
+                             reduce=True, group_level=3,
+                             startkey=[data_type], endkey=[data_type, {}])
         for row in rows:
-            labels.add(row["key"][0])
+            labels.add(row["key"][1])
     elif type(module)==list and len(module)==1:
-        rows = database.view("_design/proddata/_view/%s_by_label" % (data_type),
-                             reduce=True, group_level=2)
+        # List labels only for a given module
+        rows = database.view("_design/proddata/_view/data_by_label",
+                             reduce=True, group_level=3,
+                             startkey=[data_type], endkey=[data_type, {}])
         for row in rows:
-            if str(row["key"][1])==module[0]:
-                labels.add(row["key"][0])
+            if str(row["key"][2])==module[0]:
+                labels.add(row["key"][1])
     else:
         raise Exception("Must only provide one module name.")
     return labels
@@ -156,16 +164,20 @@ def get_versions(data_type, module=None):
     """
     versions = set()
     if module is None:
-        rows = database.view("_design/proddata/_view/%s_by_mod_pass_sr" % (data_type),
-                             reduce=True, group_level=2)
+        # List all RAT versions
+        rows = database.view("_design/proddata/_view/data_by_mod_pass_sr",
+                             reduce=True, group_level=3,
+                             startkey=[data_type], endkey=[data_type, {}])
         for row in rows:
-            versions.add(row["key"][1])
+            versions.add(row["key"][2])
     elif type(module)==list and len(module)==1:
-        rows = database.view("_design/proddata/_view/%s_by_mod_pass_sr" % (data_type),
-                             reduce=True, group_level=2)
+        # List only versions for a given module
+        rows = database.view("_design/proddata/_view/%s_by_mod_pass_sr",
+                             reduce=True, group_level=3,
+                             startkey=[data_type], endkey=[data_type, {}])
         for row in rows:
-            if str(row["key"][0])==module[0]:
-                versions.add(row["key"][1])
+            if str(row["key"][1])==module[0]:
+                versions.add(row["key"][2])
     else:
         raise Exception("Must only provide one module name.")
     return versions
@@ -181,24 +193,26 @@ def get_modules(data_type, label=None, version=None):
     modules = set()
     if label is not None:
         # Only modules for a given label
-        rows = database.view("_design/proddata/_view/%s_by_label" % (data_type),
-                             reduce=True, group_level=2, startkey=[label],
-                             endkey=[label+"_"])
+        rows = database.view("_design/proddata/_view/data_by_label" % (data_type),
+                             reduce=True, group_level=3, startkey=[data_type, label],
+                             endkey=[data_type, label, {}])
         for row in rows:
-            modules.add(row["key"][1])
+            modules.add(row["key"][2])
     elif version is not None:
         # Only modules for a given RAT version
-        rows = database.view("_design/proddata/_view/%s_by_mod_pass_sr" % (data_type),
-                             reduce=True, group_level=2)
+        rows = database.view("_design/proddata/_view/data_by_mod_pass_sr",
+                             reduce=True, group_level=3, startkey=[data_type],
+                             endkey=[data_type, {}])
         for row in rows:
-            if str(row["key"][1])==version:
-                modules.add(row["key"][0])
+            if str(row["key"][2])==version:
+                modules.add(row["key"][1])
     else:
         # Any and all modules
-        rows = database.view("_design/proddata/_view/%s_by_mod_pass_sr" % (data_type),
-                             reduce=True, group_level=1)
+        rows = database.view("_design/proddata/_view/data_by_mod_pass_sr",
+                             reduce=True, group_level=2,
+                             startkey=[data_type], endkey=[data_type, {}])
         for row in rows:
-            modules.add(row["key"][0])
+            modules.add(row["key"][1])
     return modules
 
 
@@ -275,8 +289,9 @@ if __name__=="__main__":
                         default="couch.snopl.us")
     parser.add_argument("-p", dest="db_port",
                         help="Data-flow database server port [None]", default=None, type=int)
-    parser.add_argument("-f", dest="full_data", help="[Ntuple] or full datasets (set option for full)",
-                        action="store_true")
+    parser.add_argument("-f", dest="file_type",
+                        help="[%s], %s datasets" % (allowed_file_types[0], ", ".join(f for f in allowed_file_types[1:])),
+                        default="ntuple")
     parser.add_argument("-o", dest="output", help="Filename to write the list to [filelist.dat]",
                         default="filelist.dat")
     
@@ -293,25 +308,25 @@ if __name__=="__main__":
     
     args = parser.parse_args()
 
-    # Default is to search for ntuple files
-    data_type = "ntuples"
-    if args.full_data:
-        data_type = "files"
-    
+    if args.file_type not in allowed_file_types:
+        print "Unknown filetype, allowed types are:"
+        print ", ".join(f for f in allowed_file_types)
+        sys.exit()
+
     # First, check that no help commands are requested
     if args.list_labels:
         database.connect_db(args.db_server, args.db_port, args.db_name)
-        for l in sorted(get_labels(data_type, args.module)):
+        for l in sorted(get_labels(args.file_type, args.module)):
             print l
         sys.exit()
     if args.list_versions:
         database.connect_db(args.db_server, args.db_port, args.db_name)
-        for v in sorted(get_versions(data_type, args.module)):
+        for v in sorted(get_versions(args.file_type, args.module)):
             print v
         sys.exit()
     if args.list_modules:
         database.connect_db(args.db_server, args.db_port, args.db_name)
-        for m in sorted(get_modules(data_type, args.label, args.version)):
+        for m in sorted(get_modules(args.file_type, args.label, args.version)):
             print m
         sys.exit()
 
@@ -338,9 +353,9 @@ if __name__=="__main__":
 
     # Now handle either rat version or labelled data
     if args.label:
-        names, sizes, guids, adlers = generate_list_by_label(args.label, data_type, args.module, args.run_range)   
+        names, sizes, guids, adlers = generate_list_by_label(args.label, args.file_type, args.module, args.run_range)   
     elif args.version:
-        names, sizes, guids, adlers = generate_list_by_version(args.version, data_type, args.module, args.run_range)   
+        names, sizes, guids, adlers = generate_list_by_version(args.version, args.file_type, args.module, args.run_range)   
     else:
         parser.print_help()
         sys.exit()    
