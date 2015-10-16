@@ -29,31 +29,41 @@ def ProduceRunMacros(options):
     # Select which energies to use based on the material in the detector
     energies = []
     fitter = ""
+    scale_factor_energy = 0.0
+    subfiles = 0
     if options.innerAVMaterial == "lightwater_sno":
         energies = Utilities.WaterEnergies
         fitter = "waterFitter"
+        scale_factor_energy = 5.0
+        subfiles = Utilities.WaterSubfiles
     else:
         energies = Utilities.ScintEnergies
         fitter = "scintFitter"
+        scale_factor_energy = 2.5
+        subfiles = Utilities.ScintSubfiles
 
     # Generate the specific macro for each energy/position combination, with energies and positions given in the Utilities tables.
     # For each position with energy = 5.0 MeV and each energy with position = 0.0 mm.
-    energy_position_pairs = []
+    energy_position_subfile = []
     for energy in energies:
-        energy_position_pairs.append([energy, 0.0])
+        energy_position_subfile.append([energy, 0.0, 0])
     for position in Utilities.Positions:
         if position == 0.0:
-            continue
-        energy_position_pairs.append([5.0, position])
+            for sf in range(1, subfiles):
+                energy_position_subfile.append([scale_factor_energy, position, sf])
+        else:
+            for sf in range(0, subfiles):
+                energy_position_subfile.append([scale_factor_energy, position, sf])
 
-    for pair in energy_position_pairs:
-        energy = pair[0]
-        position = pair[1]
+    for eps in energy_position_subfile:
+        energy = eps[0]
+        position = eps[1]
+        subfile = eps[2]
 
         generator = "/generator/add combo gun:fillshell\n" + \
                     "/generator/vtx/set " + options.particle + " 0 0 0 " + str(energy) + "\n" + \
                     "/generator/pos/set 0.0 0.0 0.0 " + str(position) + " " + str(position) + " inner_av,av,cavity"
-        outfileName = options.innerAVMaterial + "_P=" + str(int(position)) + "mm_E=" + str(int(energy * 1000)) + "keV"
+        outfileName = options.innerAVMaterial + "_P=" + str(int(position)) + "mm_E=" + str(int(energy * 1000)) + "keV_sf=" + str(int(subfile))
 
         outText1 = rawText1.substitute(ExtraDB = extraDB,
                                        GeoFile = options.geoFile,
