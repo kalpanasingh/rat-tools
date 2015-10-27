@@ -19,10 +19,12 @@ import os
 import settings
 
 # The following is needed to access the available chstools in rat-tools
-# the location should currently be defined in settings.py
-# This is pretty ugly
-sys.path.insert(0, os.path.join(settings.RAT_TOOLS, 'CHStools'))
-import chstools
+if "RATTOOLS" in os.environ:
+    sys.path.insert(0, os.path.join(os.environ.get("RATTOOLS"), 'CHSTools'))
+    import chstools
+else:
+    print "orca2chs: please set RATTOOLS environment variable"
+    sys.exit()
 
 
 def file_check(filename):
