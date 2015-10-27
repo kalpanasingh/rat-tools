@@ -8,11 +8,19 @@ the ORCA configuration file.
 Author: Freija Descamps
          <fbdescamps@lbl.gov>
  Inspired by dqxx_view.js script by Andy Mastbaum
+
+History:
+ Oct 2015: F. Descamps: Add the  get_current_pmtdb_info function which
+ retrieves the resistor and cable information from the SQL data-base. This
+ adds a dependency on MySQLdb. A warning message is printed if the user does
+ not supply the SQL database information.
 """
 
 import httplib
 import json
 import sys
+# The MySQLDB will need to be installed
+import MySQLdb
 
 # The SNO definition of DQXX. The 'in_use' flag denotes if we
 # are actually reading this info from the ORCA configuration
@@ -36,8 +44,8 @@ DQXX_DEFINITION = [
     [22, 'N20', False],
     [24, 'PMTIC', False],
     [26, 'RELAY HV', True],
-    [27, 'RESISTOR', False],
-    [28, 'CABLE', False],
+    [27, 'RESISTOR', True],
+    [28, 'CABLE', True],
     [29, '75OHM', False],
     [30, 'NOT OP', False]
 ]
@@ -58,7 +66,7 @@ def count_bits(dqxx, n):
     """Function that returns the number of channels that have bit n set.
     :param dqxx: A list of 9728 DQXX words (one per channel)
     :param n: The position of the bit to check, starting counting from 0.
-    :returns: An integer which is the total number of channels that have bit n set.
+    :returns: An integer = the total number of channels that have bit n set.
     """
     return sum([check_bit(x, n) for x in dqxx])
 
@@ -76,7 +84,7 @@ def is_tube_online(dqxx, lcn):
 def count_offline_tubes(dqxx):
     """Function that returns the number of offline channels.
     :param dqxx: A list of 9728 DQXX words (one per channel)
-    :returns: An integer which is the total number of channels that are offline.
+    :returns: An integer = total number of channels that are offline.
     """
     count = 0
     for lcn in range(0, len(dqxx)):
@@ -180,7 +188,10 @@ def form_dqxx_word(dqcr, dqch):
     return dqxx
 
 
-def get_run_configuration_from_db(runnumber, db_server, db_username, db_password):
+def get_run_configuration_from_db(runnumber,
+                                  db_server,
+                                  db_username,
+                                  db_password):
     """Function to retrieve the ORCA runconfiguration document
     from the snoplus database.
     :param: The run-number (int).
@@ -194,6 +205,9 @@ def get_run_configuration_from_db(runnumber, db_server, db_username, db_password
     request_url = '/orca/_design/OrcaViews/_view/viewConfigDocByRunNumber?descending=true&include_docs=true&startkey=%s&endkey=%s' % (runnumber, runnumber)
     request_headers = {'Content-type': "application/json"}
     request_headers['Authorization'] = 'Basic {}'.format(auth.encode('base64'))
+    # New python versions (=>2.7.10) do not like newlines in the HTTP headers,
+    # see http://bugs.python.org/issue22928
+    request_headers['Authorization'] = request_headers['Authorization'].rstrip()
     connection = httplib.HTTPConnection(db_server)
     connection.request('GET', request_url, headers=request_headers)
     try:
@@ -209,14 +223,55 @@ def get_run_configuration_from_db(runnumber, db_server, db_username, db_password
     return data
 
 
-def create_dqcr_dqch_dqid(runnumber, data):
+def get_current_pmtdb_info(mysql_server, mysql_user, mysql_password, mysql_db):
+    """Function to retrieve the PMT pulled resistor table
+    from the pmtdb MySQL database
+    :param: The location of the MySQL server (string)
+    :param: The username for the MySQL server (string).
+    :param: The password for the MySQL server (string).
+    :param: The name of the database on the MySQL server (string)
+    :returns: The current pulled resistor table.
+    """
+    try:
+        db = MySQLdb.connect(host=mysql_server, user=mysql_user,
+                             passwd=mysql_password, db=mysql_db)
+    except MySQLdb.OperationalError:
+        print """CHSTools: Can't connect to the PMT SQL server.
+        Do you need to connect to the snoplus VPN?"""
+        # Just re-raise so that we exit here.
+        raise
+    c = db.cursor()
+    c.execute("SELECT crate, slot, channel, pulledCable, BadCable,\
+              rPulled FROM PULLED_SNOPLUS;")
+    pulled = c.fetchall()
+    pmtdb_data = {}
+    for x in range(len(pulled)):
+        crate, card, channel, pulled_cable, bad_cable, pulled_resistor\
+            = pulled[x]
+        pmtdb_data[(crate, card, channel)]\
+            = (pulled_cable, bad_cable, pulled_resistor)
+    return pmtdb_data
+
+
+def create_dqcr_dqch_dqid(runnumber, data, pmtdb_data=None):
     """Function that creates the dqcr, dqch and dqid words for runnumber.
     :param: The run-number (int).
     :param: The ORCA run configuration data for specified run-number.
-    :returns: dqcr: A list of 9728 DQCR words (one per channel).
+    :param: The PMTDB information from the PMTDB SQL table. This defaults to
+            Null: if the SQL DB has not been contacted do not use the info.
+    :returns: dqcr: A list of 304 DQCR words (one per channel).
     :returns: dqch: A list of 9728 DQCH words (one per channel).
     :returns: dqid: A list of 1824 DQID words (6 per FEC card).
     """
+    # If no pmtdb data has been given, warn the user that
+    # she/he is missing out on some information.
+    if pmtdb_data is None:
+        print """chstools: Warning: no pmtdb information was given.
+        DQCH bits 0 (cable) and 1 (resistor) will be set to
+        0 by default.
+        Check the README for details on how to contact the
+        SQL pmtdb for this information.
+        """
     # Get the mtc, xl3 and fec information from the run configuration data
     rows = data['rows']
     for value in rows:
@@ -232,44 +287,67 @@ def create_dqcr_dqch_dqid(runnumber, data):
         for card in range(0, 16):
             dqcr_word = 0
             if len(fecs.get(str(crate))[str(card)]) > 0:
-                dqid[(crate * 96) + (card * 6)] = hex(int(fecs[str(crate)][str(card)]['mother_board']['mother_board_id'], 16))
+                dqid[(crate * 96) +
+                     (card * 6)] = hex(int(fecs[str(crate)]
+                                               [str(card)]
+                                               ['mother_board']
+                                               ['mother_board_id'],
+                                           16))
                 dqid[(crate * 96) + (card * 6) + 1] = hex(int("0x0", 16))
                 for db in range(0, 4):
-                    dqid[(crate * 96) + (card * 6) + 2 + db] = hex(int(fecs[str(crate)][str(card)]['daughter_board'][str(db)]['daughter_board_id'], 16))
+                    dqid[(crate * 96) +
+                         (card * 6) +
+                         2 + db] = hex(int(fecs[str(crate)]
+                                               [str(card)]
+                                               ['daughter_board']
+                                               [str(db)]
+                                               ['daughter_board_id'],
+                                           16))
             else:
                 # The DQIDs will be zero in this case
-                print "chstools: Warning: no FEC info for crate/card " + str(crate) + "/" + str(card)
+                print "chstools: Warning: no FEC info for crate/card " +\
+                    str(crate) + "/" + str(card)
             # Time for DQCR!
             # 0   CRATE        Crate present present(0), not present(1)
             # SNO+ : this is now replaced with: XL3 communicating.
-            # FIXME (Freija): not available in ORCA database for so I am just checking to see if
-            # there is XL3 info present... this might just be always the case though.
+            # FIXME (Freija): not available in ORCA database for so I am just
+            # checking to see if there is XL3 info present... this might just
+            # be always the case though.
             xl3com = len(xl3s.get(str(crate))) == 0
             dqcr_word |= (xl3com << 0)
             # 1   MB           MB present(0), not present(1)
-            #                  If the board id cannot be read, assume board not present
+            #                  If the board id cannot be read, assume board
+            #                  not present
             #  Just check if ID is not "0x0"
             if len(fecs.get(str(crate))[str(card)]) > 0:
-                mbPresent = (fecs.get(str(crate))[str(card)]['mother_board']['mother_board_id'] == "0")
+                mbPresent = (fecs.get(str(crate))[str(card)]['mother_board']
+                                                 ['mother_board_id'] == "0")
             else:
                 mbPresent = 1
             dqcr_word |= (mbPresent << 1)
             # 2   PMTIC        PMTIC present(0), not present(1)
-            #                  If the board id cannot be read, assume board not present
-            # FIXME (Freija) PMTIC ID is not available. For now, leave as present=hardcoded for now
+            #                  If the board id cannot be read, assume board
+            #                  not present
+            # FIXME (Freija) PMTIC ID is not available. For now, leave as
+            #       present = hardcoded for now
             pmticPresent = 0
             dqcr_word |= (pmticPresent << 2)
             # 3   DAQ          DAQ readout (eCPU) online(0), offline(1)
-            # SNO+ - Crate is in Normal Mode (0->normal mode, 1-> not-normal mode).
-            # Modes: 1=init, 2=normal, 3:cgt (no one seems to know what this last one means?)
+            # SNO+ - Crate is in Normal Mode (0->normal, 1-> not-normal).
+            # Modes: 1=init, 2=normal, 3:cgt
+            # (no one seems to know what this last one means?)
             slotNormal = ((xl3s.get(str(crate))["xl3_mode"]) == "2")
             dqcr_word |= (slotNormal << 3)
-            # 4   DC           Daughter cards all present(0), 4 bit mask of present DC
+            # 4   DC           Daughter cards all present(0),
+            #                  4 bit mask of present DC
             #                  Channel i associated with DC at bit DC + i/8
             #                  If the board id cannot be read, assume not present
             for db in range(0, 4):
                 if len(fecs.get(str(crate))[str(card)]) > 0:
-                    dbPresent = (fecs.get(str(crate))[str(card)]["daughter_board"][str(db)]["daughter_board_id"] == "0")
+                    dbPresent = (fecs.get(str(crate))[str(card)]
+                                                     ["daughter_board"]
+                                                     [str(db)]
+                                                     ["daughter_board_id"] == "0")
                 else:
                     dbPresent = 1
                 dqcr_word |= (mbPresent << 4 + db)
@@ -278,40 +356,46 @@ def create_dqcr_dqch_dqid(runnumber, data):
             # The GT mask is now a bitmask
             crMask = (1 << crate)
             gtMask = not(crMask & int(mtc["gt_mask"]))
-            # FIXME (Freija) The GT mask is not being written out correctly at the moment
+            # FIXME (Freija) The GT mask is not being written out correctly
             # Default to always masked in for now
             # dqcr_word |= (gtMask << 9)
             dqcr_word |= (0 << 9)
             # 10   CR_ONLINE   Crate on-line (i.e., is being read out by ECPU)
-            # New definition: is the crate initialized. FIXME (Freija): this is not available in
-            # configuration file.
+            # New definition: is the crate initialized.
+            # FIXME (Freija): this is not available in configuration file.
             dqcr_word |= (0 << 10)
             # 12   RELAY        HV relays all on(0), 4 bit mask of relays on
-            # The status of the HV relays come in two words: hv_relay_high_mask and hv_relay_low_mask
-            # So cards 0-7 are defined in the low mask and 8-15 in the high mask.
+            # The status of the HV relays come in two words:
+            # hv_relay_high_mask and hv_relay_low_mask
+            # So cards 0-7 are defined in the low and 8-15 in the high mask.
             relay_word = 0
             if card < 8:
                 # As a reminder: '0' means that the relay is closed...
-                relay_word = int((xl3s.get(str(crate))["hv_relay_low_mask"]) >> (card * 4)) & 0xf
+                relay_word = int((xl3s.get(str(crate))["hv_relay_low_mask"]) >>
+                                 (card * 4)) & 0xf
                 relay_word = ~relay_word & 0xf
             else:
-                relay_word = int((xl3s.get(str(crate))["hv_relay_high_mask"]) >> ((card - 8) * 4)) & 0xf
+                relay_word = int((xl3s.get(str(crate))["hv_relay_high_mask"]) >>
+                                 ((card - 8) * 4)) & 0xf
                 relay_word = ~relay_word & 0xf
             dqcr_word |= (relay_word << 12)
             # 8   SLOT_OP      OR of bits 0-7, 12-15.
-            #                  This is deemed to mean, 'slot operational', as it is
+            #                  This is deemed to mean, 'slot operational',
             #                  an OR of crate, slot, db, etc operational.
-            # FIXME (Freija) I do not see why an entire slot is un-operational if one HV relay is off?
-            # Or when a DB is missing?
-            # In any case, this just comes down to checking if dqcr_word is zero at this point
+            # FIXME (Freija) I do not see why an entire slot is un-operational
+            # if one HV relay is off? Or when a DB is missing?
+            # In any case, this just comes down to checking if dqcr_word is
+            # zero at this point
             slotOp = not(dqcr_word == 0)
             dqcr_word |= (slotOp << 8)
             # 16   HV           HV for this card. 12 bits (0-4095)
-            # This is now in the xl3 information as hv_voltage_read_value_a or hv_voltage_read_value_b
-            # The xl3 value is not in ADC counts but in actual Volts so do a conversion:
-            readHV = int(4095.0 * xl3s.get(str(crate))["hv_voltage_read_value_a"] / 3000)
+            # This is now in the xl3 information as hv_voltage_read_value_a or
+            # hv_voltage_read_value_b. The xl3 value is not in ADC counts but
+            # in actual Volts so do a conversion:
+            readHV = int(4095.0 * xl3s.get(str(crate))
+                         ["hv_voltage_read_value_a"] / 3000)
             dqcr_word |= (readHV << 16)
-            # 11   CR_HV        or of bit 0 (SNO crate present) and bits 16-31 (HV bits).
+            # 11   CR_HV        or of bit 0 (SNO crate present) and bits 16-31.
             crate_hv = not((dqcr_word & 0x1) | readHV > 0)
             dqcr_word |= (crate_hv << 11)
             # Now time for DQCH = channel-dependent status word...
@@ -321,35 +405,68 @@ def create_dqcr_dqch_dqid(runnumber, data):
                 db_index = int(ch / 8)
                 # Find out which channel this is on the DB in question
                 db_channel = ch % 8
+                dqch_word = 0
+                if pmtdb_data is not None:
+                    # 0: cable status (from PMTDB)
+                    # The cable status is defined (for now) as the 'or' of the
+                    # pulledCable, BadCable columns from the pmtdb table
+                    # The bit will be set if the cable is considered bad.
+                    cable_status = pmtdb_data[(crate, card, ch)][0] |\
+                        pmtdb_data[(crate, card, ch)][1]
+                    dqch_word |= (cable_status << 0)
+                    # 1: pulled resistor (from PMTDB)
+                    # The resistor status is defined as the rPulled column
+                    # from the pmtdb.
+                    # The bit will be set if the resistor is pulled.
+                    resistor_status = pmtdb_data[(crate, card, ch)][2]
+                    dqch_word |= (resistor_status << 1)
                 if len(fecs.get(str(crate))[str(card)]) > 0:
-                    # 0, 1, 5, 6, 7, 8, 9: All zero, meaning present & operating
-                    dqch_word = 0
+                    # 5, 6, 7, 8, 9: All zero, meaning present & operating
                     # 2 : sequencer
-                    # FIXME (Freija) This seems to be always 1 (disabled).. will set to 0 by default for now.
-                    # Uncomment the next line when this is fixed...
-                    # sequencer = not(int(fecs[str(crate)][str(card)]["mother_board"]["sequencer_mask"]) >> ch) & 0x1;
+                    # FIXME (Freija) This seems to be always 1 (disabled),
+                    # will set to 0 by default for now.
+                    # Uncomment the next lines when this is fixed...
+                    # sequencer = not(int(fecs[str(crate)][str(card)]
+                    #                         ["mother_board"]
+                    #                         ["sequencer_mask"]) >> ch) & 0x1
                     sequencer = 0
                     dqch_word |= (sequencer << 2)
                     # 3: N100 enabled
-                    # FIXME (Freija) This seems to be always 1 (disabled).. will set to 0 by default for now.
+                    # FIXME (Freija) This seems to be always 1 (disabled),
+                    # will set to 0 by default for now.
                     # Uncomment the next line when this is fixed...
-                    # n100 = not( int(fecCards.get(str(crate))[str(card)]["mother_board"]["trigger_100ns_mask"]) >> ch) & 0x1;
+                    # n100 = not( int(fecCards.get(str(crate))[str(card)]
+                    #                                         ["mother_board"]
+                    #                                         ["trigger_100ns_mask"]) >>
+                    #            ch) & 0x1;
                     n100 = 0
                     dqch_word |= (n100 << 3)
                     # 4: N20 enabled
-                    # FIXME (Freija) This seems to be always 1 (disabled).. will set to 0 by default for now.
+                    # FIXME (Freija) This seems to be always 1 (disabled),
+                    # will set to 0 by default for now.
                     # Uncomment the next line when this is fixed...
-                    # n20 = not(int(fecs.get(str(crate))[str(card)]["mother_board"]["trigger_100ns_mask"]) >> ch) & 0x1;
+                    # n20 = not(int(fecs.get(str(crate))[str(card)]
+                    #                                    ["mother_board"]
+                    #                                    ["trigger_20ns_mask"]) >>
+                    #            ch) & 0x1;
                     n20 = 0
                     dqch_word |= (n20 << 4)
                     # 10: Bad (or of bits 0-9)
                     bad = ((dqch_word & 0x511) > 0)
                     dqch_word |= (bad << 10)
                     # 16-23: vthr
-                    vthr = int(fecs.get(str(crate))[str(card)]["daughter_board"][str(db_index)]["vt"][str(db_channel)])
+                    vthr = int(fecs.get(str(crate))[str(card)]
+                                                   ["daughter_board"]
+                                                   [str(db_index)]
+                                                   ["vt"]
+                                                   [str(db_channel)])
                     dqch_word |= ((vthr & 0xff) << 16)
                     # 24-31: vthr zero
-                    vthr_zero = int(fecs.get(str(crate))[str(card)]["daughter_board"][str(db_index)]["vt_zero"][str(db_channel)])
+                    vthr_zero = int(fecs.get(str(crate))[str(card)]
+                                                        ["daughter_board"]
+                                                        [str(db_index)]
+                                                        ["vt_zero"]
+                                                        [str(db_channel)])
                     dqch_word |= ((vthr_zero & 0xff) << 24)
                 else:
                     dqch_word = 0x0

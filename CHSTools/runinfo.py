@@ -30,6 +30,20 @@ if __name__ == "__main__":
                         type=str, required=True)
     parser.add_argument("-o", "--output", action="store_true",
                         help="Output the SNO-style dqxx file")
+
+    parser.add_argument('-w', dest='mysql_server',
+                        help='URL to MySQL server',
+                        type=str, default=None)
+    parser.add_argument('-x', dest='mysql_dbname',
+                        help='Name of pmt database on MySQL server',
+                        type=str, default=None)
+    parser.add_argument('-y', dest='mysql_user',
+                        help='Name of user MySQL server',
+                        type=str, default=None)
+    parser.add_argument('-z', dest='mysql_password',
+                        help='Password for MySQL server',
+                        type=str, default=None)
+
     args = parser.parse_args()
     if args.runnumber == "0":
         print "Please supply a runnumber using \'-n\'"
@@ -42,7 +56,20 @@ if __name__ == "__main__":
                                                       args.orcadb_server,
                                                       args.orcadb_username,
                                                       args.orcadb_password)
-        dqcr, dqch, dqid = chstools.create_dqcr_dqch_dqid(args.runnumber, data)
+        if args.mysql_user is not None\
+           and args.mysql_password is not None\
+           and args.mysql_server is not None\
+           and args.mysql_user is not None:
+            pmtdb_data = chstools.get_current_pmtdb_info(args.mysql_server,
+                                                         args.mysql_user,
+                                                         args.mysql_password,
+                                                         args.mysql_dbname)
+        else:
+            pmtdb_data = None
+        # Now assemble the dqcr, dqch and dqid words
+        dqcr, dqch, dqid = chstools.create_dqcr_dqch_dqid(args.runnumber,
+                                                          data,
+                                                          pmtdb_data)
         dqxx = chstools.form_dqxx_word(dqcr, dqch)
         number_offline_tubes = chstools.count_offline_tubes(dqxx)
         print ""

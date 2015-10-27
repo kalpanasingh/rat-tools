@@ -7,6 +7,8 @@ run to the specified ratdb.
 
 Author: Freija Descamps
          <fbdescamps@lbl.gov>
+History:
+    Oct 2015: Added PMTDB SQL information.
 """
 
 import argparse
@@ -14,14 +16,13 @@ import sys
 import subprocess
 import tempfile
 import os
+import settings
 
 # The following is needed to access the available chstools in rat-tools
-if "RATTOOLS" in os.environ:
-    sys.path.insert(0, os.path.join(os.environ.get("RATTOOLS"), 'CHSTools'))
-    import chstools
-else:
-    print "orca2chs: please set RATTOOLS environment variable"
-    sys.exit()
+# the location should currently be defined in settings.py
+# This is pretty ugly
+sys.path.insert(0, os.path.join(settings.RAT_TOOLS, 'CHStools'))
+import chstools
 
 
 def file_check(filename):
@@ -60,6 +61,20 @@ def main():
     parser.add_argument('-d', dest='ratdb_name',
                         help='Name of ratdb database on server',
                         default='ratdb')
+
+    parser.add_argument('-w', dest='mysql_server',
+                        help='URL to MySQL server',
+                        type=str, default=None)
+    parser.add_argument('-x', dest='mysql_dbname',
+                        help='Name of pmt database on MySQL server',
+                        type=str, default=None)
+    parser.add_argument('-y', dest='mysql_user',
+                        help='Name of user MySQL server',
+                        type=str, default=None)
+    parser.add_argument('-z', dest='mysql_password',
+                        help='Password for MySQL server',
+                        type=str, default=None)
+
     args = parser.parse_args()
     # Get the DQXX information using the CHStools functions
     try:
@@ -67,13 +82,30 @@ def main():
                                                       args.orcadb_server,
                                                       args.orcadb_username,
                                                       args.orcadb_password)
-        dqcr, dqch, dqid = chstools.create_dqcr_dqch_dqid(args.runnumber,
-                                                          data)
     # The following is too general. Meh.
     except Exception:
         print ("orca2chs run {}: problem retrieving the ORCA configuration "
                "info").format(args.runnumber)
         return 1
+    # Get the pmtdb information from the MySQL server
+    if args.mysql_user is not None\
+       and args.mysql_password is not None\
+       and args.mysql_server is not None\
+       and args.mysql_user is not None:
+        try:
+            pmtdb_data = chstools.get_current_pmtdb_info(args.mysql_server,
+                                                         args.mysql_user,
+                                                         args.mysql_password,
+                                                         args.mysql_dbname)
+        # The following is too general. Meh.
+        except Exception:
+            print ("orca2chs run {}: problem retrieving the PMTDB configuration "
+                   "info").format(args.runnumber)
+            return 1
+    else:
+        pmtdb_data = None
+    dqcr, dqch, dqid = chstools.create_dqcr_dqch_dqid(args.runnumber,
+                                                      data, pmtdb_data)
     # Create a temporary file to hold the PMT_DQXX.ratdb content
     with tempfile.NamedTemporaryFile() as tempf:
         # Write the PMT_DQXX table to the temporary file
