@@ -8,6 +8,7 @@ IMPORTANT:
 - Always supply the snoplus password between quotes.
 - Make sure to set the RAT environment
 - The RATTOOLS enviroment variable should point to the rat-tools root directory.
+- chstools depends on MySQLdb
 
 Arguments
 Required:
@@ -28,3 +29,15 @@ Optional:
 -d RATDB_NAME
     The name of the ratdb data-base on RATDB_SERVER. Defaults to ratdb.
     This means that the default database URL is http://localhost:5984/ratdb/.
+
+-w MYSQL_SERVER
+    The MySQL server where to grab the PMTDB table from. Defaults to None. The
+    MySQL server is currently living on dbus.sp.snolab.ca. You need to be
+    on the snoplus network to contact this DB. For testing, install the DB
+    locally.
+-x MYSQL_DBNAME
+    Name of pmt database on MySQL server. Defaults to None.
+-y MYSQL_USER
+    Name of user MySQL server. Defaults to None.
+-z MYSQL_PASSWORD
+    Password for MySQL server. Defaults to None.
