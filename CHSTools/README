@@ -1,45 +1,58 @@
 # chs tools by F. Descamps <fbdescamps@lbl.gov>
 
-Scripts to access the channel hardware status information from the ORCA run configuration files. 
+Scripts to access the channel hardware status information from the ORCA run configuration files.
 The SNO-style DQXX information will be written out to PMT_DQXX_#runnumber.ratdb if requested. This
 file can then be loaded in a macro when analyzing that specific run.
 
-IMPORTANT: always supply the snoplus password between quotes.
+## IMPORTANT
+ * Always supply the snoplus password between quotes.
+ * MySQLDB needs to be installed
+ * If you want to use the PMTDB information, you will need to be connected to
+   the snoplus VPN or run the script from inside the snoplus network. Then,
+   you can specify the details for the MySQL server:
+   -w 'dbus.sp.snolab.ca'
+   -x 'pmtdb'
+   -y 'snoplus'
+   -z 'collab password here'
 
 EXAMPLES and details:
-1) Get the available hardware status for tube with lcn number 5621 for run 8600 and 
+1) Get the available hardware status for tube with lcn number 5621 for run 8600 and
 write out the SNO-style DQXX file:
 
-python tubeinfo.py -n 8600 -t 5621 -u 'snoplus' -p 'definepasswordhere' --output
+python tubeinfo.py -n 8800 -t 73 -u 'snoplus' -p 'definepasswordhere' --output \
+-w 'dbus.sp.snolab.ca' -x 'pmtdb' -y 'snoplus' -z 'definepasswordhere'
 output:
-Assembling DQXX info for run 8600
-Warning: no FEC info for crate/card 1/1
+Assembling DQXX info for run 8800
+chstools: Warning: no FEC info for crate/card 1/1
 
-DQXX status for tube 5621 is: 
-   SLOT OP  ->  False
+DQXX status for tube 73 is:
+   SLOT OP  ->  True
  CR ONLINE  ->  True
-     CR HV  ->  False
+     CR HV  ->  True
    Card MB  ->  True
         DC  ->  True
   VTHR MAX  ->  True
   RELAY HV  ->  True
+  RESISTOR  ->  False
+     CABLE  ->  True
 
-2) Print a summary for the specified run and 
+2) Print a summary for the specified run and
 write out the SNO-style DQXX file:
 
-python runinfo.py -n 8600 -u 'snoplus' -p 'definepasswordhere' --output
+python runinfo.py -n 8800 -u 'snoplus' -p 'definepasswordhere' --output \
+-w 'dbus.sp.snolab.ca' -x 'pmtdb' -y 'snoplus' -z 'definepasswordhere'
 output:
-Assembling DQXX info for run 8600
-Warning: no FEC info for crate/card 1/1
+Assembling DQXX info for run 8800
+chstools: Warning: no FEC info for crate/card 1/1
 
- ++++++++++ Run 8600 ++++++++++ 
- Number of offline tubes is 6930
- Tube status summary: 
+ ++++++++++ Run 8800 ++++++++++
+ Number of offline tubes is 1096
+ Tube status summary:
         CRATE  ->  N/A
       SLOT OP  ->  8800
            GT  ->  N/A
     CR ONLINE  ->  9728
-        CR HV  ->  3072
+        CR HV  ->  9728
       Card MB  ->  9696
            DC  ->  9696
           DAQ  ->  N/A
@@ -52,8 +65,8 @@ Warning: no FEC info for crate/card 1/1
           N20  ->  N/A
         PMTIC  ->  N/A
      RELAY HV  ->  9232
-     RESISTOR  ->  N/A
-        CABLE  ->  N/A
+     RESISTOR  ->  9189
+        CABLE  ->  9579
         75OHM  ->  N/A
        NOT OP  ->  N/A
 
@@ -67,19 +80,21 @@ Warning: no FEC info for crate/card 1/1
 
 4) Available functions in chstools.py:
 
-check_bit(word, n):        
+check_bit(word, n):
     Function that returns True if the n'th bit is set in the word.
-count_bits(dqxx, n):       
+count_bits(dqxx, n):
     Function that returns the number of channels that have bit n set.
-is_tube_online(dqxx, lcn): 
+is_tube_online(dqxx, lcn):
     Function that returns a boolean array defining if Tube is online or not.
-count_offline_tubes(dqxx): 
+count_offline_tubes(dqxx):
     Function that returns the number of offline channels.
-form_dqxx_word(dqcr, dqch): 
+form_dqxx_word(dqcr, dqch):
     Function to form the DQXX bitmaps that show the detector status.
 get_run_configuration_from_db(runnumber, db_server, db_username, db_password):
     Function to retrieve the ORCA runconfiguration document
-create_dqcr_dqch_dqid(runnumber, data):
+def get_current_pmtdb_info(mysql_server, mysql_user, mysql_password, mysql_db):
+    Function to retrieve the PMTDB SQL information
+create_dqcr_dqch_dqid(runnumber, data, pmtdata=None):
     Function that creates the dqcr, dqch and dqid words for runnumber.
 dqxx_write_to_file(dqcr, dqch, dqid, runnumber, filename=None):
     Function that writes out the SNO-style DQXX file. Defaults to

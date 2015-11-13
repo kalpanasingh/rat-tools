@@ -19,6 +19,9 @@ import multiprocessing
 import grid
 import utilities
 
+default_se = None
+se_list = {"RAL": "srm-snoplus.gridpp.rl.ac.uk",
+           "WestGrid": "sehn02.atlas.ualberta.ca"}
 
 def get_replicas(guid):
     rtc, out, err = grid.execute('lcg-lr', guid)
@@ -48,21 +51,39 @@ def bring_online(url):
 
 def bring_nearline_online(guid):
     replicas = get_replicas(guid)
+    surl = replicas[0]
     if len(replicas) != 1:
-        raise Exception("bring_nearline_online: Multiple replicas for %s" % guid)
-    locality = test_locality(replicas[0])
+        print "bring_nearline_online: Multiple replacas for %s" % guid
+        for r in replicas:
+            if se_list[default_se] in r:
+                # Run for this
+                surl = r
+        if surl:
+            print "using %s" % surl
+        else:
+            raise Exception("No replicas at %s" % default_se)
+    locality = test_locality(surl)
     if locality == "NEARLINE":
-        print "Bringing %s online (%s)" % (guid, locality)
-        bring_online(replicas[0])
+        print "Bringing %s online (%s)" % (surl, locality)
+        bring_online(surl)
     elif locality != "ONLINE" and locality != "ONLINE_AND_NEARLINE":
         raise Exception("bring_nearline_online: Unhandled file status %s" % locality)
+
+
+def parallel_helper(guid):
+    '''Simple helper function to print out exceptions raised
+    '''
+    try:
+        bring_nearline_online(guid)
+    except Exception, e:
+        print "WARNING: %s" % e
 
 
 def run_parallel(guids, streams):
     pool = multiprocessing.Pool(processes = streams)
     result = []
     for i, guid in enumerate(guids):
-        result.append(pool.apply_async(bring_nearline_online, args=(guid,)))
+        result.append(pool.apply_async(parallel_helper, args=(guid,)))
     # Add in a hack for keyboard interrupts
     pool.close()
     complete = False
@@ -90,6 +111,8 @@ if __name__=="__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-l", dest="list", help="list of files to grab [filelist.dat]",
                         default="filelist.dat")
+    parser.add_argument("-s", dest="se", help="Default storage element to run bringonline on [RAL]",
+                        default="RAL")
     parser.add_argument("--streams", dest="streams", help="Parallel streams [10]",
                         type=int, default=10)
     args = parser.parse_args()
@@ -104,4 +127,5 @@ if __name__=="__main__":
     # Now, check the downloads
     copy_type, files, sizes, guids, adlers = utilities.read_grabber_file(args.list)
 
+    default_se = args.se
     run_parallel(guids, args.streams)
