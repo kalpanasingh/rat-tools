@@ -22,7 +22,7 @@ def get_tellie_run_doc(runnumber, servername, usrname, password):
             return telliedb.get(row.id)
     raise Exception('TELLIE run doc %i doesn\'t exist' % (runnumber))
 
-def create_rat_run_doc(doc, pass_no=0):
+def reformat_run_doc(doc, pass_no=0):
     '''Fuction to updated a telliedb run doc (passed in dictionary form) to be 
     compatiple with standard ratdb format.
     :param: A dictionary containing all the doc fields.

@@ -15,61 +15,13 @@ import os
 import couchdb
 import json 
 
-# The following is needed to access the available chstools in rat-tools
-#if "RATTOOLS" in os.environ:
-#    sys.path.insert(0, os.path.join(os.environ.get("RATTOOLS"), 'TELLIETools'))
-#    import telliedbTools
-#else:
-#    print "tellie2rat: please set RATTOOLS environment variable"
-#    sys.exit()
-
-
-def get_tellie_run_doc(runnumber, servername, usrname, password):
-    '''Function to retrive specific run doc from the
-    telliedb.
-    :param: The run number requested.
-    :returns: A dictionary of the requested doc's fields.
-    '''
-    login_str = 'http://%s:%s@%s' % (usrname, password, servername)
-    telliedb = couchdb.Server(login_str)['telliedb']
-    for row in telliedb.view('_design/runs/_view/run_by_number'):
-        if int(row.key) == runnumber:
-            return telliedb.get(row.id)
-    raise Exception('TELLIE run doc %i doesn\'t exist' % (runnumber))
-
-def create_rat_run_doc(doc, pass_no=0):
-    '''Fuction to updated a telliedb run doc (passed in dictionary form) to be
-    compatiple with standard ratdb format.
-    :param: A dictionary containing all the doc fields.
-    :param: A pass number to be applied [defaults to 0].
-    :returns: A dictionary with updated doc fields.
-    '''
-    # Make run_range and del old 'run' field
-    run_range = [doc['run'], doc['run']]
-    del doc['run']
-    # Update doc
-    doc['run_range'] = run_range
-    doc['pass'] = pass_no
-    doc['version'] = int(doc['version'])
-    doc['production'] = True
-    if not 'comment' in doc:
-        doc['comment'] = ''
-    return doc
-
-def write_doc_to_file(doc, outfilename=None):
-    '''Write a .json document from dictionary.
-    :param: A dictionary containing all the doc fields.
-    :param: The name of the file to be written.
-    :returns: None.
-    '''
-    if outfilename is None:
-        outfilename = 'tellie_run_%i.js' % (doc['run_range'][0])
-    with open(outfilename, 'w+') as json_file:
-        try:
-            json_file.write(json.dumps(doc))
-        except:
-            raise Exception('Problem writing to file')
-        json_file.close()
+# The following is needed to access the available TELLIETools in rat-tools
+if "RATTOOLS" in os.environ:
+    sys.path.insert(0, os.path.join(os.environ.get("RATTOOLS"), 'TELLIETools'))
+    import telliedbTools
+else:
+    print "tellie2rat: please set RATTOOLS environment variable"
+    sys.exit()
 
 def main(): 
     parser = argparse.ArgumentParser()
@@ -94,15 +46,19 @@ def main():
     args = parser.parse_args()
     
     # Get run_doc from telliedb and generate rat-formatted version
-    data = get_tellie_run_doc(args.runnumber,
-                              args.telliedb_server,
-                              args.telliedb_username,
-                              args.telliedb_password)
-    rat_format = create_rat_run_doc(data)
-    
+    data = telliedbTools.get_tellie_run_doc(args.runnumber,
+                                            args.telliedb_server,
+                                            args.telliedb_username,
+                                            args.telliedb_password)
+
+    # Check if this run has old file type - if so, convert to
+    # ratdb compatible.
+    if int(data['version']) == 0:
+        data = telliedbTools.reformat_run_doc(data)
+
     # Create a temp. file to hold the tellie_run.ratdb content
     with tempfile.NamedTemporaryFile() as tempf:
-        write_doc_to_file(rat_format, tempf.name)
+        telliedbTools.write_doc_to_file(data, tempf.name)
         tempf.flush()
     try:
         # Run the command to upload the table to the specified
