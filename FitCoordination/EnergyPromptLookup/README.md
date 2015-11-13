@@ -17,7 +17,7 @@ The following fit coordination options apply:
 - [-p]: Particle type to use ... see generator documentation for available particles (default = 'e-')
 - [-s]: InnerAV Material to use (default = lightwater_sno)
 
-This method first runs the ProduceData.py script, which generates a set of rootfiles (one for each energy/position combination) of 20000 events each.
+This method first runs the ProduceData.py script, which generates a set of rootfiles (one for each energy/position combination) of 1000 events each.
 
 Once this is done, the AnalyseData.py script automatically begins - this takes about 1hour 30 mins to complete.
 
@@ -28,7 +28,7 @@ The coordination results are written in the "AnalyseData_Output.txt" file - ther
 -------------------------
 
 2) batch method, which needs to be invoked differently from the standard method:
-- copy this entire folder to a location with around 5GB of free disk-space
+- copy this entire folder to a location with around 9GB of free disk-space
 - navigate into this new folder, and run the command:
 
     python ProduceData.py [options]
@@ -50,7 +50,9 @@ The coordination results are written in the "AnalyseData_Output.txt" - there wil
 The Utilities script contains the following functions that can be used to get extra information about the Nhits vs. Energy vs. Position relations:
 - PlotMeanPromptNhitsPerEnergy(material): Returns a mean prompt Nhits vs Energy plot for events at the centre of the detector. This is the graphical form of the table that the EnergyPromptLookup fitter uses to map from prompt Nhits to energy.
 - PlotPromptNhitsPerEnergy(material): Returns a set of prompt Nhits histograms (one for each energy).
-- PlotPromptNhitsPerEnergy(material): Returns a plot of the scale factor that the EnergyPromptLookup fitter uses. The scale factor scales the prompt Nhits for an event, with a particular direction and radius, to what would have been expected had the event occurred at the centre of the detector.
+- PlotPositionDirectionScaleFactor(material): Returns a plot of the scale factor that the EnergyPromptLookup fitter uses. The scale factor scales the prompt Nhits for an event, with a particular radius (and direction in the case of scintillator material), to what would have been expected had the event occurred at the centre of the detector.
+- PlotHitTimeResiduals(material): Plots the hit time residuals.
+- PrintWorkingPMTs(material): Prints the number of working PMTs at the time of fit coordination.
 
 To run these functions, first run the ProduceData script as described above, and then do the following:
 
