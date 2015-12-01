@@ -23,6 +23,22 @@ else:
     print "tellie2rat: please set RATTOOLS environment variable"
     sys.exit()
 
+def file_check(filename):
+    """Function to check the tellierun info
+    :param: The name of the temporary file (string).
+    :returns: Nothing so far.
+    """
+    # First make sure it is not empty
+    if os.path.getsize(filename) == 0:
+        raise RuntimeError("File size is zero")
+    # Second, check to make sure it is all ASCII
+    # Do this by reading in the lines of the file
+    # and try to decode as ascii
+    with open(filename, 'r') as f:
+        for line in f:
+            print line.decode('ascii')
+    # Other checks can be added here
+
 def main(): 
     parser = argparse.ArgumentParser()
     parser.add_argument("-n", dest="runnumber", help="Run number",
@@ -54,23 +70,35 @@ def main():
     # Check if this run has old file type - if so, convert to
     # ratdb compatible.
     if int(data['version']) == 0:
-        data = telliedbTools.reformat_run_doc(data)
+        rat_format = telliedbTools.reformat_run_doc(data)
+    else: 
+        rat_format = data
 
     # Create a temp. file to hold the tellie_run.ratdb content
     with tempfile.NamedTemporaryFile() as tempf:
-        telliedbTools.write_doc_to_file(data, tempf.name)
+        telliedbTools.write_doc_to_file(rat_format, tempf.name)
         tempf.flush()
-    try:
-        # Run the command to upload the table to the specified
-        # ratdb location
-        command = ["ratdb", "upload", "-s", args.ratdb_server, "-d",
-                   args.ratdb_name, tempf.name]
-        print command
-        subprocess.check_call(command)
-    except subprocess.CalledProcessError:
-        print ("tellie2rat run {}: there was a problem uploading "
-               "the file").format(args.runnumber)
-        return 1
+        # Do some checks on this file to make sure it can be uploaded
+        try:
+            file_check(tempf.name)
+        except RuntimeError, e:
+            print "tellie2rat run {}: {}".format(args.runnumber, e)
+            return 1
+        except UnicodeDecodeError:
+            print ("tellie2rat run {}: non-ASCII characters present "
+                   "in file").format(args.runnumber)
+            return 2
+        try:
+            # Run the command to upload the table to the specified
+            # ratdb location
+            command = ["ratdb", "upload", "-s", args.ratdb_server, "-d",
+                       args.ratdb_name, tempf.name]
+            print command
+            subprocess.check_call(command)
+        except subprocess.CalledProcessError:
+            print ("tellie2rat run {}: there was a problem uploading "
+                   "the file").format(args.runnumber)
+            return 3
     # Done! 
     return 0
 

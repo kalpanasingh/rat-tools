@@ -3,6 +3,9 @@ This code has some tools to convert files available
 on the telliedb to be ratdb compatible. This is 
 required in a number of cases as ratdb now requires
 documents to be selectable by run number, not time
+
+Author: Ed Leming <e.leming@sussex.ac.uk>
+Date  : 1/12/2015
 '''
 
 import couchdb
