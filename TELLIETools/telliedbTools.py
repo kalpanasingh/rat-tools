@@ -11,7 +11,6 @@ Date  : 1/12/2015
 import couchdb
 import json
 import sys 
-import os
 
 def get_tellie_run_doc(runnumber, servername, usrname, password):
     '''Function to retrive specific run doc from the
