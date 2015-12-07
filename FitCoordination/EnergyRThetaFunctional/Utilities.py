@@ -2,7 +2,7 @@
 import ROOT
 import rat
 import math
-# Secondary functions and user-defined Values for the EnergyLookup2D Coordinator
+# Secondary functions and user-defined Values for the EnergyRThetaFunctional Coordinator
 # Author M Mottram - <m.mottram@qmul.ac.uk>
 
 CentralEnergies = [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0, 10.0]
@@ -16,14 +16,14 @@ NumberOfSegments = 10
 # Create theta bins and inclusion radii so that all events at RMax are included in one of the fits
 NThetaBins = 60 # This gives a segment width (on either side) of ~150mm ~ position resolution
 ThetaValues = []
+ThetaValuesInt = []
 SinThetaValues = []
 CosThetaValues = []
 for i in range(NThetaBins+1):
     ThetaValues.append(i * math.pi / NThetaBins)
+    ThetaValuesInt.append(int(ThetaValues[-1] * 1000)) # Speeds things up...
     SinThetaValues.append(math.sin(ThetaValues[-1]))
     CosThetaValues.append(math.cos(ThetaValues[-1]))
-SegmentWidth = 6000.0 * math.sin((ThetaValues[1] - ThetaValues[0])/2) # +/- half the segment
-SegmentWidth2 = SegmentWidth * SegmentWidth
 
 
 def CentralFilename(material, energy):
@@ -112,6 +112,10 @@ def CreateHMap(material):
         hGraphs[-1].SetName("hAtTheta%d" % (int(theta * 1000))) ## Make it easier to draw
         ctr.append(0)
 
+    iTheta = 0
+
+    # Load all files, note that this won't load them in order
+    # Check later to see which line we're looking at
     for iEntry, (ds, run) in enumerate(rat.dsreader(material + "_plane_*.root")):
 
         if (iEntry % 1000) == 0:
@@ -123,8 +127,9 @@ def CreateHMap(material):
         # Segment at the specified event point
         mcPosition = ds.GetMC().GetMCParticle(0).GetPosition()
         segmentor = rat.utility().GetSegmentor()
-        # segmentor.SetPatternOrigin(mcPosition, ROOT.TVector3(0.0, 0.0, 1.0), 10)
+        # This should be the default number, just in case...
         segmentor.SetNumberOfDivisions(NumberOfSegments)
+
         rawPMTSegmentIDs = segmentor.GetSegmentIDs()
         rawPMTSegmentPopulations = segmentor.GetSegmentPopulations()
         hitPMTSegmentPopulations = [0] * len(rawPMTSegmentPopulations)
@@ -135,8 +140,8 @@ def CreateHMap(material):
 
         hValue = 0.0
 
-        # It is possible to get 0 raw PMTs with the moved segmentor
-        # Need to skip these sectors
+        # N.B. not using the moved segmentor anymore, but also may have slots offline
+        # so always check to ensure a segment has >0 PMTs.
         for s in range(len(rawPMTSegmentPopulations)):
             if (hitPMTSegmentPopulations[s] >= rawPMTSegmentPopulations[s]):
                 correctedHitPMTSegmentPopulation = rawPMTSegmentPopulations[s] - 1
@@ -148,24 +153,22 @@ def CreateHMap(material):
 
         hRatio = hValue / centralH
         
-        # Check which segments this event will contribute to
+        # Check which f(r) at theta_i this event will contribute to
         rhoEvent = math.sqrt(mcPosition.X()*mcPosition.X() + mcPosition.Y()*mcPosition.Y())
         zEvent = mcPosition.Z()
         rEvent = mcPosition.Mag()
 
-        for i, (sintheta, costheta) in enumerate(zip(SinThetaValues, CosThetaValues)):
-            centralRho = rEvent * sintheta
-            centralZ = rEvent * costheta
-            rhoDiff = centralRho - rhoEvent
-            zDiff = centralZ - zEvent
-            diff2 = rhoDiff*rhoDiff + zDiff*zDiff
-            if diff2 < SegmentWidth2:
-                hGraphs[i].SetPoint(ctr[i], rEvent, hRatio)
-                ctr[i]+=1
+        thetaEvent = math.acos(zEvent / rEvent)
+
+        iTheta = ThetaValuesInt.index(int(thetaEvent*1000))
+        if math.fabs(thetaEvent - ThetaValues[iTheta]) > 0.00001:
+            raise Exception("Theta mismatch: %s\t%s" % (thetaEvent, ThetaValues[iTheta]))
+        hGraphs[iTheta].SetPoint(ctr[iTheta], rEvent, hRatio)
+        ctr[iTheta]+=1
 
         hHist.Fill(rhoEvent, zEvent, hRatio)
         hEntries.Fill(rhoEvent, zEvent)
-
+        
     # Get the mean for each bin in the map
     for i in range(hHist.GetNbinsX()):
         for j in range(hHist.GetNbinsY()):

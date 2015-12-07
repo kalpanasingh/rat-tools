@@ -65,7 +65,6 @@ def ProduceRunMacros(options):
     
     # Generator energies at the centre
     for energy in Utilities.CentralEnergies:
-
         generator = "/generator/add combo gun:point\n" + \
             "/generator/vtx/set " + options.particle + " 0 0 0 " + str(energy) + "\n" + \
             "/generator/pos/set 0 0 0" # Generate at the centre of the detector
@@ -73,17 +72,15 @@ def ProduceRunMacros(options):
         
         submit_job(options, generator, outfileName)
         
-
-    # Generate positions on a plane
-    for i in range(1, 51):
-
-        generator = "/generator/add combo gun:plane\n" + \
+    for i, (costheta, sintheta) in enumerate(zip(Utilities.CosThetaValues, Utilities.SinThetaValues)):
+        x = 6000 * sintheta
+        z = 6000 * costheta
+        generator = "/generator/add combo gun:linerotate\n" + \
             "/generator/vtx/set " + options.particle + " 0 0 0 " + str(Utilities.LookupEnergy) + "\n" + \
-            "/generator/pos/set 0 0 0 0 1 0 6000" # Generate on a plane in Y = 0
-        outfileName = Utilities.PlaneFilename(options.scintMaterial, i)
-        
-        submit_job(options, generator, outfileName)
+            "/generator/pos/set 0 0 0 " + str(x) + " 0 " + str(z)
 
+        outfileName = Utilities.PlaneFilename(options.scintMaterial, i)        
+        submit_job(options, generator, outfileName)
 
 
 import optparse
