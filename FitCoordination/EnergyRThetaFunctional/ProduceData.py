@@ -77,9 +77,9 @@ def ProduceRunMacros(options):
         z = 6000 * costheta
         generator = "/generator/add combo gun:linerotate\n" + \
             "/generator/vtx/set " + options.particle + " 0 0 0 " + str(Utilities.LookupEnergy) + "\n" + \
-            "/generator/pos/set 0 0 0 " + str(x) + " 0 " + str(z)
+            "/generator/pos/set 0 0 " + str(x) + " " + str(z)
 
-        outfileName = Utilities.PlaneFilename(options.scintMaterial, i)        
+        outfileName = Utilities.PositionFilename(options.scintMaterial, i)        
         submit_job(options, generator, outfileName)
 
 

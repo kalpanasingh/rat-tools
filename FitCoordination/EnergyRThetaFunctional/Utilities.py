@@ -29,8 +29,8 @@ for i in range(NThetaBins+1):
 def CentralFilename(material, energy):
     return material + "_energy_" + str(int(energy*1000))
 
-def PlaneFilename(material, i):
-    return material + "_plane_" + str(i)
+def PositionFilename(material, i):
+    return material + "_line_" + str(i)
 
 def CentralHistname(energy):
     return "hHistE" + str(int(energy*1000))
@@ -116,7 +116,7 @@ def CreateHMap(material):
 
     # Load all files, note that this won't load them in order
     # Check later to see which line we're looking at
-    for iEntry, (ds, run) in enumerate(rat.dsreader(material + "_plane_*.root")):
+    for iEntry, (ds, run) in enumerate(rat.dsreader(material + "_line_*.root")):
 
         if (iEntry % 1000) == 0:
             print iEntry
