@@ -53,9 +53,10 @@ def AnalysisFunction(particle, material):
             energies[infileName] = fileInfo[1]
             if (infileName.find("Bi")!=-1): #The Bi212 file has beta energies
                  betaEnergies = energies[infileName]
-        for infileName in energies:
-            if infileName.find("Po") != -1 :
-                energyRatio[infileName] = Utilities.GetEnergyRatio(betaEnergies,energies[infileName])
+    for infileName in energies:
+        if infileName.find("Po") != -1 :
+            EnergyRatios = Utilities.GetEnergyRatio(betaEnergies,energies[infileName])
+            energyRatio[infileName] = EnergyRatios
     outfileName = "AlphaBetaOutput" + particle + ".txt"
     print "The relevant PDFs for the AlphaBetaClassifier have been output to:  " + str(outfileName) 
     print "Please replace any existing entry that has the same index in the database file: ALPHA_BETA_CLASSIFIER.ratdb located in rat/data with the text found in this textfile"
