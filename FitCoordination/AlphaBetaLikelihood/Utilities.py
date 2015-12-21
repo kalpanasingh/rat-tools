@@ -66,7 +66,7 @@ def ProduceTimeResAndEnergyPDF(infileName):
                 pmtTime = calibratedPMTs.GetPMT(iPMT).GetTime()
 				
                 lightPath.CalcByPosition(vertPos, pmtPos)
-                distInScint = lightPath.GetDistInScint()
+                distInScint = lightPath.GetDistInInnerAV()
                 distInAV = lightPath.GetDistInAV()
                 distInWater = lightPath.GetDistInWater()
                 flightTime = effectiveVelocity.CalcByDistance(distInScint, distInAV, distInWater)
