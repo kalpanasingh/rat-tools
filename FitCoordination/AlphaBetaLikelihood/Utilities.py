@@ -139,12 +139,12 @@ def OutputFileChunk(pdfList, energyRatioPDF, particle, material, description,f):
    #OUTPUT ENERGY RATIO VALUES
     f.write("energy_ratio: [")
     for energyRatio in arange(EnergyRatio_lowerBound,EnergyRatio_upperBound,EnergyRatio_stepSize):
-       f.write(str(energyRatio)+"d, ")
+       f.write(str(energyRatio)+", ")
     f.write("],\n")
     #OUTPUT ENREGY RATIO PDF VALUES
     f.write("energy_probability: [")
     for energyRatio in energyRatioPDF:
-        f.write(str(energyRatio)+"d, ")
+        f.write(str(energyRatio)+", ")
     f.write("],\n")
 
     f.write("}\n")
