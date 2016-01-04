@@ -33,20 +33,16 @@ def AnalyseRootFiles(options):
     # Else run the macro locally on an interactive machine				
     else:
         os.system("python -c 'import AnalyseData; AnalyseData.AnalysisFunction(\"" + options.particle + "\", \"" + options.scintMaterial + "\")'")
-		
 
 def AnalysisFunction(particle, material):
-
     pdfs = {}
     energies={}
     energyRatio={}
     betaEnergies=[]
     particleNames = Utilities.ParticleNames[particle]
-	
-    for particleIndex, particleName in enumerate(particleNames):
-	
-        for pulseIndex, pulseDescription in enumerate(Utilities.ParticlePulseDict[particleName]):
 
+    for particleIndex, particleName in enumerate(particleNames):
+        for pulseIndex, pulseDescription in enumerate(Utilities.ParticlePulseDict[particleName]):
             infileName = particleName + pulseDescription
             fileInfo = Utilities.ProduceTimeResAndEnergyPDF(infileName+".root")
             pdfs[infileName] = fileInfo[0]
@@ -60,13 +56,11 @@ def AnalysisFunction(particle, material):
     outfileName = "AlphaBetaOutput" + particle + ".txt"
     print "The relevant PDFs for the AlphaBetaClassifier have been output to:  " + str(outfileName) 
     print "Please replace any existing entry that has the same index in the database file: ALPHA_BETA_CLASSIFIER.ratdb located in rat/data with the text found in this textfile"
-
     f = open(outfileName, 'w')
     for pulseIndex, pulseDescription in enumerate(Utilities.ParticlePulseDict[particleNames[1]]):
         Utilities.OutputFileChunk([pdfs[particleNames[0]], pdfs[particleNames[1] + pulseDescription], pdfs[particleNames[2]]],energyRatio[particleNames[1]+pulseDescription], particle, material, pulseDescription, f)
     f.close()
-	
-	
+
 import optparse
 if __name__ == '__main__':
     parser = optparse.OptionParser(usage = "usage: %prog [options] target", version = "%prog 1.0")

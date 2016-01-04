@@ -11,8 +11,8 @@ ParticlePulseDict = {"Bi212":[""], "Bi214":[""], "Te130":[""], "Po212":PulseDesc
 PulseTimeConstants = {"":"", PulseDescriptions[0]:"", PulseDescriptions[1]:"-4.6d, -18d, -156d,", PulseDescriptions[2]:"-3.2d,-18d,-172d,"}
 PulseTimeRatios = {"":"", PulseDescriptions[0]:"", PulseDescriptions[1]:"0.71d, 0.22d, 0.07d,", PulseDescriptions[2]:"0.61d,0.28d,0.11d,"}
 
-#These values were chosen to be around the ROI 
-#They loosely determine which energies are ROI-ish 
+#These values were chosen to be around the ROI
+#They loosely determine which energies are ROI-ish
 LooseROI_upperBound = 2.8
 LooseROI_lowerBound = 2.2
 #The following define the range and step size of the TimeResidual pdfs
@@ -35,7 +35,7 @@ def ProduceTimeResAndEnergyPDF(infileName):
     effectiveVelocity = rat.utility().GetEffectiveVelocity()
     lightPath = rat.utility().GetLightPathCalculator()
     pmtInfo = rat.utility().GetPMTInfo()
-		
+
     for ds,run in rat.dsreader(infileName):
 
         if ds.GetEVCount() > 0:
@@ -43,7 +43,7 @@ def ProduceTimeResAndEnergyPDF(infileName):
             mcParticle = ds.GetMC().GetMCParticle(0);
             mcPos = mcParticle.GetPosition();
             mcTime = mcParticle.GetTime()
-			
+
             ev = ds.GetEV(0)
 
             if not ev.FitResultExists("scintFitter"):
@@ -64,16 +64,16 @@ def ProduceTimeResAndEnergyPDF(infileName):
             for iPMT in range(0, calibratedPMTs.GetCount()):
                 pmtPos = pmtInfo.GetPosition(calibratedPMTs.GetPMT(iPMT).GetID())
                 pmtTime = calibratedPMTs.GetPMT(iPMT).GetTime()
-				
+
                 lightPath.CalcByPosition(vertPos, pmtPos)
                 distInScint = lightPath.GetDistInInnerAV()
                 distInAV = lightPath.GetDistInAV()
                 distInWater = lightPath.GetDistInWater()
                 flightTime = effectiveVelocity.CalcByDistance(distInScint, distInAV, distInWater)
                 timeResidual = pmtTime - flightTime - vertTime
-				
+
                 Histogram.Fill(timeResidual)
-				
+
     Histogram.Scale(1.0 / Histogram.Integral())
 
     pdfVector = []
@@ -82,7 +82,8 @@ def ProduceTimeResAndEnergyPDF(infileName):
     Histogram.Delete()
     return (pdfVector,energyList)
 
-#Takes two lists of energies and returns a PDF of the ratio of the energies such that their sum fall in or around the ROI
+#Takes two lists of energies and returns a PDF of the ratio of the energies such
+#that their sum fall in or around the ROI
 def GetEnergyRatio(betaEnergiesList,alphaEnergiesList):
     pdfVector = []
     nbins = (EnergyRatio_upperBound - EnergyRatio_lowerBound)/EnergyRatio_stepSize
@@ -104,7 +105,7 @@ def GetEnergyRatio(betaEnergiesList,alphaEnergiesList):
     for i in range(1,Histogram.GetNbinsX()):
         pdfVector.append(Histogram.GetBinContent(i))
     Histogram.Delete()
-    return pdfVector 
+    return pdfVector
 
 # Output 3 PDFs in the format that is required for the CLASSIFIER_ALPHA_BETA_LIKELIHOOD.ratdb file
 # Input pdfList must be in the following order: [Bi, Po, Te130]
@@ -122,7 +123,7 @@ def OutputFileChunk(pdfList, energyRatioPDF, particle, material, description,f):
     f.write("timestamp: \"\",\n")    
     f.write("comment: \"\",\n")    
     f.write("\n")
-	
+
     #OUTPUT EACH TIME RESIDIUAL DISTRIBUTION  
     f.write("times: [")
     for time in arange(TimeRes_lowerBound,TimeRes_upperBound,TimeRes_stepSize):
@@ -135,7 +136,7 @@ def OutputFileChunk(pdfList, energyRatioPDF, particle, material, description,f):
         for pdfIndex, pdfValue in enumerate(pdf):
             f.write(str(pdfValue) + ", ")
         f.write("],\n")
-   
+
    #OUTPUT ENERGY RATIO VALUES
     f.write("energy_ratio: [")
     for energyRatio in arange(EnergyRatio_lowerBound,EnergyRatio_upperBound,EnergyRatio_stepSize):
