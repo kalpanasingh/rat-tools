@@ -99,7 +99,8 @@ def GetEnergyRatio(betaEnergiesList,alphaEnergiesList):
                     #This is done by changing the enegies to an unphysical sentinel value
                     betaEnergiesList[iBeta] = -1
                     alphaEnergiesList[iAlpha] = -1
-     #Change the histogram into a nicer to use List               
+    #Change the histogram into a nicer to use List
+    Histogram.Scale(1.0/Histogram.Integral())
     for i in range(1,Histogram.GetNbinsX()):
         pdfVector.append(Histogram.GetBinContent(i))
     Histogram.Delete()
