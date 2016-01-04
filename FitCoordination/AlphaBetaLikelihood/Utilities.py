@@ -6,10 +6,10 @@ from numpy import arange
 #        K Majumdar - 08/09/2014 - Cleanup of Coordinators for new DS
 
 ParticleNames = {"212":["Bi212", "Po212", "Te130"], "214":["Bi214", "Po214", "Te130"]}
-PulseDescriptions = ["wPSD", "NoPSD", "SeansPSD"]
+PulseDescriptions = ["wPSD", "NoPSD"]
 ParticlePulseDict = {"Bi212":[""], "Bi214":[""], "Te130":[""], "Po212":PulseDescriptions, "Po214":PulseDescriptions}
-PulseTimeConstants = {"":"", PulseDescriptions[0]:"", PulseDescriptions[1]:"-4.6d, -18d, -156d,", PulseDescriptions[2]:"-3.2d,-18d,-172d,"}
-PulseTimeRatios = {"":"", PulseDescriptions[0]:"", PulseDescriptions[1]:"0.71d, 0.22d, 0.07d,", PulseDescriptions[2]:"0.61d,0.28d,0.11d,"}
+PulseTimeConstants = {"":"", PulseDescriptions[0]:"", PulseDescriptions[1]:"-4.6d, -18d, -156d,"}
+PulseTimeRatios = {"":"", PulseDescriptions[0]:"", PulseDescriptions[1]:"0.71d, 0.22d, 0.07d,"}
 
 #These values were chosen to be around the ROI
 #They loosely determine which energies are ROI-ish
