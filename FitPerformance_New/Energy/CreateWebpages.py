@@ -21,7 +21,7 @@ def CreateWebpages(options):
     histogramLinks1 = ""
     for energy in energyList:
         biasAndResolution_fixedZ_PlotName = pictureBaseName + "biasAndResolution_E=" + str(int(energy * 1000)) + "keV_Z=0mm.png"
-        biasAndResolution_fixedZ_Title = "Bias and Resolution vs. Y (Z = 0mm, E = " + str(int(energy * 1000)) + "keV)"
+        biasAndResolution_fixedZ_Title = "Percentage Bias and Resolution vs. Y (Z = 0mm, E = " + str(int(energy * 1000)) + "keV)"
 		
         histogramLinks1 = histogramLinks1 + "<img src=\"" + biasAndResolution_fixedZ_PlotName + "\" title=\"" + biasAndResolution_fixedZ_Title + "\" height=\"" + imageHeight + "\" width=\"" + imageWidth + "\">\n"
         
@@ -33,7 +33,7 @@ def CreateWebpages(options):
     histogramLinks2 = ""
     for energy in energyList:
         biasAndResolution_fixedY_PlotName = pictureBaseName + "biasAndResolution_E=" + str(int(energy * 1000)) + "keV_Y=0mm.png"
-        biasAndResolution_fixedY_Title = "Bias and Resolution vs. Z (Y = 0mm, E = " + str(int(energy * 1000)) + "keV)"
+        biasAndResolution_fixedY_Title = "Percentage Bias and Resolution vs. Z (Y = 0mm, E = " + str(int(energy * 1000)) + "keV)"
 		
         histogramLinks2 = histogramLinks2 + "<img src=\"" + biasAndResolution_fixedY_PlotName + "\" title=\"" + biasAndResolution_fixedY_Title + "\" height=\"" + imageHeight + "\" width=\"" + imageWidth + "\">\n"
 		

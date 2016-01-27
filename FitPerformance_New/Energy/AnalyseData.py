@@ -72,7 +72,7 @@ def PerformancePlots_SingleFitter(material, fitterName, biasColour, resolutionCo
 	
     resultsTextFileName = "AnalyseData_Energy_PerformanceResults_" + material + "_" + fitterName + ".txt"
     resultsTextFile = open(resultsTextFileName, "w")
-    resultsTextFile.write("energy (keV)    y (mm)    z (mm)   bias    resolution \n")
+    resultsTextFile.write("energy (keV)     y (mm)     z (mm)     bias (%)     resolution (%) \n")
     resultsTextFile.close()
 	
     biasPlots_FixedZ = []
@@ -219,11 +219,8 @@ def SingleE_SingleY_SingleZ_SingleFitter(material, energy, yPosition, zPosition,
     deltaEnergyPlot = ROOT.TH1D(deltaEnergyPlotName, deltaEnergyPlotName, 25, -25.0, 25.0)
     deltaEnergyPlot.GetXaxis().SetTitle("Percentage #DeltaE = [(fitted Energy - True Energy) / True Energy] * 100")
     deltaEnergyPlot.GetYaxis().SetTitle("No. of Events")
-    deltaEnergyPlot.SetDirectory(0)
-
+    
     infileName = material + "_E=" + str( int(energy * 1000) ) + "keV_y=" + str(yPosition) + "mm_z=" + str(zPosition) + "mm.root"
-    resultsTextFile = open(resultsTextFileName, "a")
-    resultsTextFile.write(infileName + "    ")
     
     for ds, run in rat.dsreader(infileName):
         if ds.GetEVCount() == 0:
@@ -248,21 +245,24 @@ def SingleE_SingleY_SingleZ_SingleFitter(material, energy, yPosition, zPosition,
         resolution = -9999.0
         chiSquared = -9999.0
     else:
-        gaussFit = ROOT.TF1("gaus", "gaus", -25.0, 25.0)
-        deltaEnergyPlot.Fit(gaussFit, "RQ")
+        gaussFitEnergy = ROOT.TF1("gaussFitEnergy", "gaus", -25.0, 25.0)
+        deltaEnergyPlot.Fit(gaussFitEnergy, "RQ")
 		
-        bias = gaussFit.GetParameter(1)
-        resolution = gaussFit.GetParameter(2)
-        chiSquared = gaussFit.GetChisquare()
+        bias = gaussFitEnergy.GetParameter(1)
+        resolution = gaussFitEnergy.GetParameter(2)
+        chiSquared = gaussFitEnergy.GetChisquare()
 		
-        del gaussFit
+        del gaussFitEnergy
 	
     deltaEPlotsFile = ROOT.TFile(deltaEPlotsFileName, "UPDATE")
     deltaEnergyPlot.Write()
     deltaEPlotsFile.Close()
 	
-    resultsTextFile.write(str(int(energy * 1000)) + "    " + str(yPosition) + "    " + str(zPosition) + "    " + str(bias) + "    " + str(resolution) + "\n")
+    resultsTextFile = open(resultsTextFileName, "a")
+    resultsTextFile.write(str(int(energy * 1000)) + "     " + str(yPosition) + "     " + str(zPosition) + "     " + str(bias) + "     " + str(resolution) + "\n")
     resultsTextFile.close()
+
+    del deltaEnergyPlot
     
     return [bias, resolution, chiSquared]
 
@@ -353,7 +353,6 @@ def OutputPlots_1Fitter(material, fitter1, performancePlots_Fitter1):
     combinedPlotsFile.Close()
 	
 
-	
 def OutputPlots_2Fitters(material, fitter1, fitter2, performancePlots_Fitter1, performancePlots_Fitter2):
 
     pictureDirectory = "./EnergyPerformance/images_" + material

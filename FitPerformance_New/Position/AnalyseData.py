@@ -63,7 +63,7 @@ def AnalysisFunction(material, fitter1, fitter2):
         print "\n"
 	
 
-def PerformancePlots_SingleFitter(material, fitterName, biasColour, resolutionColour, chiSquaredColour, fitterName1):
+def PerformancePlots_SingleFitter(material, fitterName, biasColour, resolutionColour, chiSquaredColour):
 		
     performancePlotsFileName = "AnalyseData_Position_PerformancePlots_" + material + "_" + fitterName + ".root"
     performancePlotsFile = ROOT.TFile(performancePlotsFileName, "UPDATE")
@@ -72,7 +72,7 @@ def PerformancePlots_SingleFitter(material, fitterName, biasColour, resolutionCo
 	
     resultsTextFileName = "AnalyseData_Position_PerformanceResults_" + material + "_" + fitterName + ".txt"
     resultsTextFile = open(resultsTextFileName, "w")
-    resultsTextFile.write("energy (keV)    y (mm)    z (mm)   bias    resolution \n")
+    resultsTextFile.write("energy (keV)     y (mm)     z (mm)     bias (%)     resolution (%) \n")
     resultsTextFile.close()
 	
     biasPlots_FixedZ = []
@@ -105,9 +105,9 @@ def PerformancePlots_SingleFitter(material, fitterName, biasColour, resolutionCo
         singleEnergy_fixedZ_BiasGraph.SetTitle(str(int(energy * 1000)))
         singleEnergy_fixedZ_BiasGraph.GetXaxis().SetTitle("True Position Along Y-Axis, mm")
         singleEnergy_fixedZ_BiasGraph.GetXaxis().SetAxisColor(17)
-        singleEnergy_fixedZ_BiasGraph.GetYaxis().SetTitle("Bias, Resolution")
+        singleEnergy_fixedZ_BiasGraph.GetYaxis().SetTitle("Percentage Bias, Resolution")
         singleEnergy_fixedZ_BiasGraph.GetYaxis().SetAxisColor(17)
-        singleEnergy_fixedZ_BiasGraph.GetYaxis().SetRangeUser(-100.0, 500.0)
+        singleEnergy_fixedZ_BiasGraph.GetYaxis().SetRangeUser(-25.0, 25.0)
         singleEnergy_fixedZ_BiasGraph.SetMarkerStyle(20)
         singleEnergy_fixedZ_BiasGraph.SetMarkerSize(1.0)
         singleEnergy_fixedZ_BiasGraph.SetMarkerColor(biasColour)
@@ -118,9 +118,9 @@ def PerformancePlots_SingleFitter(material, fitterName, biasColour, resolutionCo
         singleEnergy_fixedZ_ResolutionGraph.SetTitle(str(int(energy * 1000)))
         singleEnergy_fixedZ_ResolutionGraph.GetXaxis().SetTitle("True Position Along Y-Axis, mm")
         singleEnergy_fixedZ_ResolutionGraph.GetXaxis().SetAxisColor(17)
-        singleEnergy_fixedZ_ResolutionGraph.GetYaxis().SetTitle("Bias, Resolution")
+        singleEnergy_fixedZ_ResolutionGraph.GetYaxis().SetTitle("Percentage Bias, Resolution")
         singleEnergy_fixedZ_ResolutionGraph.GetYaxis().SetAxisColor(17)
-        singleEnergy_fixedZ_ResolutionGraph.GetYaxis().SetRangeUser(-100.0, 500.0)
+        singleEnergy_fixedZ_ResolutionGraph.GetYaxis().SetRangeUser(-25.0, 25.0)
         singleEnergy_fixedZ_ResolutionGraph.SetMarkerStyle(20)
         singleEnergy_fixedZ_ResolutionGraph.SetMarkerSize(1.0)
         singleEnergy_fixedZ_ResolutionGraph.SetMarkerColor(resolutionColour)
@@ -167,9 +167,9 @@ def PerformancePlots_SingleFitter(material, fitterName, biasColour, resolutionCo
         singleEnergy_fixedY_BiasGraph.SetTitle(str(int(energy * 1000)))
         singleEnergy_fixedY_BiasGraph.GetXaxis().SetTitle("True Position Along Z-Axis, mm")
         singleEnergy_fixedY_BiasGraph.GetXaxis().SetAxisColor(17)
-        singleEnergy_fixedY_BiasGraph.GetYaxis().SetTitle("Bias, Resolution")
+        singleEnergy_fixedY_BiasGraph.GetYaxis().SetTitle("Percentage Bias, Resolution")
         singleEnergy_fixedY_BiasGraph.GetYaxis().SetAxisColor(17)
-        singleEnergy_fixedY_BiasGraph.GetYaxis().SetRangeUser(-100.0, 500.0)
+        singleEnergy_fixedY_BiasGraph.GetYaxis().SetRangeUser(-25.0, 25.0)
         singleEnergy_fixedY_BiasGraph.SetMarkerStyle(20)
         singleEnergy_fixedY_BiasGraph.SetMarkerSize(1.0)
         singleEnergy_fixedY_BiasGraph.SetMarkerColor(biasColour)
@@ -180,9 +180,9 @@ def PerformancePlots_SingleFitter(material, fitterName, biasColour, resolutionCo
         singleEnergy_fixedY_ResolutionGraph.SetTitle(str(int(energy * 1000)))
         singleEnergy_fixedY_ResolutionGraph.GetXaxis().SetTitle("True Position Along Z-Axis, mm")
         singleEnergy_fixedY_ResolutionGraph.GetXaxis().SetAxisColor(17)
-        singleEnergy_fixedY_ResolutionGraph.GetYaxis().SetTitle("Bias, Resolution")
+        singleEnergy_fixedY_ResolutionGraph.GetYaxis().SetTitle("Percentage Bias, Resolution")
         singleEnergy_fixedY_ResolutionGraph.GetYaxis().SetAxisColor(17)
-        singleEnergy_fixedY_ResolutionGraph.GetYaxis().SetRangeUser(-100.0, 500.0)
+        singleEnergy_fixedY_ResolutionGraph.GetYaxis().SetRangeUser(-25.0, 25.0)
         singleEnergy_fixedY_ResolutionGraph.SetMarkerStyle(20)
         singleEnergy_fixedY_ResolutionGraph.SetMarkerSize(1.0)
         singleEnergy_fixedY_ResolutionGraph.SetMarkerColor(resolutionColour)
@@ -215,16 +215,16 @@ def PerformancePlots_SingleFitter(material, fitterName, biasColour, resolutionCo
 
 def SingleE_SingleY_SingleZ_SingleFitter(material, energy, yPosition, zPosition, fitterName, deltaRPlotsFileName, resultsTextFileName):
 
-    deltaXPlot = ROOT.TH1D("deltaXPlot", "#deltaX", 25, -1000.0, 1000.0)
-    deltaXPlot.GetXaxis().SetTitle("#DeltaX = (fitted X - True X)")
+    deltaXPlot = ROOT.TH1D("deltaXPlot", "#deltaX", 25, -25.0, 25.0)
+    deltaXPlot.GetXaxis().SetTitle("Percentage #DeltaX = [(fitted X - True X) / True X] * 100")
     deltaXPlot.GetYaxis().SetTitle("No. of Events")
 	
-    deltaYPlot = ROOT.TH1D("deltaYPlot", "#deltaY", 25, -1000.0, 1000.0)
-    deltaYPlot.GetXaxis().SetTitle("#DeltaY = (fitted Y - True Y)")
+    deltaYPlot = ROOT.TH1D("deltaYPlot", "#deltaY", 25, -25.0, 25.0)
+    deltaYPlot.GetXaxis().SetTitle("Percentage #DeltaY = [(fitted Y - True Y) / True Y] * 100")
     deltaYPlot.GetYaxis().SetTitle("No. of Events")
 	
-    deltaZPlot = ROOT.TH1D("deltaZPlot", "#deltaZ", 25, -1000.0, 1000.0)
-    deltaZPlot.GetXaxis().SetTitle("#DeltaZ = (fitted Z - True Z)")
+    deltaZPlot = ROOT.TH1D("deltaZPlot", "#deltaZ", 25, -25.0, 25.0)
+    deltaZPlot.GetXaxis().SetTitle("Percentage #DeltaZ = [(fitted Z - True Z) / True Z] * 100")
     deltaZPlot.GetYaxis().SetTitle("No. of Events")
 
     infileName = material + "_E=" + str( int(energy * 1000) ) + "keV_y=" + str(yPosition) + "mm_z=" + str(zPosition) + "mm.root"
@@ -245,30 +245,30 @@ def SingleE_SingleY_SingleZ_SingleFitter(material, energy, yPosition, zPosition,
         fittedX = fittedVertex.GetPosition().X()
         trueX = ds.GetMC().GetMCParticle(0).GetPosition().X()
         deltaX = fittedX - trueX
-        deltaXPlot.Fill(deltaX)
+        deltaXPlot.Fill((deltaX / trueX) * 100.0)
 		
         fittedY = fittedVertex.GetPosition().Y()
         trueY = ds.GetMC().GetMCParticle(0).GetPosition().Y()
         deltaY = fittedY - trueY
-        deltaYPlot.Fill(deltaY)
+        deltaYPlot.Fill((deltaY / trueY) * 100.0)
 		
         fittedZ = fittedVertex.GetPosition().Z()
         trueZ = ds.GetMC().GetMCParticle(0).GetPosition().Z()
         deltaZ = fittedZ - trueZ
-        deltaZPlot.Fill(deltaZ)
+        deltaZPlot.Fill((deltaZ / trueZ) * 100.0)
 		
     if (deltaXPlot.Integral() == 0):
         bias = -9999.0
         resolution = -9999.0
         chiSquared = -9999.0
     else:
-        gaussFitX = ROOT.TF1("gaus", "gaus", -1000.0, 1000.0)
+        gaussFitX = ROOT.TF1("gaussFitX", "gaus", -25.0, 25.0)
         deltaXPlot.Fit(gaussFitX, "RQ")
 	
-        gaussFitY = ROOT.TF1("gaus", "gaus", -1000.0, 1000.0)
+        gaussFitY = ROOT.TF1("gaussFitY", "gaus", -25.0, 25.0)
         deltaYPlot.Fit(gaussFitY, "RQ")
 	
-        gaussFitZ = ROOT.TF1("gaus", "gaus", -1000.0, 1000.0)
+        gaussFitZ = ROOT.TF1("gaussFitZ", "gaus", -25.0, 25.0)
         deltaZPlot.Fit(gaussFitZ, "RQ")
 	
         bias = math.sqrt((gaussFitX.GetParameter(1) * gaussFitX.GetParameter(1)) + (gaussFitY.GetParameter(1) * gaussFitY.GetParameter(1)) + (gaussFitZ.GetParameter(1) * gaussFitZ.GetParameter(1)));
@@ -294,7 +294,7 @@ def SingleE_SingleY_SingleZ_SingleFitter(material, energy, yPosition, zPosition,
     deltaRPlotsFile.Close()
 
     resultsTextFile = open(resultsTextFileName, "a")
-    resultsTextFile.write(str(int(energy * 1000)) + "    " + str(yPosition) + "     " + str(zPosition) + "     " + str(bias) + "    " + str(resolution) + "\n")
+    resultsTextFile.write(str(int(energy * 1000)) + "     " + str(yPosition) + "     " + str(zPosition) + "     " + str(bias) + "     " + str(resolution) + "\n")
     resultsTextFile.close()
 
     del deltaXPlot
