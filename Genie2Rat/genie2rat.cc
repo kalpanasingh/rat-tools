@@ -19,7 +19,7 @@
 #include "PDG/PDGCodes.h"
 #include "Utils/CmdLnArgParser.h"
 
-#include <RAT/DS/Root.hh>
+#include <RAT/DS/Entry.hh>
 #include <RAT/DS/MC.hh>
 #include <RAT/DS/MCParticle.hh>
 
@@ -57,8 +57,8 @@ int main(int argc, char ** argv)
   // set up output file
   TFile *outfile = new TFile(gOptOutFilename.c_str(),"RECREATE");
   TTree *outtree = new TTree("T","RAT Tree");
-  RAT::DS::Root *branchDS = new RAT::DS::Root();
-  outtree->Branch("ds",branchDS->ClassName(),&branchDS,32000,99);
+  RAT::DS::Entry branchDS;
+  outtree->Branch("ds",branchDS.ClassName(),&branchDS,32000,99);
 
   //
   // Loop over all events
@@ -75,11 +75,11 @@ int main(int argc, char ** argv)
     double y = 1000.0*event.Vertex()->Y(); // distances from GENIE are in meters
     double z = 1000.0*event.Vertex()->Z(); // distances from GENIE are in meters
 
-    RAT::DS::Root *ds = new RAT::DS::Root();
-    RAT::DS::MC *mc = ds->GetMC();
+    RAT::DS::Entry ds;
+    RAT::DS::MC mc;
 
-    mc->SetMCTime(time); // GENIE does not give global time, so we just add arbitrary times for RAT 
-    mc->SetEventID(i);
+    mc.SetMCTime(time); // GENIE does not give global time, so we just add arbitrary times for RAT
+    mc.SetMCID(i);
 
     //
     // Loop over all particles in this event
@@ -95,30 +95,33 @@ int main(int argc, char ** argv)
           (p->Pdg() == kPdgNuE || p->Pdg() == kPdgAntiNuE ||
            p->Pdg() == kPdgNuMu || p->Pdg() == kPdgAntiNuMu ||
            p->Pdg() == kPdgNuTau || p->Pdg() == kPdgAntiNuTau)){
-        RAT::DS::MCParticle *parent = mc->AddNewMCParent();
-        parent->SetPDGCode(p->Pdg());
-        parent->SetTime(0); // GENIE does not give particles time separate from event
-        parent->SetPos(TVector3(x,y,z)); // GENIE outputs particle distance from event in fm, basically 0
-        parent->SetMom(TVector3(1000.0*p->Px(),1000.0*p->Py(),1000.0*p->Pz())); // GENIE outputs momentum and energy in GeV
-        parent->SetKE(1000.0*p->KinE());
+        RAT::DS::MCParticle parent;
+        parent.SetPDGCode(p->Pdg());
+        parent.SetTime(0); // GENIE does not give particles time separate from event
+        parent.SetPosition(TVector3(x,y,z)); // GENIE outputs particle distance from event in fm, basically 0
+        parent.SetMomentum(TVector3(1000.0*p->Px(),1000.0*p->Py(),1000.0*p->Pz())); // GENIE outputs momentum and energy in GeV
+        parent.SetKineticEnergy(1000.0*p->KinE());
+        mc.AddMCParent(parent);
       }
       if (p->Status() == kIStStableFinalState){
         // skip if it is a GENIE special particle (final state unsimulated hadronic energy etc)
         if (p->Pdg() > 2000000000){
           continue;
         }
-        RAT::DS::MCParticle *particle = mc->AddNewMCParticle();
-        particle->SetPDGCode(p->Pdg());
-        particle->SetTime(0); // GENIE does not give particles time separate from event
-        particle->SetPos(TVector3(x,y,z)); // GENIE outputs particle distance from event in fm, basically 0  
-        particle->SetMom(TVector3(1000.0*p->Px(),1000.0*p->Py(),1000.0*p->Pz())); // GENIE outputs momentum and energy in GeV
-        particle->SetKE(1000.0*p->KinE());
+        RAT::DS::MCParticle particle;
+        particle.SetPDGCode(p->Pdg());
+        particle.SetTime(0); // GENIE does not give particles time separate from event
+        particle.SetPosition(TVector3(x,y,z)); // GENIE outputs particle distance from event in fm, basically 0
+        particle.SetMomentum(TVector3(1000.0*p->Px(),1000.0*p->Py(),1000.0*p->Pz())); // GENIE outputs momentum and energy in GeV
+        particle.SetKineticEnergy(1000.0*p->KinE());
+        mc.AddMCParticle(particle);
       }
     }// end loop over particles	
 
     // clear current mc event record
+    ds.SetMC(mc);
     mcrec->Clear();
-    *branchDS = *ds;
+    branchDS = ds;
     outtree->Fill();
 
     time += 1e9; // GENIE does not calculate time of events so we arbitrarily add a second

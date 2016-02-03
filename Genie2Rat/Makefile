@@ -16,7 +16,7 @@ INCLUDES := $(INCLUDES) -I$(RATROOT)/include
 all: genie2rat
 
 genie2rat: FORCE
-	$(CXX) -o genie2rat $(CXXFLAGS) $(LDFLAGS) genie2rat.cc $(INCLUDES) $(LIBRARIES)
+	$(CXX) -o genie2rat $(CXXFLAGS) $(LDFLAGS) genie2rat.cc $(INCLUDES) $(LIBRARIES) -lgfortran
 
 #################### CLEANING
 
