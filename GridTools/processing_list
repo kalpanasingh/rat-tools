@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 #####################
 #
-# production_list
+# processing_list
 #
 # Script with preset defaults to
-# download production datasets.
+# download processed datasets.
 #
 # Author: Matt Mottram
 #         <m.mottram@sussex.ac.uk>
@@ -26,15 +26,15 @@ except:
 if __name__=="__main__":
     parser = argparse.ArgumentParser(description="File list generator.  Users MUST specify either a label (-l, recommended) or rat version (-v).")
     parser.add_argument("-d", dest="db_name", help="Data-flow database name [data-production]",
-                        default="data-production")
+                        default="data-processing")
     parser.add_argument("-s", dest="db_server",
                         help="Data-flow database server [couch.snopl.us]",
                         default="couch.snopl.us")
     parser.add_argument("-p", dest="db_port",
                         help="Data-flow database server port [None]", default=None, type=int)
     parser.add_argument("-f", dest="file_type",
-                        help="[ntuple], %s datasets" % (", ".join(f for f in lg.allowed_file_types if f!="ntuple")),
-                        default="ntuple")
+                        help="[ratds], %s datasets" % (", ".join(f for f in lg.allowed_file_types if f!="ratds")),
+                        default="ratds")
     parser.add_argument("-o", dest="output", help="Filename to write the list to [filelist.dat]",
                         default="filelist.dat")
     
