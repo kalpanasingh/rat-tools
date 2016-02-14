@@ -67,8 +67,8 @@ def write_run_document_to_file(runnumber, data, outfilename=None):
         'timestamp': '',
         'production': 'true',
         'run_type': runtype,
-        'starttime': starttime,
-        'endtime': endtime
+        'start_time': starttime,
+        'end_time': endtime
     }
     with open(outfilename, 'w') as f:
         json.dump(ratdb_content, f, sort_keys=True,
