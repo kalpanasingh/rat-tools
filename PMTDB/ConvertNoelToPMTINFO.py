@@ -62,13 +62,13 @@ def neck_pos_dir(num_):
     pos_dir_ = numpy.array([-99999.0,-99999.0,-99999.0,-9999.0,-9999.0,-9999.0])
     # These are calculated based on UI drawings - see Jeanne's note book ;)
     if(num_ == 0):
-        pos_dir_ = numpy.array([13.1, 52.4,14340.1,0,0,-1])
+        pos_dir_ = numpy.array([131., 524.,14340.1,0,0,-1])
     elif(num_ == 1):
-        pos_dir_ = numpy.array([-36.4,3.2,14340.1,0,0,-1])
+        pos_dir_ = numpy.array([-364.,32.,14340.1,0,0,-1])
     elif(num_ == 2):
-        pos_dir_ = numpy.array([35.6,0.,14340.1,0,0,-1])
+        pos_dir_ = numpy.array([356.,0.,14340.1,0,0,-1])
     elif(num_ == 3):
-        pos_dir_ = numpy.array([29.8,-39.6,14340.1,0,0,-1])
+        pos_dir_ = numpy.array([298.,-396.,14340.1,0,0,-1])
     # Only expect 4 neck tubes
     return pos_dir_
 
