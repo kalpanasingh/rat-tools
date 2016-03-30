@@ -48,7 +48,7 @@ def get_panel_dir(panel_num, panel_info):
     raise # Not found the panel
 
 def is_physical(type_):
-    # DOn't build BUTTS at the moment, just normal, OWL and Neck
+    # Don't build BUTTS at the moment, just normal, OWL and Neck
     if(type_ == 1):
         return 1
     if(type_ == 5):
@@ -61,6 +61,7 @@ def is_physical(type_):
 def neck_pos_dir(num_):
     pos_dir_ = numpy.array([-99999.0,-99999.0,-99999.0,-9999.0,-9999.0,-9999.0])
     # These are calculated based on UI drawings - see Jeanne's note book ;)
+    # Check units - have increase by order of mag as think in cm not mm (need to be given in mm in detector units)
     if(num_ == 0):
         pos_dir_ = numpy.array([131., 524.,14340.1,0,0,-1])
     elif(num_ == 1):
@@ -77,7 +78,7 @@ def neck_pos_dir(num_):
 with open(args[1], "r") as panel_info_file:
     panel_data = yaml.load(json_minify(panel_info_file.read(), False))
 
-f = open(args[0], "r")
+f = open(args[0], "rU")
 noel_file = csv.reader(f)
 # Add dictionary that will map PMT location to a list of PMTs at that location
 mapping = {}
@@ -94,7 +95,7 @@ for pmt in noel_file:
 f.seek(0)
 
 
-noel_file = csv.reader(open(args[0], "r"))
+noel_file = csv.reader(open(args[0], "rU"))
 new_data = {}
 new_data["x"] = [-99999.0]
 new_data["y"] = [-99999.0]
@@ -105,7 +106,7 @@ new_data["w"] = [-9999.0]
 new_data["panelnumber"] = [-1]
 new_data["pmt_type"] = [10]
 new_data["linked_lcn"] = [-9999]
-new_data["is_physical"] = [0]
+#new_data["is_physical"] = [0]  # Decide this is redundant to output
 #new_data["pmtid"] = []
 noel_file.next() # Ignore the first line
 neck_num = 0
@@ -155,7 +156,7 @@ for pmt in noel_file:
     if(noel_type_to_rat_type(pmt[9]) > -1):
         new_data["panelnumber"].append(panel_number)
         new_data["pmt_type"].append(noel_type_to_rat_type(pmt[9]))
-        new_data["is_physical"].append(is_physical_)
+#        new_data["is_physical"].append(is_physical_)
         new_data["x"].append(float(pos_[0])) # Convert cm to mm
         new_data["y"].append(float(pos_[1]))
         new_data["z"].append(float(pos_[2]))
