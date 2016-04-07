@@ -91,13 +91,13 @@ def neck_pos_dir(num_):
     # convert from inches to mm *25.4
     # Check units - have increase by order of mag as think in cm not mm (need to be given in mm in detector units)
     if(num_ == 0):
-        pos_dir_ = numpy.array([131., 524.,14340.1,0,0,-1])
+        pos_dir_ = numpy.array([131., 524.,14340.1,0,0,1])
     elif(num_ == 1):
-        pos_dir_ = numpy.array([-364.,32.,14340.1,0,0,-1])
+        pos_dir_ = numpy.array([-364.,32.,14340.1,0,0,1])
     elif(num_ == 2):
-        pos_dir_ = numpy.array([356.,0.,14340.1,0,0,-1])
+        pos_dir_ = numpy.array([356.,0.,14340.1,0,0,1])
     elif(num_ == 3):
-        pos_dir_ = numpy.array([298.,-396.,14340.1,0,0,-1])
+        pos_dir_ = numpy.array([298.,-396.,14340.1,0,0,1])
     # Only expect 4 neck tubes
     return pos_dir_
 
