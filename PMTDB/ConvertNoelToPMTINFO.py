@@ -3,7 +3,7 @@
 # Modified J R Wilson - 5/10/2015 <j.r.wilson@qmul.ac.uk>
 # This script converts the Noel csv file to the PMTINFO format
 # Now includes calculated Neck positions and mapping of Low Gain to physical PMTs via LCN
-# There are now 5 tubes of type 0x13 which are normal tubes but with no petals - treat as normal for now.
+# There are now 5 tubes of type 0x13 which are normal tubes but with no petals - add an extra array for petal_status info and set these (alongside OWLs and Necks) to have 0=NONE, all other normal tubes have 1=STANDARD petals. At a later date we can add more petal classifications and implement an aging model...
 import optparse
 import sys
 import csv
