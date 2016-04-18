@@ -2,8 +2,8 @@
 # Author P G Jones - 12/03/2012 <p.g.jones@qmul.ac.uk>
 # Modified J R Wilson - 5/10/2015 <j.r.wilson@qmul.ac.uk>
 # This script converts the Noel csv file to the PMTINFO format
-# Now includes calculated Neck positions and mapping of Low Gain to physical PMTs via LCN
-# There are now 5 tubes of type 0x13 which are normal tubes but with no petals - add an extra array for petal_status info and set these (alongside OWLs and Necks) to have 0=NONE, all other normal tubes have 1=STANDARD petals. At a later date we can add more petal classifications and implement an aging model...
+# March 2016 - Now includes calculated Neck positions and mapping of Low Gain to physical PMTs via LCN
+# March 2016 - There are now 5 tubes of type 0x13 which are normal tubes but with no petals - add an extra array for petal_status info and set these (alongside OWLs and Necks) to have 0=NONE, all other normal tubes have 1=STANDARD petals. At a later date we can add more petal classifications and implement an aging model...
 import optparse
 import sys
 import csv
@@ -165,7 +165,8 @@ for pmt in noel_file:
             pos_ = numpy.array([all[0], all[1], all[2]])
             dir_ = numpy.array([all[3], all[4], all[5]])
             neck_num =neck_num+1
-            print crate, slot, channel, pos_, dir_, neck_num
+            # Since the positions and directions of the Neck tubes are assigned within this code, specifically output them here:
+            print "Neck tube: crate ", crate, " slot ",slot, " channel " , channel, " position " ,pos_, " direction ", dir_, " neck number ", neck_num
     else:
         # Not physical
         current_lcn = int(pmt[0])*16*32+int(pmt[1])*32+int(pmt[2])
@@ -209,7 +210,7 @@ timestamp: \"\",
 comment: \"\",
 """
 for key,value in new_data.iteritems():
-    infoText += key+": "+str(value)+","
+    infoText += key+": "+str(value)+", \n"
 infoText += """
 }
 """
