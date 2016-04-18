@@ -2,7 +2,8 @@
 # Author P G Jones - 12/03/2012 <p.g.jones@qmul.ac.uk>
 # Modified J R Wilson - 5/10/2015 <j.r.wilson@qmul.ac.uk>
 # This script converts the Noel csv file to the PMTINFO format
-# March 2016 - Now includes calculated Neck positions and mapping of Low Gain to physical PMTs via LCN
+# March 2016 - Now includes calculated Neck positions (may want to adjust these at a later date when exact install positions and mapping are known)
+#              and mapping of Low Gain to physical PMTs via LCN
 # March 2016 - There are now 5 tubes of type 0x13 which are normal tubes but with no petals - add an extra array for petal_status info and set these (alongside OWLs and Necks) to have 0=NONE, all other normal tubes have 1=STANDARD petals. At a later date we can add more petal classifications and implement an aging model...
 import optparse
 import sys
@@ -88,7 +89,9 @@ def neck_pos_dir(num_):
     pos_dir_ = numpy.array([-99999.0,-99999.0,-99999.0,-9999.0,-9999.0,-9999.0])
     # These are calculated based on UI drawings
     # https://www.snolab.ca/snoplus/private/DocDB/0003/000323/004/XDE1216D_October%2019th%20Revision.pdf
+    # Page 6 XDE1228
     # convert from inches to mm *25.4
+    # z position comes from p1 and assumes face of PMT level with top of UI - may need adjustment in future !!!! FIXME !!!!
     # Check units - have increase by order of mag as think in cm not mm (need to be given in mm in detector units)
     if(num_ == 0):
         pos_dir_ = numpy.array([131., 524.,14340.1,0,0,1])
