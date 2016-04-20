@@ -36,6 +36,8 @@ def reformat_run_doc(doc, pass_no=0):
     run_range = [doc['run'], doc['run']]
     del doc['run']
     # Update doc
+    doc['index'] = ''
+    doc['type'] = 'TELLIE_RUN'
     doc['run_range'] = run_range
     doc['pass'] = pass_no
     doc['version'] = int(doc['version'])

@@ -292,3 +292,4 @@ except ImportError:
         copy = srm_copy
     else:
         raise Exception("No grid transfer methods available")
+copy = srm_copy
