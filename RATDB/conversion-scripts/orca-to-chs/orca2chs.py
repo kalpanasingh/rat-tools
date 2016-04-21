@@ -16,7 +16,7 @@ import sys
 import subprocess
 import tempfile
 import os
-import settings
+
 
 # The following is needed to access the available chstools in rat-tools
 if "RATTOOLS" in os.environ:
