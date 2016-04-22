@@ -2,7 +2,9 @@
 # Author P G Jones - 12/03/2012 <p.g.jones@qmul.ac.uk>
 # Modified J R Wilson - 5/10/2015 <j.r.wilson@qmul.ac.uk>
 # This script converts the Noel csv file to the PMTINFO format
-# Now includes calculated Neck positions and mapping of Low Gain to physical PMTs via LCN
+# March 2016 - Now includes calculated Neck positions (may want to adjust these at a later date when exact install positions and mapping are known)
+#              and mapping of Low Gain to physical PMTs via LCN
+# March 2016 - There are now 5 tubes of type 0x13 which are normal tubes but with no petals - add an extra array for petal_status info and set these (alongside OWLs and Necks) to have 0=NONE, all other normal tubes have 1=STANDARD petals. At a later date we can add more petal classifications and implement an aging model...
 import optparse
 import sys
 import csv
@@ -24,7 +26,7 @@ def noel_type_to_rat_type(type_):
         # PMT is active mask explains 0x03, 0x09, 0x21, 0x41 and 0x81
         print type_
         raise
-    elif type_ == '0x02' or type_ == '0x03':
+    elif type_ == '0x02' or type_ == '0x03' or type_ == '0x13':
         return 1 # Normal
     elif type_ == '0x08' or type_ == '0x09':
         return 5 # Neck
@@ -40,6 +42,31 @@ def noel_type_to_rat_type(type_):
         print type_
         #raise # Error?
 
+def noel_type_to_petal_status(type_):
+    """ Return the petal status for this type of tube."""
+    if type_ == '0x00':
+        return 0 # Spare, no petals
+    elif type_ == '0x01':
+        # PMT is active mask explains 0x03, 0x09, 0x21, 0x41 and 0x81
+        print type_
+        raise
+    elif type_ == '0x02' or type_ == '0x03':
+        return 1 # normal tube, normal petals
+    elif type_ == '0x13':
+        return 0 # Balck = no petals - special type of normal tube
+    elif type_ == '0x08' or type_ == '0x09':
+        return 0 # Neck, no concentrators
+    elif type_ == '0x10':
+        return 0 # FECD
+    elif type_ == '0x20' or type_ == '0x21':
+        return 0 # Low Gain
+    elif type_ == '0x40' or type_ == '0x41':
+        return 0 # OWL
+    elif type_ == '0x80' or type_ == '0x81':
+        return 0 # BUTT
+    else:
+        print type_
+
 def get_panel_dir(panel_num, panel_info):
     """ Return the panel direction."""
     for u, v, w, number in zip(panel_info["u"], panel_info["v"], panel_info["w"], panel_info["panel_number"]):
@@ -48,7 +75,7 @@ def get_panel_dir(panel_num, panel_info):
     raise # Not found the panel
 
 def is_physical(type_):
-    # DOn't build BUTTS at the moment, just normal, OWL and Neck
+    # Don't build BUTTS at the moment, just normal, OWL and Neck
     if(type_ == 1):
         return 1
     if(type_ == 5):
@@ -60,15 +87,20 @@ def is_physical(type_):
 
 def neck_pos_dir(num_):
     pos_dir_ = numpy.array([-99999.0,-99999.0,-99999.0,-9999.0,-9999.0,-9999.0])
-    # These are calculated based on UI drawings - see Jeanne's note book ;)
+    # These are calculated based on UI drawings
+    # https://www.snolab.ca/snoplus/private/DocDB/0003/000323/004/XDE1216D_October%2019th%20Revision.pdf
+    # Page 6 XDE1228
+    # convert from inches to mm *25.4
+    # z position comes from p1 and assumes face of PMT level with top of UI - may need adjustment in future !!!! FIXME !!!!
+    # Check units - have increase by order of mag as think in cm not mm (need to be given in mm in detector units)
     if(num_ == 0):
-        pos_dir_ = numpy.array([13.1, 52.4,14340.1,0,0,-1])
+        pos_dir_ = numpy.array([131., 524.,14340.1,0,0,1])
     elif(num_ == 1):
-        pos_dir_ = numpy.array([-36.4,3.2,14340.1,0,0,-1])
+        pos_dir_ = numpy.array([-364.,32.,14340.1,0,0,1])
     elif(num_ == 2):
-        pos_dir_ = numpy.array([35.6,0.,14340.1,0,0,-1])
+        pos_dir_ = numpy.array([356.,0.,14340.1,0,0,1])
     elif(num_ == 3):
-        pos_dir_ = numpy.array([29.8,-39.6,14340.1,0,0,-1])
+        pos_dir_ = numpy.array([298.,-396.,14340.1,0,0,1])
     # Only expect 4 neck tubes
     return pos_dir_
 
@@ -77,7 +109,7 @@ def neck_pos_dir(num_):
 with open(args[1], "r") as panel_info_file:
     panel_data = yaml.load(json_minify(panel_info_file.read(), False))
 
-f = open(args[0], "r")
+f = open(args[0], "rU")
 noel_file = csv.reader(f)
 # Add dictionary that will map PMT location to a list of PMTs at that location
 mapping = {}
@@ -94,7 +126,7 @@ for pmt in noel_file:
 f.seek(0)
 
 
-noel_file = csv.reader(open(args[0], "r"))
+noel_file = csv.reader(open(args[0], "rU"))
 new_data = {}
 new_data["x"] = [-99999.0]
 new_data["y"] = [-99999.0]
@@ -105,7 +137,8 @@ new_data["w"] = [-9999.0]
 new_data["panelnumber"] = [-1]
 new_data["pmt_type"] = [10]
 new_data["linked_lcn"] = [-9999]
-new_data["is_physical"] = [0]
+new_data["petal_status"] = [-9999]
+#new_data["is_physical"] = [0]  # Decide this is redundant to output
 #new_data["pmtid"] = []
 noel_file.next() # Ignore the first line
 neck_num = 0
@@ -135,6 +168,8 @@ for pmt in noel_file:
             pos_ = numpy.array([all[0], all[1], all[2]])
             dir_ = numpy.array([all[3], all[4], all[5]])
             neck_num =neck_num+1
+            # Since the positions and directions of the Neck tubes are assigned within this code, specifically output them here:
+            print "Neck tube: crate ", crate, " slot ",slot, " channel " , channel, " position " ,pos_, " direction ", dir_, " neck number ", neck_num
     else:
         # Not physical
         current_lcn = int(pmt[0])*16*32+int(pmt[1])*32+int(pmt[2])
@@ -155,7 +190,8 @@ for pmt in noel_file:
     if(noel_type_to_rat_type(pmt[9]) > -1):
         new_data["panelnumber"].append(panel_number)
         new_data["pmt_type"].append(noel_type_to_rat_type(pmt[9]))
-        new_data["is_physical"].append(is_physical_)
+        new_data["petal_status"].append(noel_type_to_petal_status(pmt[9]))
+#        new_data["is_physical"].append(is_physical_)
         new_data["x"].append(float(pos_[0])) # Convert cm to mm
         new_data["y"].append(float(pos_[1]))
         new_data["z"].append(float(pos_[2]))
@@ -177,7 +213,7 @@ timestamp: \"\",
 comment: \"\",
 """
 for key,value in new_data.iteritems():
-    infoText += key+": "+str(value)+","
+    infoText += key+": "+str(value)+", \n"
 infoText += """
 }
 """
