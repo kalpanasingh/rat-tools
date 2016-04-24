@@ -15,6 +15,10 @@ import tempfile
 import os
 import runtools
 
+# Check if the rat environment is set
+if "RATROOT" not in os.environ:
+    print "orca2run: please set RATROOT environment variable"
+    sys.exit()
 
 def file_check(filename):
     """Function to check a ratdb file
@@ -64,7 +68,7 @@ def main():
         print ("orca2run run {}: problem retrieving the ORCA configuration "
                "info").format(args.runnumber)
         return 1
-    # Create the temporary files to hold the RUN.ratdb and DATE.ratdb content
+    # Create the temporary files to hold the RUN.ratdb content
     with tempfile.NamedTemporaryFile() as runtempf:
         # Write the RUN.ratdb table to the temporary file
         runtools.write_run_document_to_file(args.runnumber, data,

@@ -11,7 +11,7 @@ IMPORTANT:
 Arguments
 Required:
 -n RUNNUMBER
-    The runnumber for which to upload the RUN.ratdb and DATE.ratdb
+    The runnumber for which to upload the RUN.ratdb file
 -u ORCADB username
     The username to access the ORCADB
 -p ORCADB password
