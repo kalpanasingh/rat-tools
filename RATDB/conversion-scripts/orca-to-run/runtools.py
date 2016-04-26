@@ -61,7 +61,7 @@ def write_run_document_to_file(runnumber, data, outfilename=None):
     ratdb_content = {
         'type': 'RUN',
         'version': 1,
-        'pass': 0,
+        'pass': -2,  # -2 passnumber means 'override'
         'run_range': runrange,
         'comment': '',
         'timestamp': '',
