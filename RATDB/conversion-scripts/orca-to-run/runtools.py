@@ -66,7 +66,7 @@ def write_run_document_to_file(runnumber, data, outfilename=None):
         'comment': '',
         'timestamp': '',
         'production': 'true',
-        'run_type': runtype,
+        'runtype': runtype,
         'start_time': starttime,
         'end_time': endtime
     }
