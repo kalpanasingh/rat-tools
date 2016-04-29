@@ -1,0 +1,30 @@
+# DQLL information conversion by G. Prior <gersende@lip.pt>
+# Inspired by orca-to-run/orca-to-chs scripts from F. Descamps
+
+Scripts that are designed to run near-line. They can be used to automatically create and upload the
+DQLL.ratdb files to the ratdb at a specified location.
+Defaults to http://localhost:5984.
+
+IMPORTANT:
+- Always supply the snoplus password between quotes.
+
+## dqll.py ##
+Arguments
+Required:
+-n RUNNUMBER
+    The runnumber for which to upload the DQLL.ratdb file
+-u ORCADB username
+    The username to access the ORCADB
+-p ORCADB password
+    The password to access the ORCADB !in quotes!
+
+Optional:
+-c ORCADB_SERVER
+    Where to grab the ORCA run configuration files from. Defaults to couch.snopl.us server with name orca
+-s RATDB_SERVER
+    Where to upload the ratdb files to. Defaults to http://localhost:5984.
+    IMPORTANT: please specify user:pass when using the snoplus servers. For example
+    http://user:pass@couch.snopl.us
+-d RATDB_NAME
+    The name of the ratdb data-base on RATDB_SERVER. Defaults to ratdb.
+    This means that the default database URL is http://localhost:5984/ratdb/.
