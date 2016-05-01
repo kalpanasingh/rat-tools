@@ -9,11 +9,11 @@ Author: Gersende Prior
 
 import argparse
 import sys
-#import subprocess
+import subprocess
 import tempfile
 import os
 import dqlltools
-
+import math
 import array
 import dateutil
 
@@ -21,9 +21,9 @@ from pprint import pprint
 from dateutil import parser
 
 # Check if the rat environment is set
-#if "RATROOT" not in os.environ:
-#    print "dqll: please set RATROOT environment variable"
-#    sys.exit()
+if "RATROOT" not in os.environ:
+    print "dqll: please set RATROOT environment variable"
+    sys.exit()
 
 def main():
     # Parse the arguments from call_dqll nearline client script
@@ -33,12 +33,11 @@ def main():
     parser.add_argument('-c', dest='orcadb_server', help='URL to CouchDB orca server', default='couch.snopl.us')
     parser.add_argument("-u", dest="orcadb_username", help="ORCADB Username", type=str, required=True)
     parser.add_argument("-p", dest="orcadb_password", help="ORCADB Password", type=str, required=True)
-    #parser.add_argument('-s', dest='ratdb_server', help='URL to CouchDB ratdb server', default='http://localhost:5984/')
-    #parser.add_argument('-d', dest='ratdb_name', help='Name of ratdb database on server', default='ratdb')
+    parser.add_argument('-s', dest='ratdb_server', help='URL to CouchDB ratdb server', default='http://localhost:5984/')
+    parser.add_argument('-d', dest='ratdb_name', help='Name of ratdb database on server', default='ratdb')
+    parser.add_argument('-j', dest='json_dir', help='Name of local json files directory', type=str, required=True) 
+    parser.add_argument('-k', dest='ratdb_dir', help='Name of local ratdb files directory', type=str, required=True) 
     args = parser.parse_args()
-
-    # Print runtype
-    print "Run type is {}".format(args.runtype)
 
     # Crate information
     numberofcrates = 19
@@ -57,8 +56,9 @@ def main():
         print "Preparing DQ LL info for run " + str(args.runnumber)
 
         # Create the DQ LL info database file
-        tablename = "run_{0}_dqll.json".format(args.runnumber)
-        
+        tablename = "{0}run_{1}_dqll.json".format(args.json_dir,args.runnumber)
+        print "JSON table path and name {0}".format(tablename)
+ 
         dbtable = open(tablename,'w')
         
         dqlltools.write_db_header(dbtable,args.runnumber)
@@ -73,9 +73,11 @@ def main():
 
         timecheck = dqlltools.write_db_times(dbtable,rundata)
 
-        if timecheck == 'false':
+        if timecheck < 0:
             sys.stderr.write("Failed while trying to retrieve run start/end time\n")
             sys.exit(1)
+        else:
+            duration = timecheck
             
         # Accessing the configuration document
         try:
@@ -194,26 +196,69 @@ def main():
         sys.exit(1)
 
     # Convert the JSON table in ratdb format
-    dqlltools.json_to_ratdb(tablename)   
- 
-    # Upload table only if good physics or good calibration run
-    # COMMENTED FOR NOW UNTIL SETTLED ON:
-    # - bit 22 set to 1 for compensation coils on or off
-    # - what format nearline will read exactly hex/bin/other ?         
-        #try:
-            # Run the command to upload the table to the 
-            # central ratdb location
-            # UNCOMMENT ONLY WHEN WE KNOW WHAT WE ARE DOING
-            #command = ["ratdb", "upload", "-s", args.ratdb_server, "-d",
-             #          args.ratdb_name, runtempf.name]
-            #subprocess.check_call(command)
-        #except subprocess.CalledProcessError:
-         #   print ("orca2run run {}: there was a problem uploading "
-          #         "the file").format(args.runnumber)
-           # return 4
+    dqlltools.json_to_ratdb(args.ratdb_dir,tablename)
 
+    # ratdbtable path and name
+    ratdbtable = "{0}run_{1}_dqll.ratdb".format(args.ratdb_dir,args.runnumber)   
+    
+    print "RATDB table path and name {0}".format(ratdbtable) 
+
+    # Physics runs (bit 2)
+    # Comp coils on/off (bit 22)
+    physics_bit22_0 = math.pow(2,2)
+    physics_bit22_1 = math.pow(2,22) + math.pow(2,2)
+    # Upload table for good physics runs at least 30 min long
+    if args.runtype == physics_bit22_0 or args.runtype == physics_bit22_1:
+        if duration > 1799:
+           print "Good physics run > 30 min, uploading ratdb table"  
+           #try:
+           #    command = ["ratdb", "upload", "-s", args.ratdb_server, "-d", args.ratdb_name, ratdbtable]
+           #    subprocess.check_call(command)
+           #except subprocess.CalledProcessError:
+           #    print ("dqll run {}: there was a problem uploading the file").format(args.runnumber)
+           #    return 1
+
+    # Deployed sources (bit 3)   
+    #  - PCA y/n (bit 14)
+    #  - Comp coils on/off (bit 22)
+    deployedsource_bit22_0 = math.pow(2,3)
+    deployedsource_bit22_1 = math.pow(2,22) + math.pow(2,3)
+    deployedsource_pca_bit22_0 = math.pow(2,14) + math.pow(2,3)
+    deployedsource_pca_bit22_1 = math.pow(2,22) + math.pow(2,14) + math.pow(2,3)  
+    if args.runtype == deployedsource_bit22_0 or args.runtype == deployedsource_bit22_1 \
+       or args.runtype == deployedsource_pca_bit22_0 or args.runtype == deployedsource_pca_bit22_1:
+       print "Good deployed source run, uploading ratdb table"
+
+    # External sources (bit 4)
+    #  - TELLIE (bit 11) or SMELLIE (bit 12) or AMELLIE (bit 13)
+    #  - PCA y/n (bit 14) with TELLIE 
+    #  - Comp coils on/off (bit 22)
+    externalsource_tellie_bit22_0 = math.pow(2,11) + math.pow(2,4)
+    externalsource_tellie_bit22_1 = math.pow(2,22) + math.pow(2,11) + math.pow(2,4)
+    externalsource_tellie_pca_bit22_0 = math.pow(2,14) + math.pow(2,11) + math.pow(2,4)
+    externalsource_tellie_pca_bit22_1 = math.pow(2,22) + math.pow(2,14) + math.pow(2,11) + math.pow(2,4)
+    externalsource_smellie_bit22_0 = math.pow(2,12) + math.pow(2,4)
+    externalsource_smellie_bit22_1 = math.pow(2,22) + math.pow(2,12) + math.pow(2,4)
+    externalsource_amellie_bit22_0 = math.pow(2,13) + math.pow(2,4)
+    externalsource_amellie_bit22_1 = math.pow(2,22) + math.pow(2,13) + math.pow(2,4)
+    if args.runtype == externalsource_tellie_bit22_0 or args.runtype == externalsource_tellie_bit22_1 \
+       or args.runtype == externalsource_tellie_pca_bit22_0 or args.runtype == externalsource_tellie_pca_bit22_1 \
+       or args.runtype == externalsource_smellie_bit22_0 or args.runtype == externalsource_smellie_bit22_1 \
+       or args.runtype == externalsource_amellie_bit22_0 or args.runtype == externalsource_amellie_bit22_1:
+       print "Good external source run, uploading ratdb table"
+
+    # ECA (bit 5)
+    # - PDST (bit 15) or TSLOPE (bit 16)
+    # - Comp coils on/off (bit 22)
+    eca_pdst_bit22_0 = math.pow(2,15) + math.pow(2,5)
+    eca_pdst_bit22_1 = math.pow(2,22) + math.pow(2,15) + math.pow(2,5)
+    eca_tslope_bit22_0 = math.pow(2,16) + math.pow(2,5)
+    eca_tslope_bit22_1 = math.pow(2,22) + math.pow(2,16) + math.pow(2,5)
+    if args.runtype == eca_pdst_bit22_0 or args.runtype == eca_pdst_bit22_1 \
+       or args.runtype == eca_tslope_bit22_0 or args.runtype == eca_tslope_bit22_1:
+       print "Good ECA run, uploading ratdb table"
+     
     return 0  # Success!
-
 
 if __name__ == '__main__':
     print sys.exit(main())

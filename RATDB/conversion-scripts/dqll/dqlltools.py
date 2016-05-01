@@ -91,10 +91,10 @@ def get_run_document_from_db(runnumber, db_server, db_username, db_password):
 def write_db_times(table,data):
     """Write in table run start and end times and duration
     :params: The ORCA run document data for the run processed
-    :returns: true if run document properly filled, false otherwise
+    :returns: run duration in sec if ok if not any of the -999/-99/-9
     """
 
-    timeok = 'false'
+    duration = -999
 
     # Define Sudbury time zone
     sudburytimezone = pytz.timezone('US/Eastern')
@@ -116,8 +116,8 @@ def write_db_times(table,data):
 
     if not (timestartstring or timestampstartstring):
         table.write('start_time: "no start-of-run time information in the run document"\n')
-        timeok = 'false'
-        return timeok
+        duration = -9
+        return duration
     else:
 
         # Put the start time in correct format
@@ -148,12 +148,11 @@ def write_db_times(table,data):
         starttime =  timestampstart_obj.astimezone(sudburytimezone).isoformat()
         start_time = "\"start_time\": \"{0}\",\n".format(starttime)
         table.write(start_time)
-        timeok = 'true'
 
     if not (timeendstring or timestampendstring):
         table.write('end_time: "no end-of-run time information in the run document"\n')
-        timeok = 'false'
-        return timeok
+        duration = -99
+        return duration
     else:
 
         # Put the end time in correct format
@@ -184,17 +183,17 @@ def write_db_times(table,data):
         endtime = timestampend_obj.astimezone(sudburytimezone).isoformat()
         end_time = "\"end_time\": \"{0}\",\n".format(endtime)
         table.write(end_time)
-        timeok = 'true'
 
-    if timeok:
-        timestampdiff = timestampendstring - timestampstartstring
+    timestampdiff = timestampendstring - timestampstartstring
 
-        duration = "\"duration_seconds\": {0},\n".format(int(round(timestampdiff)))
-        table.write(duration)
+    duration = int(round(timestampdiff))
 
-        table.write("\n")
+    duration_sec = "\"duration_seconds\": {0},\n".format(int(round(timestampdiff)))
+    table.write(duration_sec)
 
-    return timeok
+    table.write("\n")
+
+    return duration
 
 def create_hv_status_a(data):
     """Retrieve the crate HV status (ON/OFF) from the orca runconfiguration document
@@ -366,7 +365,7 @@ def write_db_header(table,runnumber):
     """
 
     table.write('{\n')
-    table.write('"type": "DATAQUALITY_LOWLEVEL",\n')
+    table.write('"type": "DQLL",\n')
     table.write('"version": 1,\n')
     table.write('"index": "",\n')
     
@@ -374,7 +373,7 @@ def write_db_header(table,runnumber):
     table.write(runrange)
     
     table.write('"pass": 0,\n')
-    table.write('"production": false,\n')
+    table.write('"production": true,\n')
     table.write('"comment": "",\n')
 
     currentdatetime = datetime.datetime.now()
@@ -423,11 +422,14 @@ def file_jsoncheck(filename):
 
     return True
 
-def json_to_ratdb(filename):
+def json_to_ratdb(local_dir,filename):
     """Function to convert the JSON table to the ratdb format
+    :param: The local directory where to put the ratdb tables (string)
     :param: The name of the file to convert (string)
     :returns: nothing
-    """
+    """ 
+    ratdbdir = local_dir
+
     jsonfile = filename
 
     splitjson = jsonfile.split("_")
@@ -437,7 +439,7 @@ def json_to_ratdb(filename):
     print "Converting the JSON table to RATDb format for run " + str(runnumber)
 
     # Create the DQ LL table in ratdb format
-    ratdbfile = "run_{0}_dqll.ratdb".format(runnumber)
+    ratdbfile = "{0}run_{1}_dqll.ratdb".format(ratdbdir,runnumber)
         
     ratdbtable = open(ratdbfile,'w')
 
