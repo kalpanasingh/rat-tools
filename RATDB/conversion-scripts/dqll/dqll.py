@@ -266,12 +266,12 @@ def main():
     if args.runtype == eca_pdst_bit22_0 or args.runtype == eca_pdst_bit22_1 \
        or args.runtype == eca_tslope_bit22_0 or args.runtype == eca_tslope_bit22_1:
        print "Good ECA run, uploading ratdb table"
-      try:
-          command = ["ratdb", "upload", "-s", args.ratdb_server, "-d", args.ratdb_name, ratdbtable]
-          subprocess.check_call(command)
-      except subprocess.CalledProcessError:
-          print ("dqll run {0}: there was a problem uploading the ratdb file {1}").format(args.runnumber,ratdbtable)
-          return 1
+       try:
+           command = ["ratdb", "upload", "-s", args.ratdb_server, "-d", args.ratdb_name, ratdbtable]
+           subprocess.check_call(command)
+       except subprocess.CalledProcessError:
+           print ("dqll run {0}: there was a problem uploading the ratdb file {1}").format(args.runnumber,ratdbtable)
+           return 1
 
     return 0  # Success!
 
