@@ -57,7 +57,6 @@ def main():
 
         # Create the DQ LL info database file
         tablename = "{0}run_{1}_dqll.json".format(args.json_dir,args.runnumber)
-        print "JSON table path and name {0}".format(tablename)
  
         dbtable = open(tablename,'w')
         
@@ -201,8 +200,6 @@ def main():
     # ratdbtable path and name
     ratdbtable = "{0}run_{1}_dqll.ratdb".format(args.ratdb_dir,args.runnumber)   
     
-    print "RATDB table path and name {0}".format(ratdbtable) 
-
     # Physics runs (bit 2)
     # Comp coils on/off (bit 22)
     physics_bit22_0 = math.pow(2,2)
@@ -211,12 +208,12 @@ def main():
     if args.runtype == physics_bit22_0 or args.runtype == physics_bit22_1:
         if duration > 1799:
            print "Good physics run > 30 min, uploading ratdb table"  
-           #try:
-           #    command = ["ratdb", "upload", "-s", args.ratdb_server, "-d", args.ratdb_name, ratdbtable]
-           #    subprocess.check_call(command)
-           #except subprocess.CalledProcessError:
-           #    print ("dqll run {}: there was a problem uploading the file").format(args.runnumber)
-           #    return 1
+           try:
+               command = ["ratdb", "upload", "-s", args.ratdb_server, "-d", args.ratdb_name, ratdbtable]
+               subprocess.check_call(command)
+           except subprocess.CalledProcessError:
+               print ("dqll run {0}: there was a problem uploading the ratdb file {1}").format(args.runnumber,ratdbtable)
+               return 1
 
     # Deployed sources (bit 3)   
     #  - PCA y/n (bit 14)
@@ -228,6 +225,12 @@ def main():
     if args.runtype == deployedsource_bit22_0 or args.runtype == deployedsource_bit22_1 \
        or args.runtype == deployedsource_pca_bit22_0 or args.runtype == deployedsource_pca_bit22_1:
        print "Good deployed source run, uploading ratdb table"
+       try:
+           command = ["ratdb", "upload", "-s", args.ratdb_server, "-d", args.ratdb_name, ratdbtable]
+        subprocess.check_call(command)
+       except subprocess.CalledProcessError:
+           print ("dqll run {0}: there was a problem uploading the ratdb file {1}").format(args.runnumber,ratdbtable)
+           return 1
 
     # External sources (bit 4)
     #  - TELLIE (bit 11) or SMELLIE (bit 12) or AMELLIE (bit 13)
@@ -246,6 +249,12 @@ def main():
        or args.runtype == externalsource_smellie_bit22_0 or args.runtype == externalsource_smellie_bit22_1 \
        or args.runtype == externalsource_amellie_bit22_0 or args.runtype == externalsource_amellie_bit22_1:
        print "Good external source run, uploading ratdb table"
+       try:
+           command = ["ratdb", "upload", "-s", args.ratdb_server, "-d", args.ratdb_name, ratdbtable]
+           subprocess.check_call(command)
+       except subprocess.CalledProcessError:
+           print ("dqll run {0}: there was a problem uploading the ratdb file {1}").format(args.runnumber,ratdbtable)
+           return 1
 
     # ECA (bit 5)
     # - PDST (bit 15) or TSLOPE (bit 16)
@@ -257,7 +266,13 @@ def main():
     if args.runtype == eca_pdst_bit22_0 or args.runtype == eca_pdst_bit22_1 \
        or args.runtype == eca_tslope_bit22_0 or args.runtype == eca_tslope_bit22_1:
        print "Good ECA run, uploading ratdb table"
-     
+      try:
+          command = ["ratdb", "upload", "-s", args.ratdb_server, "-d", args.ratdb_name, ratdbtable]
+          subprocess.check_call(command)
+      except subprocess.CalledProcessError:
+          print ("dqll run {0}: there was a problem uploading the ratdb file {1}").format(args.runnumber,ratdbtable)
+          return 1
+
     return 0  # Success!
 
 if __name__ == '__main__':
