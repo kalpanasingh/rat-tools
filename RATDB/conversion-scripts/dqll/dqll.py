@@ -227,7 +227,7 @@ def main():
        print "Good deployed source run, uploading ratdb table"
        try:
            command = ["ratdb", "upload", "-s", args.ratdb_server, "-d", args.ratdb_name, ratdbtable]
-        subprocess.check_call(command)
+           subprocess.check_call(command)
        except subprocess.CalledProcessError:
            print ("dqll run {0}: there was a problem uploading the ratdb file {1}").format(args.runnumber,ratdbtable)
            return 1
