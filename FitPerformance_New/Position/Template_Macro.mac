@@ -1,0 +1,50 @@
+
+/rat/physics_list/OmitMuonicProcesses true
+/rat/physics_list/OmitHadronicProcesses true
+${ExtraDB}
+/rat/db/set MC thin_factor 3.5
+/rat/db/set DETECTOR geo_file "${GeoFile}"
+/rat/db/set GEO[inner_av] material "${ScintMaterial}"
+
+/run/initialize
+
+/rat/proc frontend
+/rat/proc trigger
+/rat/proc eventbuilder
+/rat/proc calibratePMT
+/rat/proc count
+/rat/procset update 50
+
+# If you want to test the position fitter part of the waterFitter/scintFitter, please use ONLY the position part below, not the overall waterFitter/scintFitter!
+# The full waterFitter/scintFitter do other things unrelated to the position fit, so leaving those parts out will help speed things up
+
+##### Position Fitter 1 #####
+/rat/proc fitter
+/rat/procset method "quad"
+/rat/proc fitter
+/rat/procset method "positionTimeLikelihood"
+/rat/procset optimiser "powell"
+/rat/procset selector "null"
+/rat/procset pdf "et1d"
+/rat/procset seed "quad"
+/rat/procset name "scintPositionFit"
+
+##### Position Fitter 2 #####
+/rat/proc fitter
+/rat/procset method "positionTimeLikelihood"
+/rat/procset optimiser "metaDriveCorrectSeed-powell"
+/rat/procset selector "modeCut"
+/rat/procset pdf "gv1d"
+/rat/procset seed "quad"
+/rat/procset name "waterPositionFit"
+
+/rat/proc outroot
+/rat/procset file "${OutFileName}"
+
+/generator/add combo gun:point:poisson
+${Generator}
+/generator/rate/set 1
+
+/rat/run/start ${NumberOfEvents}
+
+exit
