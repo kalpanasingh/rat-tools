@@ -49,6 +49,4 @@ if __name__=="__main__":
     parser.add_argument("--versions", dest="list_versions", help="Show list of possible versions", action="store_true")
     parser.add_argument("--modules", dest="list_modules", help="Show list of possible modules", action="store_true")
     
-    args = parser.parse_args()
-
-    lg.generate_list(args)
+    lg.generate_list(parser)

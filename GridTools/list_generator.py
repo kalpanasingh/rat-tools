@@ -276,10 +276,11 @@ def generate_list_by_version(version, data_type, module, run_range):
     return names, sizes, guids, adlers
 
 
-def generate_list(args):
+def generate_list(parser):
     '''Main function called by both production_list and processing_list
     '''
     global copy_type, server_list
+    args = parser.parse_args()
 
     if args.file_type not in allowed_file_types:
         print "Unknown filetype, allowed types are:"
@@ -331,6 +332,7 @@ def generate_list(args):
         names, sizes, guids, adlers = generate_list_by_version(args.version, args.file_type, args.module, args.run_range)   
     else:
         parser.print_help()
+        print "Incorrect usage; see help above"
         sys.exit()    
 
     # And write the output file
