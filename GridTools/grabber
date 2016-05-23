@@ -50,12 +50,6 @@ def download_file(directory, filename, guid, adler32, size, timeout):
             warn("Already downloaded: %s" % filename)
             return
     print "Downloading: %s" % filename
-    # Set a timeout based on the file size
-    # For lack of anything better, use 10 second for every MB + 60s basic
-    if size==0:
-        size = _GB # This is usually the max
-    if not timeout:
-        timeout = 60 + 10 * int(size / _MB)
     # Ensure correct guid format (some are missing prefix)
     if copy_type=="GUID" and not guid.startswith("guid:"):
         guid = "guid:" + guid
@@ -70,6 +64,7 @@ def download_sequence(destination, files, guids, adlers, sizes, timeout):
     """
     for i, f in enumerate(files):
         download_file(destination, f, guids[i], adlers[i], sizes[i], timeout)
+    print "Downloads complete"
 
 
 def download_parallel(destination, files, guids, adlers, sizes, streams, timeout):
@@ -98,6 +93,7 @@ def download_parallel(destination, files, guids, adlers, sizes, streams, timeout
             break
     if complete is True:
         pool.join()
+        print "Downloads complete"
 
 
 if __name__=="__main__":
@@ -106,11 +102,11 @@ if __name__=="__main__":
                         default="filelist.dat")
     parser.add_argument("-d", dest="dest", help="Directory to download files to. [downloaded]",
                         default="downloaded")
-    parser.add_argument("-p", dest="parallel", help="Parallel downloads", action="store_true")
+    parser.add_argument("--no_parallel", dest="no_parallel", help="Don't parallelise downloads", action="store_true")
     parser.add_argument("--streams", dest="streams", help="Parallel streams [10]",
                         type=int, default=10)
-    parser.add_argument("--timeout", dest="timeout", help="Override default timeout",
-                        type=int)
+    parser.add_argument("--timeout", dest="timeout", help="Override default timeout [3600s]",
+                        type=int, default=3600)
     args = parser.parse_args()
     # First, check for a proxy
     if not grid.proxy_time():
@@ -137,8 +133,7 @@ if __name__=="__main__":
             print "OK, quit!"
             sys.exit()
     # Now, download files   
-    if args.parallel:
+    if not args.no_parallel:
         download_parallel(args.dest, files, guids, adlers, sizes, args.streams, args.timeout)
     else:
         download_sequence(args.dest, files, guids, adlers, sizes, args.timeout)
-    print "Downloads complete"
