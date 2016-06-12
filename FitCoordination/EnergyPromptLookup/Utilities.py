@@ -14,7 +14,7 @@ from ROOT import RAT
 Positions = [0.0, 200.0, 400.0, 600.0, 800.0, 1000.0, 1200.0, 1400.0, 1600.0, 1800.0, 2000.0, 2200.0, 2400.0, 2600.0, 2800.0, 3000.0, 3200.0, 3400.0, 3600.0, 3800.0, 4000.0, 4200.0, 4400.0, 4600.0, 4800.0, 5000.0, 5200.0, 5400.0, 5600.0, 5800.0, 6000.0, 6200.0, 6400.0, 6600.0, 6800.0, 7000.0, 7200.0, 7400.0, 7600.0, 7800.0, 8000.0]
 ScintEnergies = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.5, 3.0, 3.5, 4.0, 5.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0, 18.0, 20.0] # Use these energies if using a scintillator-filled detector
 WaterEnergies = [3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 22.0, 24.0, 26.0, 28.0, 30.0, 32.0, 34.0, 36.0, 38.0, 40.0] # Use these energies if using a water-filled detector
-ScintTimeResidualWindow = [0.0, 30.0]
+ScintTimeResidualWindow = [0.0, 60.0]
 WaterTimeResidualWindow = [-10.0, 8.0]
 ScintSubfiles = 10
 WaterSubfiles = 20
@@ -36,12 +36,15 @@ def PromptNhitsVsEnergy(material):
     # Select which energies and time residual window to use based on the material in the detector
     energies = []
     time_residual_window = []
+    fitter = ""
     if material == "lightwater_sno":
         energies = WaterEnergies
         time_residual_window = WaterTimeResidualWindow
+        fitter = "waterResult"
     else:
         energies = ScintEnergies
         time_residual_window = ScintTimeResidualWindow
+        fitter = "scintFitter"
 
     nhitsTable = []
     histograms = []
@@ -98,11 +101,11 @@ def PromptNhitsVsEnergy(material):
             calibratedPMTs = ev.GetCalPMTs();
 
             # Check fit worked
-            if False in (ev.DefaultFitVertexExists(), ev.GetDefaultFitVertex().ContainsPosition(), ev.GetDefaultFitVertex().ValidPosition(), ev.GetDefaultFitVertex().ContainsTime(), ev.GetDefaultFitVertex().ValidTime()):
+            if False in (ev.FitResultExists(fitter), ev.GetFitResult(fitter).GetVertex(0).ContainsPosition(), ev.GetFitResult(fitter).GetVertex(0).ValidPosition(), ev.GetFitResult(fitter).GetVertex(0).ContainsTime(), ev.GetFitResult(fitter).GetVertex(0).ValidTime()):
                 continue
 
             # Get fitted event time
-            eventTime = ev.GetDefaultFitVertex().GetTime()
+            eventTime = ev.GetFitResult(fitter).GetVertex(0).GetTime()
 
             promptNhits = 0
             # Loop through calibrated PMTs
@@ -155,14 +158,17 @@ def PositionDirectionScaleFactor(material):
     time_residual_window = []
     subfiles = 0
     energy = 0.0
+    fitter = ""
     if material == "lightwater_sno":
         time_residual_window = WaterTimeResidualWindow
         subfiles = WaterSubfiles
         energy = 5.0
+        fitter = "waterResult"
     else:
         time_residual_window = ScintTimeResidualWindow
         subfiles = ScintSubfiles
         energy = 2.5
+        fitter = "scintFitter"
 
     # Calculate edges of position bins
     lowBins = [Positions[0]-(Positions[1]-Positions[0])/2]
@@ -210,9 +216,9 @@ def PositionDirectionScaleFactor(material):
             calibratedPMTs = ev.GetCalPMTs()
 
             # Check fit worked and positions close
-            if False in (ev.DefaultFitVertexExists(), ev.GetDefaultFitVertex().ContainsPosition(), ev.GetDefaultFitVertex().ValidPosition(), ev.GetDefaultFitVertex().ContainsTime(), ev.GetDefaultFitVertex().ValidTime()):
+            if False in (ev.FitResultExists(fitter), ev.GetFitResult(fitter).GetVertex(0).ContainsPosition(), ev.GetFitResult(fitter).GetVertex(0).ValidPosition(), ev.GetFitResult(fitter).GetVertex(0).ContainsTime(), ev.GetFitResult(fitter).GetVertex(0).ValidTime()):
                 continue # Didn't fit successfully
-            positionDiff = eventPosition - ev.GetDefaultFitVertex().GetPosition()
+            positionDiff = eventPosition - ev.GetFitResult(fitter).GetVertex(0).GetPosition()
             if positionDiff.Mag() > 1000.0:
                 continue # Position fit outside tolerace
 
@@ -226,7 +232,7 @@ def PositionDirectionScaleFactor(material):
                     HistogramTotal.Fill( eventPosition.Mag(), eventPosition.CosTheta() )
 
             # Get fitted time
-            eventTime = ev.GetDefaultFitVertex().GetTime()
+            eventTime = ev.GetFitResult(fitter).GetVertex(0).GetTime()
 
             # Loop through PMTs
             for ipmt in range(0, calibratedPMTs.GetCount()):
@@ -400,6 +406,16 @@ def PlotPositionDirectionScaleFactor(material):
 # Plot the time residuals
 def PlotHitTimeResiduals(material):
 
+    # Select which energy and fitter to use based on the material in the detector
+    energy = 0.0
+    fitter = ""
+    if material == "lightwater_sno":
+        energy = 5.0
+        fitter = "waterResult"
+    else:
+        energy = 2.5
+        fitter = "scintFitter"
+
     energy = 5.0
 
     infileName = material + "_P=" + str(int(0.0)) + "mm_E=" + str(int(energy * 1000)) + "keV_sf=0.root"
@@ -418,10 +434,10 @@ def PlotHitTimeResiduals(material):
             ev = ds.GetEV(iev)
 
             # Check fit worked
-            if not ev.DefaultFitVertexExists() or not ev.GetDefaultFitVertex().ContainsTime() or not ev.GetDefaultFitVertex().ValidTime():
+            if not ev.FitResultExists(fitter) or not ev.GetFitResult(fitter).GetVertex(0).ContainsTime() or not ev.GetFitResult(fitter).GetVertex(0).ValidTime():
                 continue
 
-            event_time = ev.GetDefaultFitVertex().GetTime()
+            event_time = ev.GetFitResult(fitter).GetVertex(0).GetTime()
             calibrated_pmts = ds.GetEV(iev).GetCalPMTs()
             for ipmt in range(0, calibrated_pmts.GetCount()):
                 pmt_cal = calibrated_pmts.GetPMT(ipmt)

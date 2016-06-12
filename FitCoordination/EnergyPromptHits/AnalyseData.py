@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import string, ROOT, Utilities, sys, os
-# Author J Walker - 28/09/2015 <john.walker@liverpool.ac.uk>
+# Author J Walker - 23/04/2015 <john.walker@liverpool.ac.uk>
+# Revision history: 2015-07-08 J. Walker: Removing EOL spaces from output file and switching comment/timestamp
+# Revision history: 2015-07-15 J. Walker: Modifying to allow for scintillator material
 
 
 def AnalyseRootFiles(options):
@@ -33,26 +35,24 @@ def AnalyseRootFiles(options):
         os.system("python -c 'import AnalyseData; AnalyseData.AnalysisFunction(\"" + options.index + "\", \"" + options.innerAVMaterial + "\")'")
 
 
-# returns the Nhits vs. Position/Energy table
+# returns the parameters for the Energy Prompt Lookup fitter in the form of a RATDB entry
 def AnalysisFunction(index, material):
 
-    # Select which energies to use based on the material in the detector
-    energies = []
+    # Select which time window to use based on the material in the detector
+    time_residual_window = []
     if material == "lightwater_sno":
-        energies = Utilities.WaterEnergies
+        time_residual_window = Utilities.WaterTimeResidualWindow
     else:
-        energies = Utilities.ScintEnergies
-
-    nPhotonsTable = Utilities.PredictedNCerenkovVsEnergy(material)[0]
+        time_residual_window = Utilities.ScintTimeResidualWindow
 
     outFileName = "AnalyseData_Output.txt"
     outFile = open(outFileName, "w")
 
-    outFile.write("\n \n")
-    outFile.write("Please place the table below into the database file: FIT_ENERGY_LOOKUP.ratdb located in rat/data. The index the table fits into is given below.")
+    outFile.write("\n\n")
+    outFile.write("Please place the text below into the database file: FIT_ENERGY_PROMPT_HITS.ratdb located in rat/data, replacing any existing entry with the same index.")
     outFile.write("\n\n")
     outFile.write("{\n")
-    outFile.write("type: \"FIT_ENERGY_RSP\",\n")
+    outFile.write("type: \"FIT_ENERGY_PROMPT_HITS\",\n")
     outFile.write("version: 1,\n")
     outFile.write("index: \"" + index + "\",\n")
     outFile.write("run_range: [0, 0],\n")
@@ -61,18 +61,19 @@ def AnalysisFunction(index, material):
     outFile.write("timestamp: \"\",\n")
     outFile.write("\n")
 
-    outFile.write("predicted_nphotons_energy: [0.0, ")
-    for nPhotons in nPhotonsTable:
-        outFile.write(str('%.4f' % nPhotons) + ", ")
-    outFile.write("],\n")
-    outFile.write("\n")
+    outFile.write("// prompt light time window\n")
+    outFile.write("prompt_window: [ " + str('%.1f' % time_residual_window[0]) + ", " + str('%.1f' % time_residual_window[1]) + "],\n")
+    outFile.write("// number of working PMTs at the time of coordination\n")
+    outFile.write("working_pmts: " + str('%.1f' % Utilities.WorkingPMTs(material)) + ",\n")
+    outFile.write("// prompt hits per MeV\n")
+    outFile.write("nprompt_per_mev: " + str('%.4f' % Utilities.PromptNhits(material)[0]) + ",\n")
 
     outFile.write("}\n")
     outFile.write("\n")
 
     outFile.close()
 
-    print "The coordeination results have been written to \"AnalyseData_Output.txt\""
+    print "The coordination results have been written to \"AnalyseData_Output.txt\""
 
 
 import optparse

@@ -6,11 +6,46 @@
 /rat/proc count
 /rat/procset update 100
 
-/rat/proc waterFitter
+# quadFitter
+/rat/proc fitter
+/rat/procset method "quad"
+/rat/procset name "seedResult"
 
+# simpleDirection
+/rat/proc fitter
+/rat/procset method "simpleDirection"
+/rat/procset seed "seedResult"
+/rat/procset name "waterResult"
+
+# positionTimeLikelihood
+/rat/proc fitter
+/rat/procset method "positionTimeLikelihood"
+/rat/procset optimiser "metaDriveCorrectSeed-powell"
+/rat/procset pdf "gv1d-lightwater-sno"
+/rat/procset seed "waterResult"
+/rat/procset selector "modeCut"
+/rat/procset name "waterResult"
+
+# positionTimeDirectionLikelihood
+/rat/proc fitter
+/rat/procset method "positionTimeDirectionLikelihood"
+/rat/procset optimiser "simulatedAnnealing"
+/rat/procset pdf "positionDirectionPDF"
+/rat/procset seed "waterResult"
+/rat/procset selector "modeCut"
+/rat/procset name "waterResult"
+
+# energyPromptLookup
+/rat/proc fitter
+/rat/procset method "energyPromptLookup"
+/rat/procset seed "waterResult"
+/rat/procset name "waterResult"
+
+# energyRSP
 /rat/proc fitter
 /rat/procset method "energyRSP"
-/rat/procset seed "waterFitter"
+/rat/procset seed "waterResult"
+/rat/procset name "waterResult"
 
 /rat/proc outroot
 /rat/procset file "${FileName}"
