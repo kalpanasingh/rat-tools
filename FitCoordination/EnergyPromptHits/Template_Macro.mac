@@ -1,0 +1,25 @@
+
+/rat/physics_list/OmitMuonicProcesses true
+/rat/physics_list/OmitHadronicProcesses true
+${ExtraDB}
+/rat/db/set DETECTOR geo_file "${GeoFile}"
+/rat/db/set GEO[inner_av] material "${InnerAVMaterial}"
+
+/run/initialize
+
+/rat/proc frontend
+/rat/proc trigger
+/rat/proc eventbuilder
+/rat/proc calibratePMT
+/rat/proc count
+/rat/procset update 100
+/rat/proc ${Fitter}
+
+/rat/proc outroot
+/rat/procset file "${FileName}"
+
+${Generator}
+/generator/rate/set 1
+
+/rat/run/start 1000
+exit
