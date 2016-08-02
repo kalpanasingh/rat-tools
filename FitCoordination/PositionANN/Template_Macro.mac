@@ -1,0 +1,39 @@
+
+/rat/physics_list/OmitMuonicProcesses true
+${Hadrons}
+${ExtraDB}
+/rat/db/set MC thin_factor 3.5
+/rat/db/set DETECTOR geo_file "${GeoFile}"
+/rat/db/set GEO[inner_av] material "${ScintMaterial}"
+
+/run/initialize
+
+/rat/proc frontend
+/rat/proc trigger
+/rat/proc eventbuilder
+/rat/proc calibratePMT
+/rat/proc count
+/rat/procset update 100
+
+/rat/proc outroot
+
+# Fill the inner_av central region with
+# even sampling in radius
+
+/generator/add combo ${Generator}:fillrpower:poisson
+/generator/vtx/set ${Vertex}
+/generator/pos/set 0 0 0 6005.0 1
+/generator/rate/set 1
+
+# Fill the neck (start at 6010 mm to ensure
+# nothing in the bulk is filled) up to 8000 mm.
+# Use a lower rate to account for the smaller
+# radius range (~ 2000/6000)
+/generator/add combo ${Generator}:fillshell:poisson
+/generator/vtx/set ${Vertex}
+/generator/pos/set 0 0 0 6010.0 8000.0 inner_av
+/generator/rate/set 0.3
+
+/rat/run/start 1000
+
+exit
