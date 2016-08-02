@@ -5,9 +5,7 @@ ${ExtraDB}
 /rat/db/set MC thin_factor 3.5
 /rat/db/set DETECTOR geo_file "${GeoFile}"
 /rat/db/set GEO[inner_av] material "${ScintMaterial}"
-/rat/db/set QUAD_FIT[${ScintMaterial}] light_speed ${Speed}
-# Use the line below if you intend to use an unknown material, and comment out the line above this comment
-#/rat/db/set QUAD_FIT light_speed ${Speed}
+/rat/db/set ${SpeedDB}
 
 /run/initialize
 

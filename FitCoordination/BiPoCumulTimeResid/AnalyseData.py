@@ -124,6 +124,13 @@ def GetCDFVector(energyLow, energyHigh, numberOfBins):
             continue
         ev = ds.GetEV(0)
 
+        if not ev.FitResultExists("scintFitter"):
+            continue
+        if not ev.GetFitResult("scintFitter").GetValid():
+            continue
+        if not ev.GetFitResult("scintFitter").GetVertex(0).ContainsPosition():
+            continue
+
         vertPos = ev.GetFitResult("scintFitter").GetVertex(0).GetPosition()
         if (vertPos.Mag() < fidVolLow) or (vertPos.Mag() >= fidVolHigh):
             continue

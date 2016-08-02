@@ -53,12 +53,15 @@ def AnalysisFunction(index, isotope):
     for currentTime in range(int(minTimeResid), int(maxTimeResid)):
         times.append(currentTime)
     
-    timeResidsTe = GetTimeResidsVector("130Te_NDBD.root", numberOfBins)
-    timeResidsBi = GetTimeResidsVector(isotope + "Bi_Beta.root", numberOfBins)
-    timeResidsPo = GetTimeResidsVector(isotope + "Po_Alpha.root", numberOfBins)
-    meanAlphaNhits = GetMeanNhits(isotope + "Po_Alpha.root")
+    timeResidsTe = GetTimeResidsVector("Te130_NDBD.root", numberOfBins)
+    timeResidsBi = GetTimeResidsVector("Bi_Beta" + isotope + ".root", numberOfBins)
+    timeResidsPo = GetTimeResidsVector("Po_Alpha" + isotope + ".root", numberOfBins)
+    meanAlphaNhits = GetMeanNhits("Po_Alpha" + isotope + ".root")
 	
     ##############################
+
+    # For BiPoLikelihoodDiff RATDB index is a combination of material and mass number
+    index = index + "_" + isotope + "BiPo"
 	
     print "\n"
     print "Please place the text below into the database file: CLASSIFIER_BIPO_LIKELIHOODDIFF.ratdb located in rat/data, replacing any existing entry with the same index."
@@ -167,6 +170,13 @@ def GetMeanNhits(infileName):
         if ds.GetEVCount() == 0:
             continue
         ev = ds.GetEV(0)
+
+        if not ev.FitResultExists("scintFitter"):
+            continue
+        if not ev.GetFitResult("scintFitter").GetValid():
+            continue
+        if not ev.GetFitResult("scintFitter").GetVertex(0).ContainsPosition():
+            continue
 
         vertPos = ev.GetFitResult("scintFitter").GetVertex(0).GetPosition()
         if (vertPos.Mag() < fidVolLow) or (vertPos.Mag() >= fidVolHigh):

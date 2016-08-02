@@ -52,6 +52,9 @@ def GetHParameterAtCentre(material):
         hHist = ROOT.TH1F(CentralHistname(energy), ";H parameter", 10000, 0, 10000)
         for ds, run in rat.dsreader(infilename):
             
+            if ds.GetEVCount() == 0:
+                continue
+
             segmentor = rat.utility().GetSegmentor()
             segmentor.SetNumberOfDivisions(NumberOfSegments)
             rawPMTSegmentIDs = segmentor.GetSegmentIDs()

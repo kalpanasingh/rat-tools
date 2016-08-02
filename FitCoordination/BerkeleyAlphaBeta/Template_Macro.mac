@@ -2,6 +2,7 @@ ${ExtraDB}
 
 /rat/db/set DETECTOR geo_file "${GeoFile}"
 /rat/db/set GEO[inner_av] material "${ScintMaterial}"
+/rat/db/set MC thin_factor 3.5
 
 /run/initialize
 
@@ -12,7 +13,17 @@ ${ExtraDB}
 /rat/proc count
 /rat/procset update 50
 
-/rat/proc scintFitter
+/rat/proc fitter
+/rat/procset method "quad"
+/rat/proc fitter
+/rat/procset method "positionTimeLikelihood"
+/rat/procset pdf "et1d"
+/rat/procset optimiser "powell"
+/rat/procset seed "quad"
+/rat/procset name "posTime"
+
+/rat/proc prune
+/rat/procset prune "mc"
 
 /rat/proc outroot
 /rat/procset file "${OutFileName}"

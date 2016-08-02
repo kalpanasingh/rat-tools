@@ -44,7 +44,7 @@ def AnalysisFunction(particle, material):
     for particleIndex, particleName in enumerate(particleNames):
         for pulseIndex, pulseDescription in enumerate(Utilities.ParticlePulseDict[particleName]):
             infileName = particleName + pulseDescription
-            fileInfo = Utilities.ProduceTimeResAndEnergyPDF(infileName+".root")
+            fileInfo = Utilities.ProduceTimeResAndEnergyPDF(infileName+"*.root")
             pdfs[infileName] = fileInfo[0]
             energies[infileName] = fileInfo[1]
             if (infileName.find("Bi")!=-1): #The Bi212 file has beta energies

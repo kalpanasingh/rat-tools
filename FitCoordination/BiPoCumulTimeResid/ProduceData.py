@@ -2,7 +2,7 @@
 import os, sys, string
 # Author K Majumdar - 05/09/2014 <Krishanu.Majumdar@physics.ox.ac.uk>
 
-outfileName = "130Te_NDBD"
+outfileName = "Te130_NDBD"
 
 
 def ProduceRunMacros(options):
