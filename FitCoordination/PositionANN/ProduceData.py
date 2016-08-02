@@ -25,14 +25,19 @@ def ProduceRunMacros(options):
     inFile2.close()
     
     # Generate the two macros (one for alphas, one for betas)
-    macros = {"NearAVANNAlphas.mac": {"generator": "gun", "vertex": "alpha 0 0 0 5.3"},
-              "NearAVANNBetas.mac": {"generator": "gun2", "vertex": "e- 0 0 0 0 0.2 3.0"}}
+    macros = {"NearAVANNAlphas.mac": {"generator": "gun",
+                                      "vertex": "alpha 0 0 0 5.3",
+                                      "hadrons": ""},
+              "NearAVANNBetas.mac": {"generator": "gun2",
+                                     "vertex": "e- 0 0 0 0 0.2 3.0",
+                                     "hadrons": "/rat/physics_list/OmitHadronicProcesses true"}}
     for macroName, config in macros.iteritems():
         outText1 = rawText1.substitute(ExtraDB = extraDB,
                                        GeoFile = options.geoFile,
                                        ScintMaterial = options.scintMaterial,
                                        Generator = config["generator"],
-                                       Vertex = config["vertex"])
+                                       Vertex = config["vertex"],
+                                       Hadrons = config["hadrons"])
         outFile1 = open(macroName, "w")
         outFile1.write(outText1)
         outFile1.close()

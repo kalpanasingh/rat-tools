@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-import os, sys, string, ROOT
+import os, sys, string, ROOT, rat
+from ROOT import RAT
 
 
 def CreateRootTrees(options):
@@ -49,7 +50,7 @@ def RunCreateTree(time, angle):
 
 import argparse
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(usage = "usage: %prog [options] target", version = "%prog 1.0")
+    parser = argparse.ArgumentParser()
     parser.add_argument("-b", type = str, dest = "batch", help = "Run the analysis in Batch mode")
     parser.add_argument("-i", type = str, dest = "index", help = "RATDB index to place result.", default = "")
     parser.add_argument("-t", type = int, dest = "times", help = "Timing bins", nargs = "+", default = [20])

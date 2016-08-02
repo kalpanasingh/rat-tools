@@ -112,18 +112,17 @@ def predict_ann(input_data, input_mlp, draw=False, use_mc=True, cut_data=True):
 
 def write_line(f, line):
     '''Write to file and to screen, add line endings for the file'''
-    print line
     f.write('{0}\n'.format(line))
 
 
-def save_ratdb(input_mlp, output_ratdb, n_dots, n_times):
+def save_ratdb(input_mlp, output_ratdb, output_index, n_dots, n_times):
     '''Save the ANN parameters to a ratdb format file
     '''
     mlp = joblib.load(input_mlp)
     with open(output_ratdb, 'wb') as f:
         write_line(f, '{')
         write_line(f, '"type": "FIT_POSITION_ANN",')
-        write_line(f, '"index": "labppo_scintillator",')
+        write_line(f, '"index": "{0}",'.format(output_index))
         write_line(f, '"version": 1,')
         write_line(f, '"pass": 0,')
         write_line(f, '"comment": "",')
@@ -157,6 +156,7 @@ if __name__=="__main__":
     parser.add_argument("-h1", type = int, dest = "h1", help = "Hidden layer 1 nodes", default = 20)
     parser.add_argument("-h2", type = int, dest = "h2", help = "Hidden layer 2 nodes", default = 5)
     parser.add_argument("-r", type = str, dest = "ratdb", help = "RATDB filename", default = "FIT_POSITION_ANN_COORD.ratdb")
+    parser.add_argument("-i", type = str, dest = "index", help = "RATDB index (material)")
     (args) = parser.parse_args()
 
     mlp_filename = "mlps/mlp_t_{t}_a_{a}_h1_{h1}_h2_{h2}.pkl".format(t = args.times, a = args.angles,
@@ -174,5 +174,5 @@ if __name__=="__main__":
     print "ANN score on alphas (should be above 0.90):", score_alphas
     
     # Print to file
-    save_ratdb(mlp_filename, args.ratdb, args.angles, args.times)
+    save_ratdb(mlp_filename, args.ratdb, args.index, args.angles, args.times)
     print "RATDB saved in", args.ratdb
