@@ -2,7 +2,6 @@
 import os, sys, string
 # Author K Majumdar - 05/09/2014 <Krishanu.Majumdar@physics.ox.ac.uk>
 
-
 def ProduceRunMacros(options):
     
     if (options.isotope == ""):
@@ -31,41 +30,43 @@ def ProduceRunMacros(options):
     inFile2.close()
 	
     ##############################
+
+    outfileNameTe = "Te130_NDBD"
 	
     outTextTe1 = rawText1.substitute(Hadrons = "/rat/physics_list/OmitHadronicProcesses true",
                                      ExtraDB = extraDB,
                                      GeoFile = options.geoFile,
                                      ScintMaterial = options.scintMaterial,
-                                     FileName = "130Te_NDBD.root",
+                                     FileName = outfileNameTe + ".root",
                                      Generator = "gun",
                                      Vertex = "e- 0 0 0 2.527")
-    outFileTe1 = open("130Te_NDBD.mac", "w")
+    outFileTe1 = open(outfileNameTe + ".mac", "w")
     outFileTe1.write(outTextTe1)
     outFileTe1.close()
 
-    print "Running 130Te_NDBD.mac and generating 130Te_NDBD.root"
+    print "Running " + outfileNameTe + ".mac and generating " + outfileNameTe + ".root"
 	            
     # Run the macro on a Batch system
     if options.batch:
         outTextTe2 = rawText2.substitute(Preamble = "\n".join(s for s in batch_params['preamble']),
                                          Ratenv = batch_params['ratenv'],
                                          Cwd = os.environ['PWD'].replace("/.", "/"),
-                                         RunCommand = "rat 130Te_NDBD.mac")
-        outFileTe2 = open("130Te_NDBD.sh", "w")
+                                         RunCommand = "rat " + outfileNameTe + ".mac")
+        outFileTe2 = open(outfileNameTe + ".sh", "w")
         outFileTe2.write(outTextTe2)
         outFileTe2.close()
 
-        os.system(batch_params["submit"] + " 130Te_NDBD.sh")
+        os.system(batch_params["submit"] + " " + outfileNameTe + ".sh")
 				
     # Else run the macro locally on an interactive machine				
     else:
-        os.system("rat 130Te_NDBD.mac")
+        os.system("rat " + outfileNameTe + ".mac")
         # delete the macro when running is complete
-        os.remove("130Te_NDBD.mac")
+        os.remove(outfileNameTe + ".mac")
 		
     ##############################
 	
-    outfileNameBi = options.isotope + "Bi_Beta"
+    outfileNameBi = "Bi_Beta" + options.isotope
 	
     outTextBi1 = rawText1.substitute(Hadrons = "/rat/physics_list/OmitHadronicProcesses true",
                                      ExtraDB = extraDB,
@@ -100,7 +101,7 @@ def ProduceRunMacros(options):
 		
     ##############################
 	
-    outfileNamePo = options.isotope + "Po_Alpha"
+    outfileNamePo = "Po_Alpha" + options.isotope
 	
     outTextPo1 = rawText1.substitute(Hadrons = "",
                                      ExtraDB = extraDB,

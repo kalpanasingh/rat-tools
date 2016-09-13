@@ -27,5 +27,5 @@ ${Vertex}
 /generator/pos/set 0 0 0
 /generator/rate/set 1
 
-/rat/run/start 50000
+/rat/run/start 5000
 exit

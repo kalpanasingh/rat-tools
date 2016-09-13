@@ -24,8 +24,6 @@ This method first runs the ProduceData.py script, which generates a set of rootf
 Once this is done, the AnalyseData.py script automatically begins.  
 The coordination results are written to screen - there will be a complete RATDB entry that should be placed in the EFFECTIVE_VELOCITY.ratdb located in rat/data, replacing any existing entry with the same index.  
 
-Note: this coordinator can be used to find the effective speed of an unknown material, by taking "labppo_scintillator" as a starting point and proceeding from there.  
-If this is desired, please follow the instructions given in the comments of the Template_Macro.mac file.  
 
 -------------------------
 

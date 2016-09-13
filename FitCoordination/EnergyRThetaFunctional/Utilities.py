@@ -5,7 +5,7 @@ import math
 # Secondary functions and user-defined Values for the EnergyRThetaFunctional Coordinator
 # Author M Mottram - <m.mottram@qmul.ac.uk>
 
-CentralEnergies = [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0, 10.0]
+CentralEnergies = [0.1, 0.2, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0, 10.0]
 LookupEnergy = 1.0
 
 CentralHistFilename = "hAtCentre.root"
@@ -52,6 +52,9 @@ def GetHParameterAtCentre(material):
         hHist = ROOT.TH1F(CentralHistname(energy), ";H parameter", 10000, 0, 10000)
         for ds, run in rat.dsreader(infilename):
             
+            if ds.GetEVCount() == 0:
+                continue
+
             segmentor = rat.utility().GetSegmentor()
             segmentor.SetNumberOfDivisions(NumberOfSegments)
             rawPMTSegmentIDs = segmentor.GetSegmentIDs()
@@ -80,16 +83,8 @@ def GetHParameterAtCentre(material):
         hGraph.SetPoint(i, energy, hHist.GetFunction("gaus").GetParameter(1))
         hGraph.SetPointError(i, 0, hHist.GetFunction("gaus").GetParError(1))
 
-    hFit = ROOT.TF1("hFit", "x*[0]", CentralEnergies[0], CentralEnergies[-1]+1.0)
-    hGraph.Fit(hFit)
-
     hGraph.SetName("grHVsEnergy")
     hGraph.Write()
-
-    hFit.Write()
-
-    hFile.Close()
-
 
 
 def CreateHMap(material):
@@ -98,8 +93,8 @@ def CreateHMap(material):
 
     # First, get the central H value
     hCentralFile = ROOT.TFile(CentralHistFilename, "read")
-    centralFit = hCentralFile.Get("hFit")
-    centralH = centralFit.Eval(LookupEnergy)
+    centralGr = hCentralFile.Get("grHVsEnergy")
+    centralH = centralGr.Eval(LookupEnergy)
 
     hFile = ROOT.TFile(MapHistFilename, "recreate")
 
@@ -234,7 +229,9 @@ def PrintRATDB(material):
     centralFile = ROOT.TFile(CentralHistFilename, "read")
     mappingFile = ROOT.TFile(MapHistFilename, "read")
     # Fit is of the form H = [0] * E
-    centralFit = centralFile.Get("hFit")
+    centralGr = centralFile.Get("grHVsEnergy")
+    h_energies = [0] + [e for e in CentralEnergies]
+    h_at_energy = [0] + [centralGr.Eval(e) for e in CentralEnergies]
     # Fit1 and Fit2 are both pol3s
     mappingFits1 = [mappingFile.Get("f1_%s" % (int(theta*1000))) for theta in ThetaValues]
     mappingFits2 = [mappingFile.Get("f2_%s" % (int(theta*1000))) for theta in ThetaValues]
@@ -249,7 +246,8 @@ def PrintRATDB(material):
     print "timestamp: \"\","
     print "comment: \"\","
     print "r_cutoff: %s," % 6000.0
-    print "h_per_MeV: %s," % centralFit.GetParameter(0)
+    print "h_energies: [%s]," % (", ".join(str(e) for e in h_energies))
+    print "h_at_energy: [%s]," % (", ".join(str(h_at_e) for h_at_e in h_at_energy))
     print "thetas: [%s]," % (", ".join(str(theta) for theta in ThetaValues))
     print "r_piecewise: %s," % mappingFits2[0].GetParameter(1)
     # The offset of f1 is always 1, but print to the table anyway for consistency

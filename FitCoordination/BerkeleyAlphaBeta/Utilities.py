@@ -9,7 +9,7 @@ AlphaEnergy = 50.0      #energy of alphas to simulate
 BetaEnergy = 5.0        #energy of betas to simulate
 
 TotalEvents = 100000    #total events to simulate per particle
-Batches = 10            #number of simulations to run to achieve TotalEvents
+Batches = 50           #number of simulations to run to achieve TotalEvents
 
 #power up RAT
 
@@ -48,9 +48,9 @@ def BinHitTimeResiduals(filenames, timeFirst = -200.0, timeLast = 1000.0, timeSt
                 if retrigger:
                     eventTime -= (curTime - lastTime).GetNanoSeconds();
                 else:
-                    if ev.FitResultExists("scintFitter"):
-                        eventPos = ev.GetFitResult("scintFitter").GetVertex(0).GetPosition()
-                        eventTime = ev.GetFitResult("scintFitter").GetVertex(0).GetTime()
+                    if ev.FitResultExists("posTime"):
+                        eventPos = ev.GetFitResult("posTime").GetVertex(0).GetPosition()
+                        eventTime = ev.GetFitResult("posTime").GetVertex(0).GetTime()
                     else:
                         eventPos = None
                         eventTime = None
