@@ -67,7 +67,7 @@ def get_list_by_module_version(data_type, module, rat_version, run_range):
     adlers = []
     rows = database.view("_design/proddata/_view/data_by_mod_pass_sr",
                    startkey = [data_type, module, rat_version],
-                   endkey = [data_type, module, rat_version+"_"],
+                   endkey = [data_type, module, rat_version, {}],
                    reduce=False)
     for row in rows:
         if copy_type=="GUID":
@@ -101,8 +101,8 @@ def get_list_by_label_module(data_type, label, module, run_range):
     sizes = []
     guids = []
     adlers = []
-    startkey = [label, module]
-    endkey = [label, module+"_"]
+    startkey = [data_type, label, module]
+    endkey = [data_type, label, module, {}]
     if run_range:        
         startkey = [data_type, label, module, run_range[0]]
         endkey = [data_type, label, module, run_range[1]+1] # range inclusive    
