@@ -14,7 +14,7 @@ ${ExtraDB}
 /rat/proc calibratePMT
 /rat/proc count
 /rat/procset update 100
-/rat/proc ${Fitter}
+${Fitter}
 
 /rat/proc outroot
 /rat/procset file "${FileName}"
