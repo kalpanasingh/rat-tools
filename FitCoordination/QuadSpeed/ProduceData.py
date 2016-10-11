@@ -12,7 +12,7 @@ def ProduceRunMacros(options):
     db.LoadAll(os.environ["GLG4DATA"], "*QUAD*.ratdb")
     if options.loadDB:
         db.LoadAll(options.loadDB, "*.ratdb")
-    link = db.GetLink("FIT_QUAD", options.scintMaterial)
+    link = db.GetLink("QUAD_FIT", options.scintMaterial)
     try:
         link.GetD("light_speed")
     except:
@@ -20,6 +20,7 @@ def ProduceRunMacros(options):
         print "Running for a new material"
     else:
         defaultMaterial = False
+        print "Found database index for", options.scintMaterial
 
     # Load any parameters for running the macros on a Batch system
     batch_params = None
