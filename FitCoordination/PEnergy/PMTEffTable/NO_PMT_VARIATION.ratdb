@@ -1,0 +1,10 @@
+{
+  type: "PMT_VARIATION",
+  version: 1,
+  run_range: [0,0],
+  pass: 0,
+  comment: "",
+  timestamp: "",
+
+  variation : [ 1.00 : 10000 ],
+}

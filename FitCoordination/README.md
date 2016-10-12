@@ -62,6 +62,16 @@ The following components of the scintFitter use the effective speed of light in 
 
 -------------------------
 
+## PEnergy
+
+PEnergy requires "re-coordination" in two circumstances:
+   - When there is a change to the 3-d PMT model
+   - When there is a change to the scintillator cocktail that results in a
+      change in the numbers of scintillation or Cherenkov photons produced 
+      as a function of event energy.
+
+-------------------------
+
 ## Other Coordinators
 
 The following coordinators partner fitter/classifier components that are not part of either the waterFitter or scintFitter:  
