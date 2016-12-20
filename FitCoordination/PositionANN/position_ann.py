@@ -147,25 +147,14 @@ def save_ratdb(input_mlp, output_ratdb, output_index, n_dots, n_times):
         write_line(f, '"radiusScale": {0},'.format(_radius_scale))
         write_line(f, '}')
 
+def analysis_function(times, angles, ratdb, index, h1 = 20, h2 = 5):
+    mlp_filename = "mlps/mlp_t_{t}_a_{a}_h1_{h1}_h2_{h2}.pkl".format(t = times, a = angles,
+                                                                     h1 = h1, h2 = h2)
+    train_filename = "training_tree_{0}_{1}.root".format(times, angles)
+    betas_filename = "crossval_tree_{0}_{1}.root".format(times, angles)
+    alphas_filename = "alphas_tree_{0}_{1}.root".format(times, angles)
 
-import argparse
-if __name__=="__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-t", type = int, dest = "times", help = "Timing bins", default = 20)
-    parser.add_argument("-a", type = int, dest = "angles", help = "Angular bins", default = 20)
-    parser.add_argument("-h1", type = int, dest = "h1", help = "Hidden layer 1 nodes", default = 20)
-    parser.add_argument("-h2", type = int, dest = "h2", help = "Hidden layer 2 nodes", default = 5)
-    parser.add_argument("-r", type = str, dest = "ratdb", help = "RATDB filename", default = "FIT_POSITION_ANN_COORD.ratdb")
-    parser.add_argument("-i", type = str, dest = "index", help = "RATDB index (material)")
-    (args) = parser.parse_args()
-
-    mlp_filename = "mlps/mlp_t_{t}_a_{a}_h1_{h1}_h2_{h2}.pkl".format(t = args.times, a = args.angles,
-                                                                     h1 = args.h1, h2 = args.h2)
-    train_filename = "training_tree_{0}_{1}.root".format(args.times, args.angles)
-    betas_filename = "crossval_tree_{0}_{1}.root".format(args.times, args.angles)
-    alphas_filename = "alphas_tree_{0}_{1}.root".format(args.times, args.angles)
-
-    train_ann(train_filename, mlp_filename, hidden_layer_sizes = (args.h1, args.h2),
+    train_ann(train_filename, mlp_filename, hidden_layer_sizes = (h1, h2),
               tol = 1e-30, verbose = True, max_iter = 500)
     # Always print the quality, only test on < 7m and using the estimated direction
     score_betas = test_ann(betas_filename, mlp_filename, use_mc = False, cut_data = True, plotname = 'results_betas.pdf')
@@ -174,5 +163,20 @@ if __name__=="__main__":
     print "ANN score on alphas (should be above 0.90):", score_alphas
     
     # Print to file
-    save_ratdb(mlp_filename, args.ratdb, args.index, args.angles, args.times)
-    print "RATDB saved in", args.ratdb
+    save_ratdb(mlp_filename, ratdb, index, angles, times)
+    print "RATDB saved in", ratdb
+
+
+import optparse
+if __name__=="__main__":
+    parser = optparse.OptionParser()
+    parser.add_option("-t", type = "int", dest = "times", help = "Timing bins", default = 20)
+    parser.add_option("-a", type = "int", dest = "angles", help = "Angular bins", default = 20)
+    parser.add_option("-x", type = "int", dest = "h1", help = "Hidden layer 1 nodes", default = 20)
+    parser.add_option("-y", type = "int", dest = "h2", help = "Hidden layer 2 nodes", default = 5)
+    parser.add_option("-r", type = "string", dest = "ratdb", help = "RATDB filename", default = "FIT_POSITION_ANN_COORD.ratdb")
+    parser.add_option("-i", type = "string", dest = "index", help = "RATDB index (material)", default = "labppo_scintillator")
+    (options, args) = parser.parse_args()
+ 
+    analysis_function(options.times, options.angles, options.ratdb, options.index, options.h1, options.h2)
+

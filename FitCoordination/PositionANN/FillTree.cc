@@ -71,7 +71,7 @@ void FillTree(string inputname, string outputname, int nTime = 20, int nAngle = 
         cerr << "*";
     
     const DS::Entry& entry = dsReader.GetEntry(iEntry);
-    
+
     if(entry.GetEVCount() == 0) continue;
 
     const DS::EV& ev = entry.GetEV(0);
