@@ -84,4 +84,6 @@ if __name__ == '__main__':
             analyse_options += " -i " + options.index
         if (options.particle != ""):
             analyse_options += "-p " + options.particle
+        if options.scintMaterial != "":
+            analyse_options += "-s " + options.scintMaterial
         fc.Analyse( analyse_options )
