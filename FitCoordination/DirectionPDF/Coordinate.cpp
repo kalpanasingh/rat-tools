@@ -62,7 +62,8 @@ void GetDirectionPDF(string material)
       double transitTime = groupVelocity.CalcByDistance(distInInnerAV, distInAV, distInWater);
       double timeResid = pmtTime - transitTime - eventTime;
 
-      if(timeResid<10.0 && timeResid>-10.0)
+      // Apply time residual cut at +- 9.17 ns as given in SELECTOR_ISOTROPY.ratdb
+      if(timeResid<9.17 && timeResid>-9.17)
 	histogram.Fill(theta);
     }
   }
