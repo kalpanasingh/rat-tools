@@ -73,7 +73,8 @@ def grid_file(griddir, directory, path, filenamepath, filename, storage,
                 upfile = filenamepath[i]
                 input_string = 'lcg-cr --vo snoplus.snolab.ca --checksum -d %s \
                     -P %s -l %s %s' % (storage, se_path, lfc_path, upfile)
-                logging.info("input_string = %s", input_string)
+                print input_string
+		logging.info("input_string = %s", input_string)
                 try:
                     gridid.append(os.popen(input_string).readlines()[0]
                                   )

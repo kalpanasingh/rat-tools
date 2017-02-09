@@ -155,18 +155,26 @@ def CerenkovAngularDist(material):
 
     # Fill appropriate histograms with angular distribution
     for ievent in range(0, reader.GetEntryCount()):
+	print ievent
+        
         if ievent % 100 == 0:
             print "CerenkovAngularDist:: " + str(ievent) + " : " + str(reader.GetEntryCount())
 
         ds = reader.GetEntry(ievent)
+        print ievent
         mc = ds.GetMC()
         kineticEnergy = mc.GetMCParticle(0).GetKineticEnergy()
+        print kineticEnergy
         initialDir = mc.GetMCParticle( 0 ).GetMomentum().Unit()
         for itrack in range(0, mc.GetMCTrackCount()):
-            mctrack = mc.GetMCTrack(itrack)
+            print mc.GetMCTrackCount()
+            print itrack
+            mctrack = mc.GetMCTrackFromIndex(itrack)
             if mctrack.GetPDGCode() != 0:
                 continue
             initialStep = mctrack.GetMCTrackStep( 0 )
+	    print initialStep.GetProcess()
+            
             if initialStep.GetProcess() != "Cerenkov":
                 continue
             histograms[energies.index(kineticEnergy)].Fill(initialStep.GetMomentum().Unit().Dot( initialDir ))
@@ -175,10 +183,13 @@ def CerenkovAngularDist(material):
     for Histogram in histograms:
         singleEnergyAngularDist = []
         integral = Histogram.Integral("width")
+        print integral
         if integral > 0:
             Histogram.Scale( 1/integral )
         for costhetaIndex, costheta in enumerate(costhetaValues):
             singleEnergyAngularDist.append(Histogram.GetBinContent( costhetaIndex+1 ))
+            print costhetaIndex+1
+	    print singleEnergyAngularDist
         angularDist.append(singleEnergyAngularDist)
         del singleEnergyAngularDist
 
@@ -248,7 +259,7 @@ def RayleighAttenuationProb(material):
 
         # Loop through MC tracks
         for itrack in range(0, mc.GetMCTrackCount()):
-            mctrack = mc.GetMCTrack(itrack)
+            mctrack = mc.GetMCTrackFromIndex(itrack)
 
             # Check if track hit PMT
             mctrackID = mctrack.GetTrackID()
