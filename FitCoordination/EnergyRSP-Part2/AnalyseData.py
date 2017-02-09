@@ -72,6 +72,8 @@ def AnalysisFunction(index, material):
 
     outFile.close()
 
+    print "The coordeination results have been written to \"AnalyseData_Output.txt\""
+
 
 import optparse
 if __name__ == '__main__':

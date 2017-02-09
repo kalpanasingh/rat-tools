@@ -47,7 +47,7 @@ def AnalysisFunction(material, numberOfRuns, velocity):
     if material == "lightwater_sno":
         if velocity > 0:
             raise Exception("Cannot rerun GV1D with modified velocity")
-        ROOT.GetWaterPDF(material, velocity);
+        ROOT.GetWaterPDF(material);
     else:
         ROOT.GetScintPDF(material, numberOfRuns, velocity);
 

@@ -1,10 +1,26 @@
 #!/usr/bin/env python
-import os, sys, string, Utilities
+import os, sys, string, Utilities, rat
+from ROOT import RAT
 # Author I T Coulter - 9/11/2012 <icoulter@hep.upenn.edu>
 #        K Majumdar - 11/09/2014 - Cleanup of Coordinators for new DS
 
 
 def ProduceRunMacros(options):
+
+    # First, check if the material is new or not
+    db = RAT.DB.Get()
+    db.LoadAll(os.environ["GLG4DATA"], "*QUAD*.ratdb")
+    if options.loadDB:
+        db.LoadAll(options.loadDB, "*.ratdb")
+    link = db.GetLink("QUAD_FIT", options.scintMaterial)
+    try:
+        link.GetD("light_speed")
+    except:
+        defaultMaterial = True
+        print "Running for a new material"
+    else:
+        defaultMaterial = False
+        print "Found database index for", options.scintMaterial
 
     # Load any parameters for running the macros on a Batch system
     batch_params = None
@@ -37,10 +53,15 @@ def ProduceRunMacros(options):
 
         outfileName = "quadFit_" + str(int(speed)) 
 
+        if defaultMaterial:
+            speedString = "QUAD_FIT light_speed %s" % speed
+        else:
+            speedString = "QUAD_FIT[%s] light_speed %s" % (options.scintMaterial, speed)
+
         outText1 = rawText1.substitute(ExtraDB = extraDB,
                                        GeoFile = options.geoFile,
                                        ScintMaterial = options.scintMaterial,
-                                       Speed = speed,
+                                       SpeedDB = speedString,
                                        FileName = outfileName + ".root",
                                        Particle = options.particle,
                                        Energy = energy)

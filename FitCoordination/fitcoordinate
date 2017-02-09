@@ -29,9 +29,6 @@ class FitCoordinate:
     def Produce( self, options ):
         self.RunCommand( "python " + self.production_script + " " + options )
     def Analyse( self, options ):
-        if hasattr(self, 'analysis_script_material') and self._run_options.scintMaterial!="":
-            # Requires the material name
-            options += ' -s %s ' % self._run_options.scintMaterial
         self.RunCommand( "python " + self.analysis_script + " " + options )
     def RunCommand( self, command ):
         print 'Running:', command
@@ -84,4 +81,6 @@ if __name__ == '__main__':
             analyse_options += " -i " + options.index
         if (options.particle != ""):
             analyse_options += "-p " + options.particle
+        if options.scintMaterial != "":
+            analyse_options += "-s " + options.scintMaterial
         fc.Analyse( analyse_options )

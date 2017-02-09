@@ -1,0 +1,17 @@
+{
+type: "NTUPLE",
+version: 1,
+index: "hitcount",
+run_range: [0, 0],
+pass: 0,
+comment: "",
+timestamp: "",
+fields: [
+        "mc_id", "mc.mcid",
+        "mc_pehitct", "mc.@pmts.size()", //PMTs with a photon in bucket or a PE
+        "mc_pect", "mc.mcPECount",	 // Total PEs before the DAQ
+        "mc_dirpehitct", "mc.numDirPE",  // No. of PMTs with PE from own photon
+        ],
+}
+
+//        "mc_daqhitct", "mc.@hit.size()",

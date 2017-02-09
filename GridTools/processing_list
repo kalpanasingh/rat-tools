@@ -1,0 +1,47 @@
+#!/usr/bin/env python
+#####################
+#
+# processing_list
+#
+# Script with preset defaults to
+# download processed datasets.
+#
+# Author: Matt Mottram
+#         <m.mottram@sussex.ac.uk>
+#
+#####################
+
+import list_generator as lg
+try:
+    import argparse
+except:
+    raise ImportError("argparse not available; python version needs to be 2.7+")
+    
+
+if __name__=="__main__":
+    parser = argparse.ArgumentParser(description="File list generator.  Users MUST specify either a label (-l, recommended) or rat version (-v).")
+    parser.add_argument("-d", dest="db_name", help="Data-flow database name [data-production]",
+                        default="data-processing")
+    parser.add_argument("-s", dest="db_server",
+                        help="Data-flow database server [couch.snopl.us]",
+                        default="couch.snopl.us")
+    parser.add_argument("-p", dest="db_port",
+                        help="Data-flow database server port [None]", default=None, type=int)
+    parser.add_argument("-f", dest="file_type",
+                        help="[ratds], %s datasets" % (", ".join(f for f in lg.allowed_file_types if f!="ratds")),
+                        default="ratds")
+    parser.add_argument("-o", dest="output", help="Filename to write the list to [filelist.dat]",
+                        default="filelist.dat")
+    
+    parser.add_argument("-m", dest="module", help="Requested module, format -m mod1 mod2 ... (blank for all)", nargs="+")
+    parser.add_argument("-r", dest="run_range", help="Requested run range, format -r low high (blank for all)", type=int, nargs='+')
+    
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("-l", dest="label", help="Requested production label (recommended)")   
+    group.add_argument("-v", dest="version", help="Requested RAT version")
+    
+    parser.add_argument("--labels", dest="list_labels", help="Show list of possible labels", action="store_true")
+    parser.add_argument("--versions", dest="list_versions", help="Show list of possible versions", action="store_true")
+    parser.add_argument("--modules", dest="list_modules", help="Show list of possible modules", action="store_true")
+    
+    lg.generate_list(parser)

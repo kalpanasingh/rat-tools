@@ -9,6 +9,8 @@
 #include <TTree.h>
 
 #include <RAT/DU/DSReader.hh>
+#include <RAT/DU/LightPathCalculator.hh>
+#include <RAT/DU/GroupVelocity.hh>
 #include <RAT/DU/Utility.hh>
 #include <RAT/DU/PMTInfo.hh>
 #include <RAT/DS/MC.hh>
@@ -28,6 +30,8 @@ void GetDirectionPDF(string material)
 
   // Fill the histogram with the angle theta: the angle between the photon direction and the MC direction
   RAT::DU::DSReader dsReader(fileNameString);
+  RAT::DU::LightPathCalculator lightPath = RAT::DU::Utility::Get()->GetLightPathCalculator();
+  const RAT::DU::GroupVelocity& groupVelocity = RAT::DU::Utility::Get()->GetGroupVelocity();
   const RAT::DU::PMTInfo& pmtInfo = RAT::DU::Utility::Get()->GetPMTInfo();
 
   for(size_t i = 0; i < dsReader.GetEntryCount(); i++) 
@@ -40,6 +44,7 @@ void GetDirectionPDF(string material)
     if(dsEntry.GetEVCount() == 0) continue;
     const RAT::DS::EV& triggeredEvent = dsEntry.GetEV(0);
     const RAT::DS::CalPMTs& calibratedPMTs = triggeredEvent.GetCalPMTs();
+    double eventTime = 390 - dsEntry.GetMCEV(0).GetGTTime();
     
     for(size_t j = 0; j < calibratedPMTs.GetCount(); j++)
     {
@@ -48,8 +53,18 @@ void GetDirectionPDF(string material)
       TVector3 photonDirection = (pmtPosition - mcPosition);
       double cosTheta = (photonDirection.Unit()).Dot(mcDirection);
       double theta = acos(cosTheta);
+      double pmtTime = pmt.GetTime();
 
-      histogram.Fill(theta);
+      lightPath.CalcByPosition(mcPosition, pmtPosition);
+      double distInInnerAV = lightPath.GetDistInInnerAV();
+      double distInAV = lightPath.GetDistInAV();
+      double distInWater = lightPath.GetDistInWater();
+      double transitTime = groupVelocity.CalcByDistance(distInInnerAV, distInAV, distInWater);
+      double timeResid = pmtTime - transitTime - eventTime;
+
+      // Apply time residual cut at +- 9.17 ns as given in SELECTOR_ISOTROPY.ratdb
+      if(timeResid<9.17 && timeResid>-9.17)
+	histogram.Fill(theta);
     }
   }
 

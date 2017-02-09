@@ -50,16 +50,21 @@ def PredictedNCerenkovVsEnergy(material):
         ds = reader.GetEntry(ievent)
         mc = ds.GetMC()
         kineticEnergy = mc.GetMCParticle(0).GetKineticEnergy()
+        position = mc.GetMCParticle(0).GetPosition()
+
+        if position.Mag() > 6005.0:
+            continue
 
         for iev in range(0, ds.GetEVCount()):
             if iev != 0:
                 continue # throw away retriggers
             ev = ds.GetEV(iev)
-            if not ev.DefaultFitVertexExists() or not ev.GetDefaultFitVertex().ContainsPosition() or not ev.GetDefaultFitVertex().ValidPosition() or not ev.GetDefaultFitVertex().ContainsDirection() or not ev.GetDefaultFitVertex().ValidDirection():
-                continue  # didn't fit succesfully
-            # Fitter must have reconstructed inside AV
-            if ev.GetDefaultFitVertex().GetPosition().Mag() < 6005.0:
-                histograms[energies.index(kineticEnergy)].Fill(ev.GetFitResult("energyRSP:waterFitter").GetFOM("nCerPhotons"))
+            if not ev.FitResultExists("waterResult"):
+                continue  # fit doesn't exist
+
+            FOM_names = ev.GetFitResult("waterResult").GetFOMNames()
+            if "nCerPhotons" in FOM_names:
+                histograms[energies.index(kineticEnergy)].Fill(ev.GetFitResult("waterResult").GetFOM("nCerPhotons"))
 
     # Fill list with histogram mean values
     for Histogram in histograms:

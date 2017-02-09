@@ -81,7 +81,7 @@ def NhitsVsEnergyPosition(material):
 		
             infileName = material + "_P=" + str(int(position)) + "mm_E=" + str(int(energy * 1000)) + "keV"
 
-            Histogram = ROOT.TH1D(infileName, "Nhits", 300, 0.0, 3000.0)
+            Histogram = ROOT.TH1D(infileName, "Nhits", 1000, 0.0, 10000.0)
 
             for ds, run in rat.dsreader(infileName):
                 if ds.GetEVCount() == 0:

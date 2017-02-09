@@ -2,6 +2,7 @@
 import string, ROOT, Utilities, sys, os
 # Author J Walker - 23/04/2015 <john.walker@liverpool.ac.uk>
 # Revision history: 2015-07-08 J. Walker: Removing EOL spaces from output file and switching comment/timestamp
+# Revision history: 2015-07-15 J. Walker: Modifying to allow for scintillator material
 
 
 def AnalyseRootFiles(options):
@@ -39,12 +40,15 @@ def AnalysisFunction(index, material):
 
     # Select which energies to use based on the material in the detector
     energies = []
+    time_residual_window = []
     if material == "lightwater_sno":
         energies = Utilities.WaterEnergies
+        time_residual_window = Utilities.WaterTimeResidualWindow
     else:
         energies = Utilities.ScintEnergies
+        time_residual_window = Utilities.ScintTimeResidualWindow
 
-    nHitsTable = Utilities.PromptNhitsVsEnergy(material)
+    nHitsTable = Utilities.PromptNhitsVsEnergy(material)[0]
     scaleFactor = Utilities.PositionDirectionScaleFactor(material)
 
     outFileName = "AnalyseData_Output.txt"
@@ -74,6 +78,10 @@ def AnalysisFunction(index, material):
     outFile.write("costheta_bins: " + str('%.1f' % Utilities.uDotrBins) + ",\n")
     outFile.write("// maximum radius\n")
     outFile.write("r_max: " + str('%.1f' % Utilities.Positions[-1]) + ",\n")
+    outFile.write("// prompt light time window\n")
+    outFile.write("prompt_window: [ " + str('%.1f' % time_residual_window[0]) + ", " + str('%.1f' % time_residual_window[1]) + "],\n")
+    outFile.write("// number of working PMTs at the time of coordination\n")
+    outFile.write("working_pmts: " + str('%.1f' % Utilities.WorkingPMTs(material)) + ",\n")
     outFile.write("\n")
 
     outFile.write("// Scaling factor corresponding to radius and costheta value.\n")
@@ -82,14 +90,21 @@ def AnalysisFunction(index, material):
         outFile.write("// Coefficients for " + str('%.2f' % Utilities.uDotrLimitValues[uDotrBin]) + " < CosTheta < " + str('%.2f' % Utilities.uDotrLimitValues[uDotrBin+1]) + "\n")
         for positionIndex, position in enumerate(Utilities.Positions):
             outFile.write(str('%.4f' % scaleFactor[uDotrBin][positionIndex]) + ", ")
+        outFile.seek(-1, os.SEEK_END)
+        outFile.truncate()
         outFile.write("\n")
     outFile.write("],\n")
     outFile.write("\n\n")
 
-    outFile.write("// Values to map between adjusted prompt Nhits and corresponding MeV energy.\n")
-    outFile.write("// 0.26 MeV is the threshold for Cerenkov radiation for electrons in water.\n")
-    outFile.write("\n")
-    outFile.write("mev_values: [0.26, "),
+    if material == "lightwater_sno":
+        outFile.write("// Values to map between adjusted prompt Nhits and corresponding MeV energy.\n")
+        outFile.write("// 0.26 MeV is the threshold for Cerenkov radiation for electrons in water.\n")
+        outFile.write("\n")
+        outFile.write("mev_values: [0.26, "),
+    else:
+        outFile.write("// Values to map between adjusted prompt Nhits and corresponding MeV energy.\n")
+        outFile.write("\n")
+        outFile.write("mev_values: [0.0, "),
     for energy in energies:
         outFile.write(str('%.1f' % energy) + ", ")
     outFile.write("],\n")

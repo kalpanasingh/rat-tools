@@ -14,7 +14,7 @@ ${ExtraDB}
 /rat/proc calibratePMT
 /rat/proc count
 /rat/procset update 100
-/rat/proc ${Fitter}
+${Fitter}
 
 /rat/proc outroot
 /rat/procset file "${FileName}"
@@ -22,5 +22,5 @@ ${ExtraDB}
 ${Generator}
 /generator/rate/set 1
 
-/rat/run/start 20000
+/rat/run/start 1000
 exit

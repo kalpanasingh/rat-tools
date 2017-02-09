@@ -1,0 +1,10 @@
+This folder contains PMT INFO csv files as output from Noel's PMT database
+--------------------------------------------------------------------------
+
+PMTINFO_rat3.ratdb - ?
+airfill2.ratdb	- Default pmt info set to airfill status - used up to rat 5.3
+airfill3.ratdb	- updated airfill PMT status but neve default
+snoman.ratdb	- Status of detector for SNO data to match snoman
+snoman_phil.ratdb - ?
+PMT_INFO_DEC2014.csv  - pmt info as of December 2014
+PMT_INFO_Mar2016.csv  - pmt info as of March 2016, now includes 5 pmts of type ox13 which have black petals. 

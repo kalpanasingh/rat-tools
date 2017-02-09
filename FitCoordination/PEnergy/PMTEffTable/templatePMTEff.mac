@@ -1,0 +1,41 @@
+#/**
+#*      Macro template for runs to determine PMT effectiveness
+#*      Contact:        W. Heintzelman
+#*/
+
+/control/verbose 1	# Echo commands from this file into the log file
+
+# Load database table to ensure that there is no PMT variation
+/rat/db/load NO_PMT_VARIATION.ratdb
+
+# Load custome ntuple definition
+/rat/db/load NTUPLE_custom.ratdb
+
+# Turn noise off
+/rat/db/set NOISE_MC noise_flag 0
+
+/run/initialize
+
+# Enable full track storage
+/rat/tracking/store   full
+
+# BEGIN EVENT LOOP ************************************************
+/rat/proc frontend
+/rat/proc trigger
+/rat/proc eventbuilder
+/rat/procset countpe  1
+/rat/proc calibratePMT
+/rat/proc count
+/rat/procset update 100
+
+# Send output to an ntuple file
+/rat/proc python
+/rat/procset class "ratproc.Ntuple('FFFFFF-ntuple.root', 'hitcount')"
+
+# END EVENTLOOP ************************************************
+
+# Parameters on following line are accessed by GenPMTEff::SetState function.
+/generator/add pmteff  WLWLWL:IAIAIA:PPPPPP
+
+# generate specified number of events
+/rat/run/start 5
